@@ -17,7 +17,8 @@ export class xiaofei_update extends plugin {
 					/** 命令正则匹配 */
 					reg: '#?小飞(插件)?(强制)?更新',
 					/** 执行方法 */
-					fnc: 'update_plugin'
+					fnc: 'update_plugin',
+					permission: 'master'
 				},
 			]
 		});
