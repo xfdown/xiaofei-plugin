@@ -1,6 +1,6 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import { update } from '../.././other/update.js'
-
+import { Version } from '.././components/index.js'
 export class xiaofei_update extends plugin {
 	constructor () {
 		super({
@@ -15,9 +15,16 @@ export class xiaofei_update extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '#?小飞(插件)?(强制)?更新',
+					reg: '^#?小飞(插件)?(强制)?更新$',
 					/** 执行方法 */
 					fnc: 'update_plugin',
+					permission: 'master'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: '^#?小飞(插件)?版本$',
+					/** 执行方法 */
+					fnc: 'plugin_version',
 					permission: 'master'
 				},
 			]
@@ -36,6 +43,11 @@ export class xiaofei_update extends plugin {
 				setTimeout(() => Update_Plugin.restart(), 2000)
 			}
 		}
+		return true;
+	}
+	
+	async plugin_version(){
+		await this.reply('小飞插件当前版本：'+Version.ver);
 		return true;
 	}
 }

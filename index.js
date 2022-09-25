@@ -4,6 +4,7 @@
 */
 
 import fs from 'node:fs'
+import { Version } from './components/index.js'
 
 const files = fs.readdirSync('./plugins/xiaofei-plugin/apps').filter(file => file.endsWith('.js'))
 
@@ -16,7 +17,7 @@ files.forEach((file) => {
 ret = await Promise.allSettled(ret)
 
 let apps = {}
-let ver = '1.1.1';
+let ver = Version.ver;
 
 logger.info(`---------^_^---------`)
 logger.info(`小飞插件${ver}初始化~`)
