@@ -2,7 +2,7 @@
 
 #### 介绍
 
-自己做的Yunzai机器人插件（仅支持v3）
+版本：v1.0
 
 #### 安装教程
 
@@ -11,7 +11,6 @@
 推荐使用git进行安装，以方便后续升级。在Yunzai根目录夹打开终端，运行
 
 ```
-
 // 使用gitee
 git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
@@ -19,9 +18,9 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 #### 使用说明
 
-【点歌插件】可用命令：【#点歌 #多选点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】
+【点歌】可用命令：【#点歌 #多选点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】
 
-【天气插件】可用命令：【#天气】
+【天气】可用命令：【#天气】
 
 #### 参与贡献
 
