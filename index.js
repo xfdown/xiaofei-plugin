@@ -16,7 +16,7 @@ files.forEach((file) => {
 ret = await Promise.allSettled(ret)
 
 let apps = {}
-let ver = '1.0';
+let ver = '1.1';
 
 logger.info(`---------^_^---------`)
 logger.info(`小飞插件${ver}初始化~`)
