@@ -5,7 +5,7 @@ export class xiaofei_update extends plugin {
 	constructor () {
 		super({
 			/** 功能名称 */
-			name: '更新插件',
+			name: '小飞插件_更新',
 			/** 功能描述 */
 			dsc: '调用Yunzai自带更新模块进行插件更新',
 			/** https://oicqjs.github.io/oicq/#events */

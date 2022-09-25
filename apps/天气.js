@@ -4,15 +4,11 @@ import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
-/**
-插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
-*/
-
 export class xiaofei_weather extends plugin {
 	constructor () {
 		super({
 			/** 功能名称 */
-			name: '小飞天气查询v1.2',
+			name: '小飞插件_天气',
 			/** 功能描述 */
 			dsc: '请求腾讯天气网站进行页面截图，目前支持以下命令：【#天气】',
 			/** https://oicqjs.github.io/oicq/#events */

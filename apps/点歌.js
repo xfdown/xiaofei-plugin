@@ -6,15 +6,11 @@ const _path = process.cwd();
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 
-/** 
-插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
-*/
-
 export class xiaofei_music extends plugin {
 	constructor () {
 		super({
 			/** 功能名称 */
-			name: '小飞点歌v1.8.1',
+			name: '小飞插件_点歌',
 			/** 功能描述 */
 			dsc: '使用互联分享接口发送音乐，目前支持以下命令：【#点歌 #多选点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】',
 			/** https://oicqjs.github.io/oicq/#events */
@@ -143,7 +139,9 @@ async function music_message(e){
 			break;
 	}
 	if(search == ''){
-		e.reply("格式：#"+reg[1]+reg[2]+"点歌(歌名|歌手|歌词|专辑)\r\n例如：#"+reg[1]+reg[2]+"点歌周杰伦",true);
+		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
+		await e.reply(help,true);
+		//e.reply("格式：#"+reg[1]+reg[2]+"点歌(歌名|歌手|歌词|专辑)\r\n例如：#"+reg[1]+reg[2]+"点歌周杰伦",true);
 		return true;
 	}
 	
