@@ -2,7 +2,7 @@
 
 #### 介绍
 
-版本：v1.0
+版本：v1.1
 
 #### 安装教程
 
@@ -21,6 +21,8 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 【点歌】可用命令：【#点歌 #多选点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】
 
 【天气】可用命令：【#天气】
+
+【更新】可用命令：【#小飞插件更新 #小飞插件强制更新】
 
 #### 参与贡献
 
