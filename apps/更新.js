@@ -27,11 +27,13 @@ export class xiaofei_update extends plugin {
 		let Update_Plugin = new update();
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;
-		Update_Plugin.isUp = true;
 		
 		let plu = 'xiaofei-plugin';
 		if(Update_Plugin.getPlugin(plu)){
 			await Update_Plugin.runUpdate(plu);
+			if(Update_Plugin.isUp){
+				setTimeout(() => Update_Plugin.restart(), 2000)
+			}
 		}
 		return true;
 	}
