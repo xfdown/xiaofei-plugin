@@ -1,6 +1,9 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import { update } from '../.././other/update.js'
 import { Version } from '.././components/index.js'
+
+const plugin_name = 'xiaofei-plugin';
+
 export class xiaofei_update extends plugin {
 	constructor () {
 		super({
@@ -25,7 +28,12 @@ export class xiaofei_update extends plugin {
 					reg: '^#?小飞(插件)?版本$',
 					/** 执行方法 */
 					fnc: 'plugin_version',
-					permission: 'master'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: '^#?小飞(插件)?更新日志$',
+					/** 执行方法 */
+					fnc: 'update_log',
 				},
 			]
 		});
@@ -36,9 +44,8 @@ export class xiaofei_update extends plugin {
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;
 		
-		let plu = 'xiaofei-plugin';
-		if(Update_Plugin.getPlugin(plu)){
-			await Update_Plugin.runUpdate(plu);
+		if(Update_Plugin.getPlugin(plugin_name)){
+			await Update_Plugin.runUpdate(plugin_name);
 			if(Update_Plugin.isUp){
 				setTimeout(() => Update_Plugin.restart(), 2000)
 			}
@@ -48,6 +55,17 @@ export class xiaofei_update extends plugin {
 	
 	async plugin_version(){
 		await this.reply('小飞插件当前版本：'+Version.ver);
+		return true;
+	}
+	
+	async update_log(){
+		let Update_Plugin = new update();
+		Update_Plugin.e = this.e;
+		Update_Plugin.reply = this.reply;
+		
+		if(Update_Plugin.getPlugin(plugin_name)){
+			this.e.reply(await Update_Plugin.getLog(plugin_name));
+		}
 		return true;
 	}
 }
