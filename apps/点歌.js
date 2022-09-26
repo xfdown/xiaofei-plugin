@@ -160,6 +160,30 @@ async function music_handle(e,search,source,page = 0){
 			message.push('----------------');
 			message.push('提示：请在一分钟内发送序号进行点歌！');
 			let msg_result = await e.reply(message.join("\r\n"),true);
+			if(!msg_result){//消息发送失败，使用转发消息发送
+				let nickname = Bot.nickname;
+				if (e.isGroup) {
+					let info = await Bot.getGroupMemberInfo(e.group_id, Bot.uin)
+					nickname = info.card || info.nickname;
+					if(e.at && !e.atBot){
+						return false;
+					}
+				}
+				
+				let MsgList = [];
+				let user_info = {
+					nickname: nickname,
+					user_id: Bot.uin
+				};
+				
+				MsgList.push({
+					...user_info,
+					message: message.join("\r\n"),
+				});
+				let forwardMsg = await Bot.makeForwardMsg(MsgList);
+				
+				msg_result = await e.reply(forwardMsg);
+			}
 			let data = {
 				time: new Date().getTime(),
 				data: result.data,
