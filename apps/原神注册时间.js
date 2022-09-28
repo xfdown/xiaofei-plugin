@@ -29,15 +29,13 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 	async QueryRegTime(){
 		let cookies = null;
 		let result = await query_mysck(this.e);
-		console.log(result);
-		if(result?.code == 1 && (await hk4e_cn_login(result.ck,result.uid)).code == 1){
-			cookies = result.ck;
+		if(result?.code == 1 && (await hk4e_cn_login(result.data?.ck,result.data?.uid)).code == 1){
+			cookies = result.data?.ck;
 		}else if(result?.code == -2){
 			this.e.reply(result.msg);
 			return true;
 		}else{
 			let result = await xiaoyao_query_mysck(this.e);
-			console.log(result);
 			if(result.code == -1){
 				this.e.reply('cookie_token已失效，请重新抓取ck！\r\n发送【ck帮助】查看配置教程\r\n'+result.msg);
 				return true;
@@ -78,7 +76,6 @@ async function query_reg_time(mys_cookies,uid){
 		try{
 			let res = await response.json();
 			let data = res.data?.data;
-			console.log(data);
 			data = data ? JSON.parse(data) : {};
 			reg_time = data['1'];
 		}catch(err){}
