@@ -4,6 +4,8 @@
 
 版本：v1.2.3
 
+交流群：938326742
+
 #### 安装教程
 
 请将xiaofei-plugin放置在Yunzai-Bot的plugins目录下，重启Yunzai-Bot后即可使用。
