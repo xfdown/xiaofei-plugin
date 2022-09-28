@@ -1,4 +1,4 @@
-import plugin from '../../../lib/plugins/plugin.js'
+﻿import plugin from '../../../lib/plugins/plugin.js'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
 import User from '../../genshin/model/user.js'
@@ -30,7 +30,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 		let cookies = null;
 		let result = await query_mysck(this.e);
 		console.log(result);
-		if(result?.code != 2 && (await hk4e_cn_login(result.ck,result.uid)).code == 1){
+		if(result?.code != 1 && (await hk4e_cn_login(result.ck,result.uid)).code == 1){
 			cookies = result.ck;
 		}else if(result?.code == -2){
 			this.e.reply(result.msg);
