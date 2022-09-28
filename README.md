@@ -2,7 +2,7 @@
 
 #### 介绍
 
-版本：v1.1.3
+版本：v1.2
 
 #### 安装教程
 
@@ -23,6 +23,8 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 【天气】可用命令：【#天气】
 
 【更新】可用命令：【#小飞插件更新 #小飞插件强制更新】
+
+【原神注册时间查询】可用命令：【#原神注册时间】
 
 #### 参与贡献
 
