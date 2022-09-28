@@ -8,7 +8,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 	constructor () {
 		super({
 			/** 功能名称 */
-			name: '原神注册时间查询',
+			name: '小飞插件_原神注册时间查询',
 			/** 功能描述 */
 			dsc: '从原神绘忆星辰活动获取游戏注册时间。获取cookie_token调用了逍遥插件！',
 			/** https://oicqjs.github.io/oicq/#events */
