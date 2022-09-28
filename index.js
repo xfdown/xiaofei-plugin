@@ -20,7 +20,7 @@ let apps = {}
 let ver = Version.ver;
 
 logger.info(`---------^_^---------`)
-logger.info(`小飞插件${ver}初始化~`)
+logger.info(`小飞插件${ver}：初始化~`)
 
 for (let i in files) {
   let name = files[i].replace('.js', '')
@@ -32,6 +32,6 @@ for (let i in files) {
   logger.info(`小飞插件${ver}：${name}模块载入成功！`)
   apps[name] = ret[i].value[Object.keys(ret[i].value)[0]]
 }
-logger.info(`小飞插件${ver}初始化完成！`)
+logger.info(`小飞插件${ver}：初始化完成！`)
 logger.info(`---------------------`)
 export { apps }

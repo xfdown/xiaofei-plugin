@@ -1,4 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
+import { execSync } from 'child_process'
 import { update } from '../.././other/update.js'
 import { Version } from '.././components/index.js'
 
@@ -45,6 +46,9 @@ export class xiaofei_update extends plugin {
 		Update_Plugin.reply = this.reply;
 		
 		if(Update_Plugin.getPlugin(plugin_name)){
+			if(this.e.msg.includes('强制')){
+				await execSync('git reset --hard',{cwd: `${process.cwd()}/plugins/${plugin_name}/`});
+			}
 			await Update_Plugin.runUpdate(plugin_name);
 			if(Update_Plugin.isUp){
 				setTimeout(() => Update_Plugin.restart(), 2000)
