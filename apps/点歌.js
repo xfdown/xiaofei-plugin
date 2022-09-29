@@ -11,6 +11,7 @@ const _plugin_path = _path + '/plugins/xiaofei-plugin';
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 
 export class xiaofei_music extends plugin {
+	var _page_size = 30;
 	constructor () {
 		super({
 			/** 功能名称 */
@@ -37,6 +38,10 @@ export class xiaofei_music extends plugin {
 			fnc: clear_music_cache,
 			log: false
 		};
+	}
+	
+	async init(){
+		
 	}
 	
 	async message(){
@@ -149,11 +154,11 @@ async function music_message(e){
 		return true;
 	}
 	
-	return music_handle(e,search,source,reg[1] == '多选' ? 1 : 0);
+	return music_handle(e, search, source, reg[1] == '多选' ? 1 : 0, reg[1] == '多选' ? this._page_size : 10);
 }
 
-async function music_handle(e,search,source,page = 0){
-	let result = await music_search(search,source,page == 0 ? 1 : page);
+async function music_handle(e,search,source,page = 0,page_size = 10){
+	let result = await music_search(search, source, page == 0 ? 1 : page, page_size);
 	if(result && result.data && result.data.length > 0){
 		if(page > 0){
 			let message = ['---搜索结果---'];
@@ -243,7 +248,7 @@ function get_MusicListId(e){
 	return `${id}`;
 }
 
-async function music_search(search,source,page = 1){
+async function music_search(search,source,page = 1,page_size = 10){
 	let list = [];
 	let result = [];
 	
@@ -381,18 +386,18 @@ async function music_search(search,source,page = 1){
 	
 	switch(source){
 		case 'netease':
-			result = await netease_search(search,page);
+			result = await netease_search(search,page,page_size);
 			break;
 		case 'kuwo':
-			result = await kuwo_search(search,page);
+			result = await kuwo_search(search,page,page_size);
 			break;
 		case 'kugou':
-			result = await kugou_search(search,page);
+			result = await kugou_search(search,page,page_size);
 			break;
 		case 'qq':
 		default:
 			source = 'qq';
-			result = await qqmusic_search(search,page);
+			result = await qqmusic_search(search,page,page_size);
 			break;
 	}
 	if(result && result.data && result.data.length > 0){
@@ -520,8 +525,8 @@ async function SendMusicShare(e,data,to_uin = null){
 	}
 }
 
-async function kugou_search(search,page = 1){
-	let url = `http://msearchcdn.kugou.com/api/v3/search/song?page=${page}&pagesize=10&keyword=${encodeURI(search)}`;
+async function kugou_search(search,page = 1,page_size = 10){
+	let url = `http://msearchcdn.kugou.com/api/v3/search/song?page=${page}&pagesize=${page_size}&keyword=${encodeURI(search)}`;
 	let response = await fetch(url,{ method: "get" }); //调用接口获取数据
 	let res = await response.json(); //结果json字符串转对象
 	if(!res.data || res.data.info < 1){
@@ -530,12 +535,13 @@ async function kugou_search(search,page = 1){
 	return {page: page,data: res.data.info};
 }
 
-async function qqmusic_search(search,page = 1){
-	let qq_search_json = JSON.parse('{"search":{"module":"music.search.SearchBrokerCgiServer","method":"DoSearchForQQMusicMobile","param":{"query":"","highlight":1,"searchid":"123456789","sub_searchid":0,"search_type":0,"nqc_flag":0,"sin":0,"ein":30,"page_num":1,"num_per_page":10,"cat":2,"grp":1,"remoteplace":"search.android.defaultword","multi_zhida":1,"sem":0}}}');
+async function qqmusic_search(search,page = 1,page_size = 10){
+	let qq_search_json = {"search":{"module":"music.search.SearchBrokerCgiServer","method":"DoSearchForQQMusicMobile","param":{"query":"","highlight":1,"searchid":"123456789","sub_searchid":0,"search_type":0,"nqc_flag":0,"sin":0,"ein":30,"page_num":1,"num_per_page":10,"cat":2,"grp":1,"remoteplace":"search.android.defaultword","multi_zhida":1,"sem":0}}};
 	
 	qq_search_json['search']['param']['searchid'] = new Date().getTime();
 	qq_search_json['search']['param']['query'] = search;
 	qq_search_json['search']['param']['page_num'] = page;
+	qq_search_json['search']['param']['num_per_page'] = page_size;
 	
 	let options = {
 		method: 'POST',//post请求 
@@ -555,12 +561,12 @@ async function qqmusic_search(search,page = 1){
 	return {page: page,data: res.search.data.body.item_song};
 }
 
-async function netease_search(search,page = 1){
+async function netease_search(search,page = 1,page_size = 10){
 	let url = 'http://music.163.com/api/cloudsearch/pc';
 	let options = {
 		method: 'POST',//post请求 
 		headers: { 'Content-Type': ' application/x-www-form-urlencoded'},
-		body: `offset=${page-1}&limit=10&type=1&s=${encodeURI(search)}`
+		body: `offset=${page-1}&limit=${page_size}&type=1&s=${encodeURI(search)}`
 	};
 
 	let response = await fetch(url,options); //调用接口获取数据
@@ -572,8 +578,8 @@ async function netease_search(search,page = 1){
 	return {page: page,data: res.result.songs};
 }
 	
-async function kuwo_search(search,page = 1){
-	let url = `http://search.kuwo.cn/r.s?user=&android_id=&prod=kwplayer_ar_10.1.2.1&corp=kuwo&newver=3&vipver=10.1.2.1&source=kwplayer_ar_10.1.2.1_40.apk&p2p=1&q36=&loginUid=&loginSid=&notrace=0&client=kt&all=${search}&pn=${page-1}&rn=10&uid=&ver=kwplayer_ar_10.1.2.1&vipver=1&show_copyright_off=1&newver=3&correct=1&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&vermerge=1&mobi=1&searchapi=5&issubtitle=1&province=&city=&latitude=&longtitude=&userIP=&searchNo=&spPrivilege=0`;
+async function kuwo_search(search,page = 1,page_size = 10){
+	let url = `http://search.kuwo.cn/r.s?user=&android_id=&prod=kwplayer_ar_10.1.2.1&corp=kuwo&newver=3&vipver=10.1.2.1&source=kwplayer_ar_10.1.2.1_40.apk&p2p=1&q36=&loginUid=&loginSid=&notrace=0&client=kt&all=${search}&pn=${page-1}&rn=${page_size}&uid=&ver=kwplayer_ar_10.1.2.1&vipver=1&show_copyright_off=1&newver=3&correct=1&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&vermerge=1&mobi=1&searchapi=5&issubtitle=1&province=&city=&latitude=&longtitude=&userIP=&searchNo=&spPrivilege=0`;
 	
 	let response = await fetch(url,{ method: "get" }); //调用接口获取数据
 	let res = await response.json(); //结果json字符串转对象
