@@ -25,14 +25,14 @@ var zuozhe = "{{zuozhe}}"   // 1，2，3，4，5，6
 var arrList3 = zuozhe.split(",");     // ['1','2','3','4','5','6']
  document.write('<table border="1" ' )
  
- document.write("<tr>" + "<td>" + "序号" + "</td>" + "<td>" + "歌曲" + "</td>" + "<td>" + "作者"+ "</td>" + "</tr>")
+ document.write("<tr>" + "<td>" + "序号" + "</td>" + "<td>" + "歌名" + "</td>" + "<td>" + "歌手"+ "</td>" + "</tr>")
 for (i=0;i<=arrList.length-2;i++)
 {
 let nr ="<tr>" + "<td>" + arrList[i] + "</td>" + "<td>" + arrList2[i] + "</td>" + "<td>" + arrList3[i] + "</td>" + "</tr>"
  if(i%2==0){
  
 
-            document.write(nr )
+            document.write(nr)
         }else{
            document.write(nr)
     }
