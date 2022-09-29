@@ -3,8 +3,11 @@ import { segment } from "oicq";
 import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-const _path = process.cwd();
+import cfg from '../../../lib/config/config.js'
+import { Version } from '.././components/index.js'
 
+const _path = process.cwd();
+const _plugin_path = _path + '/plugins/xiaofei-plugin';
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 
 export class xiaofei_music extends plugin {
@@ -160,8 +163,13 @@ async function music_handle(e,search,source,page = 0){
 			}
 			message.push('----------------');
 			message.push('提示：请在一分钟内发送序号进行点歌！');
-			//let msg_result = await e.reply(message.join("\r\n"),true);
-			let msg_result = await e.reply(await sharemusic_HtmlList(result.data));//生成图片列表
+			let msg_result = false;
+			
+			if(e.guild_id){//频道的话发文字，图片不显示。。。
+				msg_result = await e.reply(message.join("\r\n"));
+			}else{
+				msg_result = await e.reply(await sharemusic_HtmlList(result.data));//生成图片列表
+			}
 			
 			if(!msg_result){//消息发送失败，使用转发消息发送
 				let nickname = Bot.nickname;
@@ -205,30 +213,19 @@ async function music_handle(e,search,source,page = 0){
 	
 }
 
-
-
-async function sharemusic_HtmlList(list){//来自土块插件（earth-k-plugin）的列表样式
-	let indexs = [];//序号列表
-	let names = [];//歌名列表
-	let artists = [];//歌手列表
-	
-	for(let i in list){
-		indexs.push((Number(i) + 1));
-		names.push(list[i].name);
-		artists.push(list[i].artist);
-	}
-	
+async function sharemusic_HtmlList(list){//来自土块插件（earth-k-plugin）的列表样式（已修改）
 	let data = {
-		tplFile: './plugins/xiaofei-plugin/resources/sharemusic/sharemusic.html',
-		xvhao: indexs.join(',')+',',
-		song: names.join(',')+',',
-		zuozhe: artists.join(',')+',',
-		dz: _path,
-		bj: String(random(1,13))
+		plugin_path: _plugin_path,
+		background_path: `${_plugin_path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
+		title: '点 歌 列 表',
+		tips: '提示：请在一分钟内发送序号进行点歌！',
+		sub_title: `Created By Yunzai-Bot v${cfg.package.version} & xiaofei-Plugin ${Version.ver}`,
+		list: list
 	};
-
-	let img = await puppeteer.screenshot("123", {
-		...data,
+		
+	let img = await puppeteer.screenshot("music_list", {
+		tplFile: `${_plugin_path}/resources/html/music_list/index.html`,
+		data: data,
 	});
 	
 	return img;

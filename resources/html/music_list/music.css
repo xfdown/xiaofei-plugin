@@ -1,18 +1,9 @@
-@font-face {
+﻿@font-face {
   font-family: "jty";
   src: url("jty.OTF");
   font-weight: normal;
   font-style: normal;
 }
-
-@font-face {
-  font-family: "NZBZ";
-  src: url("NZBZ.TTF");
-  font-weight: normal;
-  font-style: normal;
-}
-
-
 
 body {
   

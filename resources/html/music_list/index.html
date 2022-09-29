@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="{{data.plugin_path}}/resources/html/music_list/music.css" />
+</head>
+<body background = '{{data.background_path}}'>
+<div class="bt">{{data.title}}</div>
+<table border="1">
+<tr><td>序号</td><td>歌名</td><td>歌手</td></tr>
+
+{{each data.list}}
+<tr><td>{{$index + 1}}</td><td>{{$value.name}}</td><td>{{$value.artist}}</td></tr>
+{{/each}}
+
+</table>
+<p class="lb" >{{data.tips}}</p>
+<p class="jw" >{{data.sub_title}}</p>
+<br>
+</body>
+</html>
