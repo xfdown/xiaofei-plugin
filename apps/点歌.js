@@ -2,6 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import { segment } from "oicq";
 import fetch from "node-fetch";
 import { core } from "oicq";
+import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 const _path = process.cwd();
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
@@ -159,7 +160,9 @@ async function music_handle(e,search,source,page = 0){
 			}
 			message.push('----------------');
 			message.push('提示：请在一分钟内发送序号进行点歌！');
-			let msg_result = await e.reply(message.join("\r\n"),true);
+			//let msg_result = await e.reply(message.join("\r\n"),true);
+			let msg_result = await e.reply(await sharemusic_HtmlList(result.data));//生成图片列表
+			
 			if(!msg_result){//消息发送失败，使用转发消息发送
 				let nickname = Bot.nickname;
 				if (e.isGroup) {
@@ -200,6 +203,35 @@ async function music_handle(e,search,source,page = 0){
 	}
 	return true;
 	
+}
+
+
+
+async function sharemusic_HtmlList(list){//来自土块插件（earth-k-plugin）的列表样式
+	let indexs = [];//序号列表
+	let names = [];//歌名列表
+	let artists = [];//歌手列表
+	
+	for(let i in list){
+		indexs.push((Number(i) + 1));
+		names.push(list[i].name);
+		artists.push(list[i].artist);
+	}
+	
+	let data = {
+		tplFile: './plugins/xiaofei-plugin/resources/sharemusic/sharemusic.html',
+		xvhao: indexs.join(',')+',',
+		song: names.join(',')+',',
+		zuozhe: artists.join(',')+',',
+		dz: _path,
+		bj: String(random(1,13))
+	};
+
+	let img = await puppeteer.screenshot("123", {
+		...data,
+	});
+	
+	return img;
 }
 
 function get_MusicListId(e){
