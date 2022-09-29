@@ -9,9 +9,10 @@ import { Version } from '.././components/index.js'
 const _path = process.cwd();
 const _plugin_path = _path + '/plugins/xiaofei-plugin';
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
+var _page_size = 30;
 
 export class xiaofei_music extends plugin {
-	var _page_size = 30;
+	
 	constructor () {
 		super({
 			/** 功能名称 */
@@ -154,7 +155,7 @@ async function music_message(e){
 		return true;
 	}
 	
-	return music_handle(e, search, source, reg[1] == '多选' ? 1 : 0, reg[1] == '多选' ? this._page_size : 10);
+	return music_handle(e, search, source, reg[1] == '多选' ? 1 : 0, reg[1] == '多选' ? _page_size : 10);
 }
 
 async function music_handle(e,search,source,page = 0,page_size = 10){
