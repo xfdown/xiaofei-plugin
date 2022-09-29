@@ -25,11 +25,11 @@ logger.info(`小飞插件${ver}：初始化~`)
 for (let i in files) {
   let name = files[i].replace('.js', '')
   if (ret[i].status != 'fulfilled') {
-    logger.error(`小飞插件${ver}：${logger.red(name)}模块载入失败！`)
+    logger.error(`${logger.red(name)}模块载入失败！`)
     logger.error(ret[i].reason)
     continue
   }
-  logger.info(`小飞插件${ver}：${name}模块载入成功！`)
+  logger.info(`${name}模块载入成功！`)
   apps[name] = ret[i].value[Object.keys(ret[i].value)[0]]
 }
 logger.info(`小飞插件${ver}：初始化完成！`)
