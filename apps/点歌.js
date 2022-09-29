@@ -148,6 +148,9 @@ async function music_message(e){
 			source = 'qq';
 			break;
 	}
+	
+	source = [source, reg[2]];
+	
 	if(search == ''){
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help,true);
@@ -159,10 +162,10 @@ async function music_message(e){
 }
 
 async function music_handle(e,search,source,page = 0,page_size = 10){
-	let result = await music_search(search, source, page == 0 ? 1 : page, page_size);
+	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if(result && result.data && result.data.length > 0){
 		if(page > 0){
-			let message = ['---搜索结果---'];
+			let message = [`---${source[1]}点歌列表---`];
 			for(let i in result.data){
 				let music = result.data[i];
 				message.push((Number(i)+1) + '.' + music.name + '-' + music.artist);
@@ -174,7 +177,7 @@ async function music_handle(e,search,source,page = 0,page_size = 10){
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
 				msg_result = await e.reply(message.join("\r\n"));
 			}else{
-				msg_result = await e.reply(await sharemusic_HtmlList(result.data));//生成图片列表
+				msg_result = await e.reply(await sharemusic_HtmlList(result.data,source[1]));//生成图片列表
 			}
 			
 			if(!msg_result){//消息发送失败，使用转发消息发送
@@ -219,11 +222,11 @@ async function music_handle(e,search,source,page = 0,page_size = 10){
 	
 }
 
-async function sharemusic_HtmlList(list){//来自土块插件（earth-k-plugin）的列表样式（已修改）
+async function sharemusic_HtmlList(list,source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
 	let data = {
 		plugin_path: _plugin_path,
 		background_path: `${_plugin_path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
-		title: '点 歌 列 表',
+		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌！',
 		sub_title: `Created By Yunzai-Bot v${cfg.package.version} & xiaofei-Plugin ${Version.ver}`,
 		list: list
