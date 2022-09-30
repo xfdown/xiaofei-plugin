@@ -14,7 +14,7 @@ export class xiaofei_weather extends plugin {
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
-			priority: 3000,
+			priority: 1000,
 			rule: [
 				{
 					/** 命令正则匹配 */
@@ -27,8 +27,7 @@ export class xiaofei_weather extends plugin {
 	}
 	
 	async query_weather(){
-		await weather(this.e,this.e.msg.replace('#','').replace('天气',''));
-		return true;
+		return await weather(this.e,this.e.msg.replace('#','').replace('天气',''));
 	}
 	
 }
@@ -95,30 +94,42 @@ async function weather(e,search){
 		district: district,
 		isDefault: true
 	}]);
-
-	const browser = await puppeteer.browserInit();
-	const page = await browser.newPage();
-	await page.setViewport({
-		width: 1280,
-		height: 1320
-	});
-	await page.goto('https://tianqi.qq.com/favicon.ico');
-	await page.evaluate(`localStorage.setItem('attentionCity', '${attentionCity}')`);//设置默认地区信息
 	
+	let buff = null;
+	try{
+		const browser = await puppeteer.browserInit();
+		const page = await browser.newPage();
+		await page.setViewport({
+			width: 1280,
+			height: 1320
+		});
+		
+		await page.goto('https://tianqi.qq.com/favicon.ico');
+		await page.evaluate(`localStorage.setItem('attentionCity', '${attentionCity}')`);//设置默认地区信息
+		
+		
+		await page.goto('https://tianqi.qq.com/');//请求天气页面
+		
+		await page.evaluate(() => {
+			$('#ct-footer').remove();//删除底部导航栏
+		});
+		
+		buff = await page.screenshot({
+			fullPage: true,
+			type: 'jpeg',
+			omitBackground: false,
+			quality: 90,
+		});
+		
+		page.close().catch((err) => logger.error(err));
+	}catch(err){
+		logger.error(err);
+	}
 	
-	await page.goto('https://tianqi.qq.com/');//请求天气页面
-	
-	await page.evaluate(() => {
-		$('#ct-footer').remove();//删除底部导航栏
-	});
-	
-	let buff = await page.screenshot({
-		fullPage: true,
-		type: 'jpeg',
-        omitBackground: false,
-        quality: 90,
-	});
-	page.close().catch((err) => logger.error(err));
+	if(!buff){
+		await e.reply('[小飞插件]天气截图失败！');
+		return false;
+	}
 	
 	await e.reply(segment.image(buff));
 	
