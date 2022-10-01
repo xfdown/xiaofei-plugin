@@ -2,7 +2,7 @@
 
 #### 介绍
 
-版本：v1.4.1
+版本：v1.5.0
 
 交流群：938326742
 
@@ -31,6 +31,8 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 【通行证ck转米游社ck】：用户只提交通行证ck时，插件自动生成米游社ck并完成绑定。
 
 【代发言】：可用命令：【#代@xx 指令 #代203017966 指令】（仅主人可用。）
+
+【用户ck统计】：可用命令：【#用户ck统计】
 
 #### 参与贡献
 
