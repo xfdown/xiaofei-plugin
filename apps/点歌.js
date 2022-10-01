@@ -264,7 +264,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				for(let index in data.ar){
 					ars.push(data.ar[index].name);
 				}
-				return ars.join('·');
+				return ars.join('/');
 			},
 			pic: (data) => {
 				let url = data.al ? data.al.picUrl + '?param=300x300' : no_pic;
@@ -321,7 +321,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				for(let index in data.singer){
 					ars.push(data.singer[index].name);
 				}
-				return ars.join('·');
+				return ars.join('/');
 			},
 			pic: (data) => {
 				let album_mid = data.album ? data.album.mid : '';
