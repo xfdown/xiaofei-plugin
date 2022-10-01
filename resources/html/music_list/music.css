@@ -6,7 +6,7 @@
 }
 
 body {
-  width: 100%;
+  width: 900px;
   height: 130%;
   background-size: 100%;
 }
@@ -30,8 +30,8 @@ body {
 	padding-bottom: 10px;
 	padding-top: 10px;
 	padding-right: 10px;
-	margin-left: 30px;
-	margin-right: 30px;
+	margin-left: 20px;
+	margin-right: 55px;
 	color: #fff;
 	background-color: rgb(0 0 0 / 30%);
 	text-shadow: 3px 3px 3px #00f;
@@ -40,12 +40,13 @@ body {
 table{
 	border: none;/*去除默认边框*/
 	border-collapse: collapse;/*合并单元格边框*/
-	margin-left: 30px;
-	margin-right: 30px;
+	margin-left: 20px;
+	margin-right: 40px;
 	font-family: "jty";
 	box-shadow: 3px 3px 3px rgb(0 0 0 / 50%);
 	border-radius: 10px;
 	overflow: hidden;
+	width: 820px;
 }
 th,td{
 	border: none;/*去除默认边框*/
