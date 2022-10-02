@@ -4,7 +4,6 @@ import lodash from 'lodash'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
 import { Version } from '.././components/index.js'
-
 /** redis key */
 const keyPre = 'Yz:genshin:mys:';
 const key = {
