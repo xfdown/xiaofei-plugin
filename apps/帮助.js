@@ -35,7 +35,7 @@ export class xiaofei_help extends plugin {
 
 }
 
-export async function help(e,help_list=null){
+async function help(e){
   let custom = {}
   let help = {}
 
@@ -44,8 +44,7 @@ export async function help(e,help_list=null){
   custom = help
 
   let helpConfig = lodash.defaults(diyCfg.helpCfg || {}, custom.helpCfg, sysCfg.helpCfg)
-  let helpList = help_list || diyCfg.helpList || custom.helpList || sysCfg.helpList
-  console.log(helpList);
+  let helpList = diyCfg.helpList || custom.helpList || sysCfg.helpList
   let helpGroup = []
 
   lodash.forEach(helpList, (group) => {
