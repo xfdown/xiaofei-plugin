@@ -2,8 +2,6 @@ import plugin from '../../../lib/plugins/plugin.js'
 import { segment } from "oicq";
 import fetch from 'node-fetch'
 
-const _path = process.cwd()
-
 export class xiaofei_mysck extends plugin {
 	constructor () {
 		super({

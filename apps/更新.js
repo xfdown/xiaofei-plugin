@@ -1,9 +1,7 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import { execSync } from 'child_process'
-import { update } from '../.././other/update.js'
-import { Version } from '.././components/index.js'
-
-const plugin_name = 'xiaofei-plugin';
+import { update } from '../../other/update.js'
+import { Version , Common, Plugin_Name} from '../components/index.js'
 
 export class xiaofei_update extends plugin {
 	constructor () {
@@ -15,7 +13,7 @@ export class xiaofei_update extends plugin {
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
-			priority: 5000,
+			priority: 3000,
 			rule: [
 				{
 					/** 命令正则匹配 */
@@ -45,11 +43,11 @@ export class xiaofei_update extends plugin {
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;
 		
-		if(Update_Plugin.getPlugin(plugin_name)){
+		if(Update_Plugin.getPlugin(Plugin_Name)){
 			if(this.e.msg.includes('强制')){
-				await execSync('git reset --hard',{cwd: `${process.cwd()}/plugins/${plugin_name}/`});
+				await execSync('git reset --hard',{cwd: `${process.cwd()}/plugins/${Plugin_Name}/`});
 			}
-			await Update_Plugin.runUpdate(plugin_name);
+			await Update_Plugin.runUpdate(Plugin_Name);
 			if(Update_Plugin.isUp){
 				setTimeout(() => Update_Plugin.restart(), 2000)
 			}
@@ -58,8 +56,8 @@ export class xiaofei_update extends plugin {
 	}
 	
 	async plugin_version(){
-		await this.reply('小飞插件当前版本：'+Version.ver);
-		return true;
+		//await this.reply('小飞插件当前版本：'+Version.ver);
+		return versionInfo(this.e);
 	}
 	
 	async update_log(){
@@ -67,9 +65,18 @@ export class xiaofei_update extends plugin {
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;
 		
-		if(Update_Plugin.getPlugin(plugin_name)){
-			this.e.reply(await Update_Plugin.getLog(plugin_name));
+		if(Update_Plugin.getPlugin(Plugin_Name)){
+			this.e.reply(await Update_Plugin.getLog(Plugin_Name));
 		}
 		return true;
 	}
+}
+
+async function versionInfo (e) {
+	console.log(Version.logs);
+  return await Common.render('help/version-info', {
+    currentVersion: Version.ver,
+    changelogs: Version.logs,
+    elem: 'cryo'
+  }, { e, scale: 1.2 })
 }

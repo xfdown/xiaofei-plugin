@@ -3,8 +3,6 @@ import cfg from '../../../lib/config/config.js'
 import { segment } from "oicq";
 import fetch from 'node-fetch'
 
-const _path = process.cwd()
-
 export class xiaofei_replace extends plugin {
 	constructor () {
 		super({

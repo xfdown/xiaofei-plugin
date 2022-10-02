@@ -4,10 +4,8 @@ import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
-import { Version } from '.././components/index.js'
+import { Version, Plugin_Path} from '.././components/index.js'
 
-const _path = process.cwd();
-const _plugin_path = _path + '/plugins/xiaofei-plugin';
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
 
@@ -224,8 +222,8 @@ async function music_handle(e,search,source,page = 0,page_size = 10){
 
 async function sharemusic_HtmlList(list,source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
 	let data = {
-		plugin_path: _plugin_path,
-		background_path: `${_plugin_path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
+		plugin_path: Plugin_Path,
+		background_path: `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌！',
 		sub_title: `Created By Yunzai-Bot v${cfg.package.version} & xiaofei-Plugin ${Version.ver}`,
@@ -233,7 +231,7 @@ async function sharemusic_HtmlList(list,source = ''){//来自土块插件（eart
 	};
 		
 	let img = await puppeteer.screenshot("music_list", {
-		tplFile: `${_plugin_path}/resources/html/music_list/index.html`,
+		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
 	

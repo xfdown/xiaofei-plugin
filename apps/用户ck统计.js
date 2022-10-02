@@ -3,7 +3,7 @@ import GsCfg from '../../genshin/model/gsCfg.js'
 import lodash from 'lodash'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
-import { Version } from '.././components/index.js'
+import { Version, Plugin_Path} from '.././components/index.js'
 /** redis key */
 const keyPre = 'Yz:genshin:mys:';
 const key = {
@@ -18,9 +18,6 @@ const key = {
 	/** qq-uid */
 	qqUid: `${keyPre}qq-uid:`
 };
-
-const _path = process.cwd();
-const _plugin_path = _path + '/plugins/xiaofei-plugin';
 
 export class xiaofei_userck_statistics extends plugin {
 	constructor () {
@@ -75,7 +72,7 @@ export class xiaofei_userck_statistics extends plugin {
 		});
 		
 		let data = {
-			plugin_path: _plugin_path,
+			plugin_path: Plugin_Path,
 			uids,
 			uidCount,
 			queryCount,
@@ -91,7 +88,7 @@ export class xiaofei_userck_statistics extends plugin {
 		};
 		
 		let img = await puppeteer.screenshot("user-stat", {
-			tplFile: `${_plugin_path}/resources/html/user-stat/index.html`,
+			tplFile: `${Plugin_Path}/resources/html/user-stat/index.html`,
 			...data
 		});
 		await e.reply(img);
