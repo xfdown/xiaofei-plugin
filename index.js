@@ -3,9 +3,9 @@
 插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
 */
 import fs from 'node:fs'
-import { Version } from './components/index.js'
+import { Version, Plugin_Path} from './components/index.js'
 
-const files = fs.readdirSync(`${_path}/plugins/xiaofei-plugin/apps`).filter(file => file.endsWith('.js'))
+const files = fs.readdirSync(`${Plugin_Path}/apps`).filter(file => file.endsWith('.js'))
 
 let ret = []
 
