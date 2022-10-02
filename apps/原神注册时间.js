@@ -87,7 +87,7 @@ async function query_reg_time(mys_cookies,uid){
 			reg_time = '查询失败！';
 		}
 		
-		return `uid：${nickname}(${uid})\r\n服务器：${region_name}\r\n世界等级：${level}\r\n注册时间：${reg_time}`;
+		return `uid：${nickname}(${uid})\r\n服务器：${region_name}\r\n冒险等级：${level}\r\n注册时间：${reg_time}`;
 	}
 	return `uid：${uid}\r\n注册时间：查询失败！`;
 }
