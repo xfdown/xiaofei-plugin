@@ -73,7 +73,6 @@ export class xiaofei_update extends plugin {
 }
 
 async function versionInfo (e) {
-	console.log(Version.logs);
   return await Common.render('help/version-info', {
     currentVersion: Version.ver,
     changelogs: Version.logs,

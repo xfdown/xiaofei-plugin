@@ -1,4 +1,4 @@
-import { Data, Version , Plugin_Name} from '../index.js'
+import { Data, Version, Plugin_Name} from '../index.js'
 import Cfg from '../Cfg.js'
 import fs from 'fs'
 import puppeteer from '../../../../lib/puppeteer/puppeteer.js'
