@@ -41,7 +41,7 @@ export default async function (path, params, cfg) {
     data._app = app
     fs.writeFileSync(file, JSON.stringify(data))
   }
-  let base64 = await puppeteer.screenshot(`${plugin}/${app}/${tpl}`, data)
+  let base64 = await puppeteer.screenshot(`${Plugin_Name}/${app}/${tpl}`, data)
   let ret = true
   if (base64) {
     ret = await e.reply(base64)
