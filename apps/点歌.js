@@ -4,11 +4,10 @@ import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
-import { Version, Plugin_Path} from '.././components/index.js'
+import {Config, Version, Plugin_Path} from '.././components/index.js'
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
-var qqmusic_vip = {is_vip: false,time: 0};
 
 export class xiaofei_music extends plugin {
 	constructor () {
@@ -539,6 +538,16 @@ async function SendMusicShare(e,data,to_uin = null){
 	if(result[3] != 0){
 		e.reply('歌曲分享失败：'+result[3],true);
 	}
+}
+
+async function get_netease_cookie(){
+	try{
+	}catch(err){}
+}
+
+async function get_qqmusic_cookie(){
+	try{
+	}catch(err){}
 }
 
 async function is_qqmusic_vip(uin){
