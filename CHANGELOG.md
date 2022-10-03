@@ -1,3 +1,6 @@
+# 1.7.2
+* 除`#天气` `#代发言` `通行证ck转米游社ck`外，其他指令优先级统一改为2000。
+
 # 1.7.1
 * `#点歌`网易音乐源支持配置黑胶账号cookie
 	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
