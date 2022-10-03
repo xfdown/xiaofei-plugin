@@ -4,7 +4,7 @@
 
 交流群：938326742
 
-查看更新(./CONTRIBUTING.md)
+[查看更新](./CONTRIBUTING.md)
 
 #### 安装教程
 
