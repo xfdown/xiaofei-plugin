@@ -77,7 +77,6 @@ try {
   // do nth
 }
 
-console.log(changelogs);
 try{
 	if(fs.existsSync(README_path)){
 		let README = fs.readFileSync(README_path, 'utf8') || ''
