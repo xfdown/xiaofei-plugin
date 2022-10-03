@@ -1,3 +1,7 @@
+# 1.7.1
+* `#点歌`网易音乐源支持配置黑胶账号cookie
+	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
+
 # 1.7.0
 * 增加`#获取抽卡链接`功能
 	* 获取authkey调用了逍遥插件

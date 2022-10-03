@@ -31,10 +31,8 @@ class Config {
 
   /** 用户配置 */
   getConfig (app, name) {
-    if (this.ignore.includes(`${app}.${name}`)) {
-      return this.getYaml(app, name, 'config')
-    }
-    return { ...this.getdefSet(app, name), ...this.getYaml(app, name, 'config') }
+	return this.getYaml(app, name, 'config')
+    //return { ...this.getdefSet(app, name), ...this.getYaml(app, name, 'config') }
   }
 
   /**
@@ -64,8 +62,21 @@ class Config {
   }
 
   getFilePath (app, name, type) {
-    if (type == 'defSet') return `${this.defSetPath}${app}/${name}.yaml`
-    else return `${this.configPath}${app}.${name}.yaml`
+	  let config_path = '';
+	  if(type == 'defSet'){
+		  config_path = `${this.defSetPath}`;
+	  }else{
+		  config_path = `${this.configPath}`;
+	  }
+	  
+	  let file = `${config_path}${app}.${name}.yaml`;
+	  try{
+		  if(!fs.existsSync(file)){
+			  let default_file = `${config_path}default/${app}.${name}.yaml`;
+			  fs.copyFileSync(default_file,file);
+		  }
+	  }catch(err){}
+	  return file;
   }
 
   /** 监听配置文件 */

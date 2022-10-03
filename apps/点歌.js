@@ -9,6 +9,24 @@ import {Config, Version, Plugin_Path} from '.././components/index.js'
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
 
+var music_cookies = {
+	qqmusic: {
+		ck: '',
+		time: 0
+	},
+	netease: {
+		get ck(){
+			try{
+				let data = Config.getConfig('music','cookies');
+				if(data?.netease){
+					return data?.netease;
+				}
+			}catch(err){}
+			return '';
+		}
+	}
+};
+
 export class xiaofei_music extends plugin {
 	constructor () {
 		super({
@@ -32,10 +50,13 @@ export class xiaofei_music extends plugin {
 		
 		this.task = {
 			cron: '*/10 * * * * ?',
-			name: '多选点歌缓存清理任务',
-			fnc: clear_music_cache,
+			name: '[小飞插件_点歌]默认任务',
+			fnc: music_task,
 			log: false
 		};
+	}
+	
+	async init(){
 	}
 
 	async message(){
@@ -68,7 +89,7 @@ if(!Bot.xiaofei_music_temp_data){
 	Bot.xiaofei_music_temp_data = {};
 }
 
-async function clear_music_cache(){
+async function music_task(){
 	let data = Bot.xiaofei_music_temp_data;
 	for(let key in data){
 		if((new Date().getTime() - data[key].time) > (1000 * 60)){
@@ -271,13 +292,16 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let url = 'http://music.163.com/song/media/outer/url?id=' + data.id;
 				if(data.privilege && data.privilege.plLevel == 'none'){
 					try{
+						let cookie = music_cookies.netease?.ck;
+						cookie = cookie ? cookie : '';
 						let options = {
 							method: 'POST',//post请求 
 							headers: {
 								'Content-Type': 'application/x-www-form-urlencoded',
-								'User-Agent': 'User-Agent:Dalvik/2.1.0 (Linux; U; Android 12; MI Build/SKQ1.211230.001)'
+								'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 12; MI Build/SKQ1.211230.001)',
+								'Cookie': cookie
 							},
-							body: `ids=${JSON.stringify([data.id])}&level=standard&encodeType=aac`
+							body: `ids=${JSON.stringify([data.id])}&level=standard&encodeType=mp3`
 						};
 						let response = await fetch('https://music.163.com/api/song/enhance/player/url/v1',options); //调用接口获取数据
 						let res = await response.json(); //结果json字符串转对象
@@ -538,16 +562,6 @@ async function SendMusicShare(e,data,to_uin = null){
 	if(result[3] != 0){
 		e.reply('歌曲分享失败：'+result[3],true);
 	}
-}
-
-async function get_netease_cookie(){
-	try{
-	}catch(err){}
-}
-
-async function get_qqmusic_cookie(){
-	try{
-	}catch(err){}
 }
 
 async function is_qqmusic_vip(uin){
