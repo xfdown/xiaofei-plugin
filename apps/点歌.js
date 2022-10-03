@@ -57,6 +57,11 @@ export class xiaofei_music extends plugin {
 	}
 	
 	async init(){
+		try{
+			for(let key in music_cookies){
+				music_cookies[key].ck;
+			}
+		}catch(err){}
 	}
 
 	async message(){
