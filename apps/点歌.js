@@ -8,9 +8,9 @@ import { Version, Plugin_Path} from '.././components/index.js'
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
+var qqmusic_vip = {is_vip: false,time: 0};
 
 export class xiaofei_music extends plugin {
-	
 	constructor () {
 		super({
 			/** 功能名称 */
@@ -38,11 +38,7 @@ export class xiaofei_music extends plugin {
 			log: false
 		};
 	}
-	
-	async init(){
-		
-	}
-	
+
 	async message(){
 		return music_message(this.e);
 	}
@@ -543,6 +539,37 @@ async function SendMusicShare(e,data,to_uin = null){
 	if(result[3] != 0){
 		e.reply('歌曲分享失败：'+result[3],true);
 	}
+}
+
+async function is_qqmusic_vip(uin){
+	let json = {"comm":{"cv":4747474,"ct":24,"format":"json","inCharset":"utf-8","outCharset":"utf-8","notice":0,"platform":"yqq.json","needNewCode":1,"uin":0,"g_tk_new_20200303":5381,"g_tk":5381},
+	"req_0":{"module":"userInfo.VipQueryServer",
+	"method":"SRFVipQuery_V2",
+	"param":{
+		"uin_list":[uin]
+	}}};
+	
+	let options = {
+		method: 'POST',//post请求 
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Cookie': Bot.cookies['y.qq.com']
+			},
+		body: JSON.stringify(json)
+	};
+	
+	let url = `http://u6.y.qq.com/cgi-bin/musicu.fcg`;
+	try{
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json();
+		if(res.req_0 && res.req_0?.code == '0'){
+			let data = res.req_0.data?.infoMap?.[uin];
+			if(data.iVipFlag == 1 || data.iSuperVip == 1 || data.iNewVip == 1 || data.iNewSuperVip == 1){
+				return true;
+			}
+		}
+	}catch(err){}
+	return false;
 }
 
 async function kugou_search(search,page = 1,page_size = 10){
