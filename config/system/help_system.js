@@ -38,10 +38,6 @@ export const helpList = [
     icon: 91,
     title: '#原神注册时间',
     desc: '查询当前绑定ck的原神注册时间'
-  },{
-    icon: 6,
-    title: '#获取抽卡链接',
-    desc: '获取原神抽卡历史记录链接'
   }]
 },{
   group: '其他查询指令',
