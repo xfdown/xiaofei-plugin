@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
-import {Config, Version, Plugin_Path} from '.././components/index.js'
+import {Config, Version, Plugin_Path} from '../components/index.js'
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
@@ -41,7 +41,7 @@ export class xiaofei_music extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$',
+					reg: '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$',
 					/** 执行方法 */
 					fnc: 'message'
 				}
@@ -83,7 +83,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(/^#?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$/.test(e.msg) || /^([1-9]|(1|2|3)[0-9])$/.test(e.msg)){
+	if(/^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$/.test(e.msg) || /^([1-9]|(1|2|3)[0-9])$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -141,12 +141,12 @@ async function music_message(e){
 	}
 	
 	
-	reg = /^#?(多选)?(.*)?(点播音乐|点播|点歌|播放|来一?首)(.*)$/.exec(e.msg);
-	let search = reg[4];
+	reg = /^#?(小飞)?(多选)?(.*)?(点播音乐|点播|点歌|播放|来一?首)(.*)$/.exec(e.msg);
+	let search = reg[5];
 	let source = '';
-	if(!reg[1]) reg[1] = '';
+	if(!reg[2]) reg[2] = '';
 	
-	switch(reg[2]){
+	switch(reg[3]){
 		case '网易':
 		case '网易云':
 			source = 'netease';
@@ -163,21 +163,20 @@ async function music_message(e){
 		case 'qq':
 		case 'QQ':
 		default:
-			reg[2] = 'QQ';
+			reg[3] = 'QQ';
 			source = 'qq';
 			break;
 	}
 	
-	source = [source, reg[2]];
+	source = [source, reg[3]];
 	
 	if(search == ''){
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help,true);
-		//e.reply("格式：#"+reg[1]+reg[2]+"点歌(歌名|歌手|歌词|专辑)\r\n例如：#"+reg[1]+reg[2]+"点歌周杰伦",true);
 		return true;
 	}
 	
-	return music_handle(e, search, source, reg[1] == '多选' ? 1 : 0, reg[1] == '多选' ? _page_size : 10);
+	return music_handle(e, search, source, reg[2] == '多选' ? 1 : 0, reg[2] == '多选' ? _page_size : 10);
 }
 
 async function music_handle(e,search,source,page = 0,page_size = 10){

@@ -1,6 +1,8 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import { segment } from "oicq";
 import fetch from 'node-fetch'
+import fs from 'node:fs'
+import {Path, Plugin_Path} from '../components/index.js'
 
 export class xiaofei_mysck extends plugin {
 	constructor () {
@@ -77,6 +79,14 @@ export class xiaofei_mysck extends plugin {
 			let stoken_data = result.data;
 			
 			try{
+				
+				try{
+					let file = `${Path}/plugins/xiaoyao-cvs-plugin/data/yaml/${this.e.user_id}.yaml`;
+					if(fs.existsSync(file)){
+						fs.unlinkSync(file);
+					}
+				}catch(err){}
+				
 				let xy_gsCfg = await import('../../xiaoyao-cvs-plugin/model/gsCfg.js'); xy_gsCfg = xy_gsCfg.default;
 				let datalist = {};
 				for(let info of infos){
