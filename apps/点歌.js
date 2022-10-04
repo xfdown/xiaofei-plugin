@@ -41,7 +41,7 @@ export class xiaofei_music extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$',
+					reg: '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页).*$',
 					/** 执行方法 */
 					fnc: 'message'
 				}
@@ -70,7 +70,7 @@ export class xiaofei_music extends plugin {
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
-		if(/^([1-9]|(1|2|3)[0-9])$/.test(this.e.msg)){
+		if(/^(\d+)$/.test(this.e.msg)){
 			return music_message(this.e);
 		}
 		return false;
@@ -83,7 +83,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(/^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首).*$/.test(e.msg) || /^([1-9]|(1|2|3)[0-9])$/.test(e.msg)){
+	if(/^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页).*$/.test(e.msg) || /^(\d+)$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -98,24 +98,26 @@ async function music_task(){
 	let data = Bot.xiaofei_music_temp_data;
 	for(let key in data){
 		if((new Date().getTime() - data[key].time) > (1000 * 60)){
-			await recallMusicMsg(key,data[key].msg_result);
+			await recallMusicMsg(key,data[key].msg_results);
 			delete data[key];
 		}
 	}
 }
 
-async function recallMusicMsg(key,msg_result){
-	if(msg_result){
-		let arr = key.split('_');
-		let type = arr[0];
-		let message_id = msg_result.message_id;
-		switch(type){
-			case 'group':
-				await Bot.pickGroup(arr[1]).recallMsg(message_id);
-				break;
-			case 'friend':
-				await Bot.pickFriend(arr[1]).recallMsg(message_id);
-				break;
+async function recallMusicMsg(key,msg_results){
+	if(msg_results && msg_results.length > 0){
+		for(let msg_result of msg_results){
+			let arr = key.split('_');
+			let type = arr[0];
+			let message_id = msg_result?.message_id;
+			switch(type){
+				case 'group':
+					await Bot.pickGroup(arr[1]).recallMsg(message_id);
+					break;
+				case 'friend':
+					await Bot.pickFriend(arr[1]).recallMsg(message_id);
+					break;
+			}
 		}
 	}
 }
@@ -133,15 +135,15 @@ async function music_message(e){
 		if(data[key].data.length > index && index > -1){
 			let music = data[key].data[index];
 			await SendMusicShare(e,music);
-			await recallMusicMsg(key,data[key].msg_result);
-			delete data[key];
+			//await recallMusicMsg(key,data[key].msg_results);
+			//delete data[key];
 			return true;
 		}
 		return false;
 	}
 	
 	
-	reg = /^#?(小飞)?(多选)?(.*)?(点播音乐|点播|点歌|播放|来一?首)(.*)$/.exec(e.msg);
+	reg = /^#?(小飞)?(多选)?(.*)?(点播音乐|点播|点歌|播放|来一?首|下一页)(.*)$/.exec(e.msg);
 	let search = reg[5];
 	let source = '';
 	if(!reg[2]) reg[2] = '';
@@ -170,32 +172,61 @@ async function music_message(e){
 	
 	source = [source, reg[3]];
 	
-	if(search == ''){
+	if(search == '' && reg[4] != '下一页'){
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help,true);
 		return true;
 	}
 	
-	return music_handle(e, search, source, reg[2] == '多选' ? 1 : 0, reg[2] == '多选' ? _page_size : 10);
+	let temp_data = {};
+	let page = reg[2] == '多选' ? 1 : 0;
+	let page_size = reg[2] == '多选' ? _page_size : 10;
+	
+	if(reg[4] == '下一页'){
+		let key = get_MusicListId(e);
+		let data = Bot.xiaofei_music_temp_data;
+		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60)){
+			return false;
+		}
+		data[key].time = new Date().getTime();//续期，防止搜索时清除
+		page_size = _page_size;
+		page = data[key].page + 1;
+		search = data[key].search;
+		source = data[key].source;
+		temp_data = data[key];//上一页的列表数据
+	}
+	
+	return music_handle(e, search, source, page, page_size, temp_data);
 }
 
-async function music_handle(e,search,source,page = 0,page_size = 10){
+async function music_handle(e, search, source, page = 0, page_size = 10, temp_data = {}){
 	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if(result && result.data && result.data.length > 0){
+		
+		let key = get_MusicListId(e);
+		let data = Bot.xiaofei_music_temp_data;
+		if(data[key]?.msg_results){
+			recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
+		}
+		
 		if(page > 0){
 			let message = [`---${source[1]}点歌列表---`];
 			for(let i in result.data){
 				let music = result.data[i];
-				message.push((Number(i)+1) + '.' + music.name + '-' + music.artist);
+				let index = Number(i) + 1;
+				if(page > 1){
+					index = ((page - 1) * 10) + index;
+				}
+				message.push(index + '.' + music.name + '-' + music.artist);
 			}
 			message.push('----------------');
-			message.push('提示：请在一分钟内发送序号进行点歌！');
+			message.push('提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！');
 			let msg_result = false;
 			
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
 				msg_result = await e.reply(message.join("\r\n"));
 			}else{
-				msg_result = await e.reply(await sharemusic_HtmlList(result.data,source[1]));//生成图片列表
+				msg_result = await e.reply(await sharemusic_HtmlList(result.data, page, page_size, source[1]));//生成图片列表
 			}
 			
 			if(!msg_result){//消息发送失败，使用转发消息发送
@@ -222,34 +253,69 @@ async function music_handle(e,search,source,page = 0,page_size = 10){
 				
 				msg_result = await e.reply(forwardMsg);
 			}
-			let data = {
-				time: new Date().getTime(),
-				data: result.data,
-				page: result.page,
-				msg_result: msg_result
-			};
+			let data = {};
+			if(page > 1){
+				let list_data = temp_data.data; list_data = list_data ? list_data : [];
+				list_data = list_data.concat(result.data);
+				let msg_results = temp_data.msg_results; msg_results = msg_results ? msg_results : [];
+				msg_results.push(msg_result);
+				data = {
+					time: new Date().getTime(),
+					data: list_data,
+					page: result.page,
+					msg_results: msg_results,
+					search: search,
+					source: source
+				};
+			}else{
+				data = {
+					time: new Date().getTime(),
+					data: result.data,
+					page: result.page,
+					msg_results: [msg_result],
+					search: search,
+					source: source
+				};
+			}
 			Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
 		}else{
 			let music = result.data[0];
 			await SendMusicShare(e,music);
 		}
 	}else{
-		e.reply('没有找到该歌曲！',true);
+		if(page > 1){
+			await e.reply('没有找到更多歌曲！',true);
+		}else{
+			await e.reply('没有找到该歌曲！',true);
+		}
 	}
 	return true;
 	
 }
 
-async function sharemusic_HtmlList(list,source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
+async function sharemusic_HtmlList(list, page, page_size, source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
+	let new_list = [];
+	for(let i in list){
+		let music = list[i];
+		let index = Number(i) + 1;
+		if(page > 1){
+			index = ((page - 1) * page_size) + index;
+		}
+		new_list.push({
+			index: index,
+			name: music.name,
+			artist: music.artist,
+		});
+	}
 	let data = {
 		plugin_path: Plugin_Path,
 		background_path: `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
-		tips: '提示：请在一分钟内发送序号进行点歌！',
+		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
 		sub_title: `Created By Yunzai-Bot v${cfg.package.version} & xiaofei-Plugin ${Version.ver}`,
-		list: list
+		list: new_list,
 	};
-		
+	
 	let img = await puppeteer.screenshot("music_list", {
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
