@@ -15,7 +15,7 @@
 * `#点歌`
 	* 网易音乐源支持配置黑胶账号cookie
 	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
-* `通行证ck转米游社ck
+* `通行证ck转米游社ck`
 	* 功能优先级改为-1（防止禁用私聊功能后无法绑定通行证ck）
 	* 增加自动保存stoken至逍遥插件数据目录
 	* 优化ck识别
