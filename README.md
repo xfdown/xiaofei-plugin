@@ -38,8 +38,6 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 【版本】可用命令：【#小飞版本】
 
-【获取抽卡记录链接】可用命令：【#获取抽卡链接】
-
 #### 参与贡献
 
 1.  Fork 本仓库
