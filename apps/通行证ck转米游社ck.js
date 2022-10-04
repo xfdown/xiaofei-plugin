@@ -214,3 +214,15 @@ async function getUserGameRoles(param){
 	
 	return result;
 }
+
+function getCookieMap(cookie) {
+	let cookiePattern = /^(\S+)=(\S+)$/;
+	let cookieArray = cookie.replace(/\s*/g, "").split(";");
+	let cookieMap = new Map();
+	for (let item of cookieArray) {
+		let entry = item.split("=");
+		if (!entry[0]) continue;
+		cookieMap.set(entry[0], entry[1]);
+	}
+	return cookieMap||{};
+}
