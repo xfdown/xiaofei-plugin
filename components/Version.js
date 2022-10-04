@@ -76,7 +76,6 @@ try {
   // do nth
 }
 
-logger.error(logs);
 logger.error(changelogs);
 
 try{
