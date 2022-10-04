@@ -1,8 +1,7 @@
 import fs from 'fs'
 import lodash from 'lodash'
 import cfg from '../../../lib/config/config.js'
-const Path = process.cwd();
-const Plugin_Path = `./plugins/xiaofei-plugin`;
+const Plugin_Path = `${process.cwd()}/plugins/xiaofei-plugin`;
 const README_path = `${Plugin_Path}/README.md`
 const CHANGELOG_path = `${Plugin_Path}/CHANGELOG.md`
 const yunzai_ver = `v${cfg.package.version}`;
@@ -25,8 +24,9 @@ const getLine = function (line) {
 try {
   if (fs.existsSync(CHANGELOG_path)) {
     logs = fs.readFileSync(CHANGELOG_path, 'utf8') || ''
+	logger.mark(logs);
 	logs = logs.replace(/\t/g,'   ').split('\r\n')
-
+	logger.error(logs);
     let temp = {};
     let lastLine = {}
     lodash.forEach(logs, (line) => {
@@ -74,6 +74,7 @@ try {
     })
   }
 } catch (e) {
+	logger.error(e);
   // do nth
 }
 
