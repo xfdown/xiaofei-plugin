@@ -24,7 +24,7 @@ const getLine = function (line) {
 try {
   if (fs.existsSync(CHANGELOG_path)) {
     logs = fs.readFileSync(CHANGELOG_path, 'utf8') || ''
-	logs = logs.replace(/\t/g,'   ').split('\r\n')
+	logs = logs.replace(/\t/g,'   ').split('\n')
     let temp = {};
     let lastLine = {}
     lodash.forEach(logs, (line) => {
