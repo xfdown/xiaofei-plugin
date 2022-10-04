@@ -25,9 +25,9 @@ export class xiaofei_mysck extends plugin {
 	}
 	
 	async mysck(){
-		if (this.e.msg.includes('login_ticket=') && this.e.msg.includes('login_uid=') && !this.e.msg.includes('cookie_token')) {
+		if (this.e.msg.includes('login_ticket=') && this.e.msg.includes('login_uid=')) {
 			if (this.e.isGroup) {
-				this.reply('请私聊发送cookie', false, { at: true });
+				this.e.reply('请私聊发送cookie', false, { at: true });
 				this.e.msg = '';
 				return true;
 			}
@@ -42,41 +42,58 @@ export class xiaofei_mysck extends plugin {
 				let arr = [];
 				!login_ticket && arr.push('login_ticket参数不存在!');
 				!login_uid && arr.push('login_uid参数不存在!');
-				this.reply('[米哈游通行证]Cookie参数不完整！'+arr.join("\r\n"), false);
+				this.e.reply('[米哈游通行证]Cookie参数不完整！'+arr.join("\r\n"), false);
 				this.e.msg = '';
 				return true;
 			}
 			
 			let result = await getUserGameRoles(param);
 			if(result?.code != 1){
-				this.reply('[米哈游通行证]Cookie已失效，请重新获取！', false);
+				this.e.reply('[米哈游通行证]Cookie已失效，请重新获取！', false);
 				this.e.msg = '';
 				return true;
 			}
 			
-			let info = null;
+			let infos = [];
 			for(let index in result.data){
 				let value = result.data[index];
 				if(value.game_biz == 'hk4e_cn'){
-					info = value;
-					break;
+					infos.push(value);
 				}
 			}
 			
-			if(info == null){
-				e.reply('[米哈游通行证]获取账号游戏信息失败！');
+			if(infos.length < 1){
+				this.e.reply('[米哈游通行证]获取账号游戏信息失败！');
 				this.e.msg = '';
 				return true;
 			}
 			
 			result = await get_stoken(param);
 			if(result?.code != 1){
-				this.reply('[米哈游通行证]获取stoken失败，请重试！', false);
+				this.e.reply('[米哈游通行证]获取stoken失败，请重试！', false);
 				this.e.msg = '';
 				return true;
 			}
+			let stoken_data = result.data;
 			
-			let cookies = result.data;
+			try{
+				let xy_gsCfg = await import('../../xiaoyao-cvs-plugin/model/gsCfg.js'); xy_gsCfg = xy_gsCfg.default;
+				let datalist = {};
+				for(let info of infos){
+					datalist[info.game_uid] = {
+						stuid: stoken_data.stuid,
+						stoken: stoken_data.stoken,
+						ltoken: stoken_data.ltoken,
+						uid: info.game_uid,
+						userId: this.e.user_id,
+						is_sign: true
+					};
+				}
+				xy_gsCfg.saveBingStoken(this.e.user_id, datalist);
+				this.e.reply('[米哈游通行证]已保存stoken！', false);
+			}catch(err){}
+			
+			let cookies = stoken_data.cookies;
 			
 			try{
 				let map = getCookieMap(cookies);
@@ -95,14 +112,14 @@ export class xiaofei_mysck extends plugin {
 					arr.push(`login_ticket=${param.login_ticket}`);
 					arr.push(`login_uid=${param.login_uid}`);
 					console.log(arr.join('; '));
-					await this.reply('[米哈游通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。', false);
+					await this.e.reply('[米哈游通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。', false);
 					this.e.ck = arr.join('; ');
 					this.e.msg = '#绑定cookie';
 					return true;
 				}
 			}catch(err){}
 			
-			this.reply('[米哈游通行证]获取cookie_token失败，请重试！', false);
+			this.e.reply('[米哈游通行证]获取cookie_token失败，请重试！', false);
 			this.e.msg = '';
 			return true;
 		}
@@ -127,11 +144,13 @@ async function get_stoken(param){
 			let arr = [];
 			for(let index in list){
 				let value = list[index];
+				result.data[value.name] = value.token;
 				arr.push(`${value.name}=${value.token}`);
 			}
+			result.data['stuid'] = param.login_uid;
 			arr.push(`stuid=${param.login_uid}`);
+			result.data['cookies'] = arr.join('; ');
 			result.code = 1;
-			result.data = arr.join('; ');
 		}
 	}catch(err){}
 	
