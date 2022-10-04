@@ -12,7 +12,7 @@ export class xiaofei_mysck extends plugin {
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
-			priority: 100
+			priority: -1//防止禁用私聊功能后无法绑定通行证ck
 		});
 	}
 	
@@ -113,8 +113,10 @@ export class xiaofei_mysck extends plugin {
 					arr.push(`login_uid=${param.login_uid}`);
 					console.log(arr.join('; '));
 					await this.e.reply('[米哈游通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。', false);
-					this.e.ck = arr.join('; ');
-					this.e.msg = '#绑定cookie';
+					//this.e.ck = arr.join('; ');
+					//this.e.msg = '#绑定cookie';
+					this.e.msg = arr.join('; ');
+					this.e.raw_message = this.e.msg;
 					return true;
 				}
 			}catch(err){}
