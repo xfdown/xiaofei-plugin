@@ -2,7 +2,7 @@ import fs from 'fs'
 import lodash from 'lodash'
 import cfg from '../../../lib/config/config.js'
 const Path = process.cwd();
-const Plugin_Path = `${Path}/plugins/xiaofei-plugin`;
+const Plugin_Path = `./plugins/xiaofei-plugin`;
 const README_path = `${Plugin_Path}/README.md`
 const CHANGELOG_path = `${Plugin_Path}/CHANGELOG.md`
 const yunzai_ver = `v${cfg.package.version}`;
