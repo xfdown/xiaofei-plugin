@@ -78,31 +78,6 @@ export class xiaofei_mysck extends plugin {
 			}
 			let stoken_data = result.data;
 			
-			try{
-				
-				try{
-					let file = `${Path}/plugins/xiaoyao-cvs-plugin/data/yaml/${this.e.user_id}.yaml`;
-					if(fs.existsSync(file)){
-						fs.unlinkSync(file);
-					}
-				}catch(err){}
-				
-				let xy_gsCfg = await import('../../xiaoyao-cvs-plugin/model/gsCfg.js'); xy_gsCfg = xy_gsCfg.default;
-				let datalist = {};
-				for(let info of infos){
-					datalist[info.game_uid] = {
-						stuid: stoken_data.stuid,
-						stoken: stoken_data.stoken,
-						ltoken: stoken_data.ltoken,
-						uid: info.game_uid,
-						userId: this.e.user_id,
-						is_sign: true
-					};
-				}
-				xy_gsCfg.saveBingStoken(this.e.user_id, datalist);
-				this.e.reply('[米哈游通行证]已保存stoken！', false);
-			}catch(err){}
-			
 			let cookies = stoken_data.cookies;
 			
 			try{

@@ -10,7 +10,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			/** 功能名称 */
 			name: '小飞插件_原神注册时间查询',
 			/** 功能描述 */
-			dsc: '从原神绘忆星辰活动获取游戏注册时间。获取cookie_token调用了逍遥插件！',
+			dsc: '从原神绘忆星辰活动获取游戏注册时间。',
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
@@ -35,12 +35,8 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			this.e.reply(result.msg);
 			return true;
 		}else{
-			let result = await xiaoyao_query_mysck(this.e);
-			if(result.code == -1){
-				this.e.reply('cookie_token已失效，请重新抓取ck！\r\n发送【ck帮助】查看配置教程\r\n'+result.msg);
-				return true;
-			}
-			cookies = result.cookies;
+			this.e.reply('cookie_token已失效，请重新抓取ck！\r\n发送【ck帮助】查看配置教程\r\n'+result.msg);
+			return true;
 		}
 		
 		let ck = gsCfg.getBingCkSingle(this.e.user_id)
@@ -150,36 +146,6 @@ async function query_mysck(e){
       return {code: 1,msg: '获取成功！',data: ck};
     }
 	return {code: -1,msg: '获取Cookie失败！'};;
-}
-
-async function xiaoyao_query_mysck(e){
-	try{
-		var MihoYoApi = await import('../../xiaoyao-cvs-plugin/model/mys/mihoyo-api.js'); MihoYoApi = MihoYoApi.default;
-		var utils = await import('../../xiaoyao-cvs-plugin/model/mys/utils.js');
-		var xy_gsCfg = await import('../../xiaoyao-cvs-plugin/model/gsCfg.js'); xy_gsCfg = xy_gsCfg.default;
-	}catch(err){
-		return {code: -1,msg: '加载xiaoyao-cvs-plugin失败，请确定已安装xiaoyao-cvs-plugin！'};
-	}
-	
-	let stoken = await xy_gsCfg.getUserStoken(e.user_id);
-	if (Object.keys(stoken).length==0) {
-		return {code: -1,msg: '请先绑定stoken\n发送【stoken帮助】查看配置教程'};
-	}
-	let miHoYoApi = new MihoYoApi(e);
-	let cookies = '';
-
-	for(let item of  Object.keys(stoken)){
-		e.region = getServer(stoken[item].uid)
-		miHoYoApi.cookies= `stuid=${stoken[item].stuid};stoken=${stoken[item].stoken};ltoken=${stoken[item].ltoken};`;
-		let resObj = await miHoYoApi.updCookie();
-		if (!resObj?.data) {
-			return {code: -1,msg: '获取Cookies失败！'};
-		}
-		let sk = await utils.getCookieMap(miHoYoApi.cookies);
-		let ck = resObj["data"]["cookie_token"];
-		cookies = `ltoken=${sk.get("ltoken")};ltuid=${sk.get("stuid")};cookie_token=${ck}; account_id=${sk.get("stuid")};`;
-	}
-	return {code: 1,cookies: cookies};
 }
 
 function getServer (uid) {
