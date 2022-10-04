@@ -45,14 +45,14 @@ export class xiaofei_mysck extends plugin {
 				!login_ticket && arr.push('login_ticket参数不存在!');
 				!login_uid && arr.push('login_uid参数不存在!');
 				this.e.reply('[米哈游通行证]Cookie参数不完整！'+arr.join("\r\n"), false);
-				this.e.msg = '';
+				//this.e.msg = '';
 				return true;
 			}
 			
 			let result = await getUserGameRoles(param);
 			if(result?.code != 1){
 				this.e.reply('[米哈游通行证]Cookie已失效，请重新获取！', false);
-				this.e.msg = '';
+				//this.e.msg = '';
 				return true;
 			}
 			
@@ -66,14 +66,14 @@ export class xiaofei_mysck extends plugin {
 			
 			if(infos.length < 1){
 				this.e.reply('[米哈游通行证]获取账号游戏信息失败！');
-				this.e.msg = '';
+				//this.e.msg = '';
 				return true;
 			}
 			
 			result = await get_stoken(param);
 			if(result?.code != 1){
 				this.e.reply('[米哈游通行证]获取stoken失败，请重试！', false);
-				this.e.msg = '';
+				//this.e.msg = '';
 				return true;
 			}
 			let stoken_data = result.data;
@@ -132,7 +132,7 @@ export class xiaofei_mysck extends plugin {
 			}catch(err){}
 			
 			this.e.reply('[米哈游通行证]获取cookie_token失败，请重试！', false);
-			this.e.msg = '';
+			//this.e.msg = '';
 			return true;
 		}
 		return false;
@@ -214,17 +214,3 @@ async function getUserGameRoles(param){
 	
 	return result;
 }
-
-
-function getCookieMap(cookie) {
-	let cookiePattern = /^(\S+)=(\S+)$/;
-	let cookieArray = cookie.replace(/\s*/g, "").split(";");
-	let cookieMap = new Map();
-	for (let item of cookieArray) {
-		let entry = item.split("=");
-		if (!entry[0]) continue;
-		cookieMap.set(entry[0], entry[1]);
-	}
-	return cookieMap||{};
-}
-
