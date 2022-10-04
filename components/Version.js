@@ -25,12 +25,12 @@ const getLine = function (line) {
 try {
   if (fs.existsSync(CHANGELOG_path)) {
     logs = fs.readFileSync(CHANGELOG_path, 'utf8') || ''
-    logs = "\r\n\r\n" + logs;
 	logs = logs.replace(/\t/g,'   ').split('\r\n')
 
     let temp = {};
     let lastLine = {}
     lodash.forEach(logs, (line) => {
+	  line = line.trim();
       if (versionCount <= -1) {
         return false
       }
