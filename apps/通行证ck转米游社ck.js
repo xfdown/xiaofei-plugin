@@ -25,7 +25,7 @@ export class xiaofei_mysck extends plugin {
 	}
 	
 	async mysck(){
-		if (this.e.msg.includes('login_ticket') && !this.e.msg.includes('cookie_token')) {
+		if (this.e.msg.includes('login_ticket=') && this.e.msg.includes('login_uid=') && !this.e.msg.includes('cookie_token')) {
 			if (this.e.isGroup) {
 				this.reply('请私聊发送cookie', false, { at: true });
 				this.e.msg = '';
