@@ -63,7 +63,7 @@ class Config {
 		  this.watcher[type] = {};
 	  }
 	  
-	  let config_path = `${this.Plugin_Path}/${type}/`;
+	  let config_path = `${Plugin_Path}/${type}/`;
 	  let file = `${config_path}${app}.${name}.yaml`;
 	  try{
 		  if(!fs.existsSync(file)){
