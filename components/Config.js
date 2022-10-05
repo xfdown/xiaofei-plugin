@@ -7,16 +7,10 @@ const Plugin_Name = 'xiaofei-plugin'
 const Plugin_Path = `${Path}/plugins/${Plugin_Name}`;
 class Config {
 	constructor () {
-    /** 默认设置 */
-    this.defSetPath = `./plugins/${Plugin_Name}/defSet/`
-    this.defSet = {}
-
-    /** 用户设置 */
-    this.configPath = `./plugins/${Plugin_Name}/config/`
     this.config = {}
 
     /** 监听文件 */
-    this.watcher = { config: {}, defSet: {} }
+    this.watcher = {}
 
     this.ignore = []
   }
@@ -32,7 +26,6 @@ class Config {
   /** 用户配置 */
   getConfig (app, name) {
 	return this.getYaml(app, name, 'config')
-    //return { ...this.getdefSet(app, name), ...this.getYaml(app, name, 'config') }
   }
 
   /**
@@ -45,10 +38,10 @@ class Config {
     let file = this.getFilePath(app, name, type)
     let key = `${app}.${name}`
 
-    if (this[type][key]) return this[type][key]
+    if (this.config[type][key]) return this.config[type][key]
 
     try {
-      this[type][key] = YAML.parse(
+      this.config[type][key] = YAML.parse(
         fs.readFileSync(file, 'utf8')
       )
     } catch (error) {
@@ -62,13 +55,15 @@ class Config {
   }
 
   getFilePath (app, name, type) {
-	  let config_path = '';
-	  if(type == 'defSet'){
-		  config_path = `${this.defSetPath}`;
-	  }else{
-		  config_path = `${this.configPath}`;
+	  if(!this.config[type]){
+		  this.config[type] = {};
 	  }
 	  
+	  if(!this.watcher[type]){
+		  this.watcher[type] = {};
+	  }
+	  
+	  let config_path = `${this.Plugin_Path}/${type}/`;
 	  let file = `${config_path}${app}.${name}.yaml`;
 	  try{
 		  if(!fs.existsSync(file)){
