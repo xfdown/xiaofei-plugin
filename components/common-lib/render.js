@@ -28,7 +28,8 @@ export default async function (path, params, cfg) {
     sys: {
       scale: Cfg.scale(cfg.scale || 1),
       copyright: `Created By Yunzai-Bot<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
-    }
+    },
+	quality: 100
   }
   if (process.argv.includes('web-debug')) {
     // debug下保存当前页面的渲染数据，方便模板编写与调试
