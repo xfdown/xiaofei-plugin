@@ -49,7 +49,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			list.push(await query_reg_time(this.e,cookies,uids[i]));
 		}
 		
-		this.reply(`---原神注册时间---\r\n${list.join('\r\n----------------\r\n')}\r\n提示：如需更新最新数据，请发送【#刷新原神注册时间】`);
+		this.reply(`---原神注册时间---\r\n${list.join('\r\n----------------\r\n')}\r\n----------------\r\n提示：如需更新数据，请发送【#刷新注册时间】`);
 
 		return true;
 	}
@@ -69,12 +69,11 @@ async function query_reg_time(e,mys_cookies,uid){
 		let reg_time = data['1'];
 		
 		if(reg_time > 0){
-			reg_time = new Date(reg_time*1000).toLocaleString();
+			reg_time = new Date(reg_time*1000 + 28800000).toJSON().split('T').join(' ').split('.')[0];
 		}else{
 			reg_time = '查询失败！';
 		}
-		
-		let query_time = new Date(result.query_time).toLocaleString();
+		let query_time = new Date(result.query_time + 28800000).toJSON().split('T').join(' ').split('.')[0];
 		return `uid：${nickname}(${uid})\r\n服务器：${region_name}\r\n冒险等级：${level}\r\n注册时间：${reg_time}\r\n查询时间：${query_time}`;
 	}
 	return `uid：${uid}\r\n注册时间：查询失败，cookie_token可能已过期！`;
