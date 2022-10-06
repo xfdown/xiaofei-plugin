@@ -134,7 +134,7 @@ async function update_game_data(mys_cookies,uid){
 		try{
 			let res = await response.json();
 			let data = res.data?.data;
-			if(res.retcode != 0 && info_data && data){
+			if(info_data && data){
 				return {
 					code: 1,
 					msg: msg,
