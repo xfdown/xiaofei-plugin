@@ -29,28 +29,21 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 	}
 	
 	async QueryRegTime(){
-		let cookies = null;
 		let result = await query_mysck(this.e);
-		if(result?.code == 1){
-			cookies = result.data?.ck;
-		}else if(result?.code == -2){
-			this.e.reply(result.msg);
-			return true;
-		}else{
-			this.e.reply('cookie_token已失效，请重新抓取ck！\r\n发送【ck帮助】查看配置教程\r\n'+result.msg);
+		if(result.code != 1){
+			await this.e.reply(result.msg);
 			return true;
 		}
-		
-		let ck = gsCfg.getBingCkSingle(this.e.user_id)
-		let uids = lodash.map(ck, 'uid')
-		
-		let list = [];
-		for(var i in uids){
-			list.push(await query_reg_time(this.e,cookies,uids[i]));
+		let ck_list = result.data; ck_list = ck_list ? ck_list : [];
+		let query_list = [];
+		let cookie = '';
+		for(let ck of ck_list){
+			if(ck.ck){
+				cookie = ck.ck;
+			}
+			query_list.push(await query_reg_time(this.e, cookie, ck.uid));
 		}
-		
-		this.reply(`---原神注册时间---\r\n${list.join('\r\n----------------\r\n')}\r\n----------------\r\n提示：如需更新数据，请发送【#刷新注册时间】`);
-
+		this.reply(`---原神注册时间---\r\n${query_list.join('\r\n----------------\r\n')}\r\n----------------\r\n提示：如需更新数据，请发送【#刷新注册时间】`);
 		return true;
 	}
 }
@@ -76,10 +69,13 @@ async function query_reg_time(e,mys_cookies,uid){
 		let query_time = new Date(result.query_time + 28800000).toJSON().split('T').join(' ').split('.')[0];
 		return `uid：${nickname}(${uid})\r\n服务器：${region_name}\r\n冒险等级：${level}\r\n注册时间：${reg_time}\r\n查询时间：${query_time}`;
 	}
-	return `uid：${uid}\r\n注册时间：查询失败，cookie_token可能已过期！`;
+	let msg = result.msg;
+	msg = msg ? msg : '查询失败！';
+	return `uid：${uid}\r\n注册时间：${msg}`;
 }
 
 async function get_game_data(e,mys_cookies,uid){
+	let msg = '';
 	let game_data = null;
 	let temp_data = null;
 	let temp_file = `${Plugin_Path}/data/ys_RegTime/${e.user_id}.json`;
@@ -102,17 +98,20 @@ async function get_game_data(e,mys_cookies,uid){
 				fs.writeFileSync(temp_file, JSON.stringify(save_data), 'utf8');
 			}catch(err){}
 			game_data = result.data;
+		}else{
+			msg = result.msg;
 		}
 	}
 	
 	if(game_data){
-		return {code: 1, ...game_data};
+		return {code: 1, msg: msg, ...game_data};
 	}
-
-	return {code: -1};
+	msg = msg ? msg : '查询失败！';
+	return {code: -1, msg: msg};
 }
 
 async function update_game_data(mys_cookies,uid){
+	let msg = '';
 	let result = await hk4e_cn_login(mys_cookies,uid);
 	if(result.code == 1){
 		let info_data = result.data.data?.data; info_data = info_data ? info_data : null;
@@ -122,26 +121,47 @@ async function update_game_data(mys_cookies,uid){
 				'Cookie': result.data.cookies.join('; ')
 			}
 		};
-		let url = `https://hk4e-api.mihoyo.com/event/e20220928anniversary/game_data?badge_uid=${uid}&badge_region=${info_data.region}&lang=zh-cn&game_biz=${info_data.game_biz}`;
+
+		let api = 'https://hk4e-api.mihoyo.com';
+		let region = info_data.region; region = region ? region : '';
+		if(region.includes('os_')){
+			api = 'https://sg-hk4e-api.hoyoverse.com';
+		}
+		
+		let url = `${api}/event/e20220928anniversary/game_data?badge_uid=${uid}&badge_region=${info_data.region}&lang=zh-cn&game_biz=${info_data.game_biz}`;
+		
 		let response = await fetch(url,options);
 		try{
 			let res = await response.json();
 			let data = res.data?.data;
-			if(info_data && data){
-				return {code: 1, 
+			if(res.retcode != 0 && info_data && data){
+				return {
+					code: 1,
+					msg: msg,
 					data: {game_data: res, info_data: info_data, query_time: new Date().getTime()}
 				};
+			}else{
+				msg = res.message;
 			}
 		}catch(err){}
+	}else{
+		msg = result.msg;
 	}
-	return {code: -1};
+	msg = msg ? msg : '查询失败！';
+	return {code: -1, msg: msg};
 }
 
 
 async function hk4e_cn_login(mys_cookies,uid){
+	let api = 'https://api-takumi.mihoyo.com';
 	let body = {"game_biz":"hk4e_cn","lang":"zh-cn","region":"cn_gf01","uid":""};
 	body['region'] = getServer(uid);
 	body['uid'] = uid;
+	
+	if(body['region'].includes('os_')){
+		body['game_biz'] = 'hk4e_global';
+		api = 'https://sg-public-api.hoyoverse.com';
+	}
 	
 	let options = {
 		method: 'POST',
@@ -152,16 +172,16 @@ async function hk4e_cn_login(mys_cookies,uid){
 		body: JSON.stringify(body)
 	};
 	
-	let url = `https://api-takumi.mihoyo.com/common/badge/v1/login/account`;
-	let response = await fetch(url,options);
+	let url = `${api}/common/badge/v1/login/account`;
+	let response = await fetch(url, options);
 	
 	let cookies = [];
 	let code = -1;
+	let msg = '';
 	let result = null;
 	try{
 		let headers = response.headers;
 		let SetCookie = headers.getAll('set-cookie');
-		
 		for(let index in SetCookie){
 			let cookie = SetCookie[index];
 			let reg = /(.*?);/.exec(cookie);
@@ -176,25 +196,30 @@ async function hk4e_cn_login(mys_cookies,uid){
 				}
 			}
 		}
-		if(cookies.length > 0){
-			let res = await response.json();
-			result = {cookies: cookies,data: res};
-		}
+		let res = await response.json();
+		result = {cookies: cookies, data: res};
+		msg = res.message;
 	}catch(err){}
-	return {code: code,data: result};
+	return {code: code, msg: msg,data: result};
 }
 
 async function query_mysck(e){
-	let ck = gsCfg.getBingCkSingle(e.user_id);
-    if (lodash.isEmpty(ck)) {
-      return {code: -2,msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程'};
+	let cks = gsCfg.getBingCkSingle(e.user_id);
+    if (lodash.isEmpty(cks)) {
+      return {code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程'};
     }
+	let list = [];
+	for(let uid in cks){
+		let ck = cks[uid];
+		if (!lodash.isEmpty(ck)) {
+			list.push(ck);
+		}
+	}
 	
-    ck = lodash.find(ck, (v) => { return v.isMain })
-    if (!lodash.isEmpty(ck)) {
-      return {code: 1,msg: '获取成功！',data: ck};
-    }
-	return {code: -1,msg: '获取Cookie失败！'};;
+	if(list.length < 1){
+		return {code: -1, msg: '获取Cookie失败！'};
+	}
+	return {code: 1, msg: '获取成功！', data: list};
 }
 
 function getServer (uid) {
@@ -215,5 +240,3 @@ function getServer (uid) {
     }
     return 'cn_gf01'
 }
-
-

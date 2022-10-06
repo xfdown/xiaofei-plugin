@@ -27,7 +27,7 @@ export class xiaofei_mysck extends plugin {
 	}
 	
 	async mysck(){
-		if (this.e.msg.includes('login_ticket=') && this.e.msg.includes('login_uid=')) {
+		if (this.e.msg.includes('login_ticket=') && !this.e.msg.includes('cookie_token=')) {
 			if (this.e.isGroup) {
 				this.e.reply('请私聊发送cookie', false, { at: true });
 				this.e.msg = '';
@@ -40,49 +40,39 @@ export class xiaofei_mysck extends plugin {
 				login_uid: ck_map?.get('login_uid')
 			};
 			
-			if(!param.login_ticket || !param.login_uid){
+			if(!param.login_ticket){
 				let arr = [];
-				!login_ticket && arr.push('login_ticket参数不存在!');
-				!login_uid && arr.push('login_uid参数不存在!');
-				this.e.reply('[米哈游通行证]Cookie参数不完整！'+arr.join("\r\n"), false);
+				!param.login_ticket && arr.push('login_ticket参数不存在!');
+				this.e.reply('[通行证]Cookie参数不完整！'+arr.join("\r\n"), false);
+				//this.e.msg = '';
+				return true;
+			}
+			let result = await get_server_api(param);
+			if(result.api_index < 0){
+				this.e.reply('[通行证]Cookie已失效，请重新获取！', false);
 				//this.e.msg = '';
 				return true;
 			}
 			
-			let result = await getUserGameRoles(param);
-			if(result?.code != 1){
-				this.e.reply('[米哈游通行证]Cookie已失效，请重新获取！', false);
-				//this.e.msg = '';
-				return true;
-			}
-			
-			let infos = [];
-			for(let index in result.data){
-				let value = result.data[index];
-				if(value.game_biz == 'hk4e_cn'){
-					infos.push(value);
-				}
-			}
-			
-			if(infos.length < 1){
-				this.e.reply('[米哈游通行证]获取账号游戏信息失败！');
-				//this.e.msg = '';
-				return true;
-			}
+			param = {
+				...param,
+				...result
+			};
+			param.login_uid = String(param.account_id);
 			
 			result = await get_stoken(param);
 			if(result?.code != 1){
-				this.e.reply('[米哈游通行证]获取stoken失败，请重试！', false);
+				this.e.reply(`[${param.server_name}通行证]获取stoken失败，请重试！`, false);
 				//this.e.msg = '';
 				return true;
 			}
 			let stoken_data = result.data;
-			
 			let cookies = stoken_data.cookies;
 			
 			try{
 				let map = getCookieMap(cookies);
-				let url = `https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoBySToken?game_biz=hk4e_cn`;
+				let game_biz = param.api_index == 0 ? 'hk4e_cn' : 'hk4e_global';
+				let url = `${param.api}/auth/api/getCookieAccountInfoBySToken?game_biz=${game_biz}`;
 				url += `&stoken=${map.get("stoken")}&uid=${map.get("stuid")}`;
 				let response = await fetch(url);
 				let res = await response.json()
@@ -96,8 +86,7 @@ export class xiaofei_mysck extends plugin {
 					arr.push(`account_id=${map.get("stuid")}`);
 					arr.push(`login_ticket=${param.login_ticket}`);
 					arr.push(`login_uid=${param.login_uid}`);
-					console.log(arr.join('; '));
-					await this.e.reply('[米哈游通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。', false);
+					await this.e.reply(`[${param.server_name}通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。`, false);
 					//this.e.ck = arr.join('; ');
 					//this.e.msg = '#绑定cookie';
 					this.e.msg = arr.join('; ');
@@ -106,7 +95,7 @@ export class xiaofei_mysck extends plugin {
 				}
 			}catch(err){}
 			
-			this.e.reply('[米哈游通行证]获取cookie_token失败，请重试！', false);
+			this.e.reply(`[${param.server_name}通行证]获取cookie_token失败，请重试！`, false);
 			//this.e.msg = '';
 			return true;
 		}
@@ -124,7 +113,7 @@ async function get_stoken(param){
 	};
 	
 	try{
-		var response = await fetch(`https://api-takumi.mihoyo.com/auth/api/getMultiTokenByLoginTicket?login_ticket=${param.login_ticket}&token_types=3&uid=${param.login_uid}`);
+		var response = await fetch(`${param.api}/auth/api/getMultiTokenByLoginTicket?login_ticket=${param.login_ticket}&token_types=3&uid=${param.login_uid}`);
 		var res = await response.json();
 		if(res?.retcode == 0 && res?.data?.list){
 			let list = res.data.list;
@@ -144,50 +133,38 @@ async function get_stoken(param){
 	return result;
 }
 
-async function getUserGameRoles(param){
-	let result = {
-		code: -1,
-		msg: '',
-		data: {}
-	};
-	let action_ticket = null;
-	
-	let options = {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-			'Cookie': `login_uid=${param.login_uid}; login_ticket=${param.login_ticket}`
-		},
-		body: `action_type=game_role&t=${new Date().getTime()}`
-	};
-	
-	
-	
+async function get_server_api(param){
+	let apis = ['https://api-takumi.mihoyo.com', 'https://api-os-takumi.mihoyo.com'];
+	let web_apis = ['https://webapi.account.mihoyo.com', 'https://webapi-os.account.hoyoverse.com'];
+	let api_index = -1;
+	let account_id = 0;
+	let server_name = '';
 	try{
-		let url = `https://webapi.account.mihoyo.com/Api/get_ticket_by_loginticket`;
-		let response = await fetch(url,options);
-		let res = await response.json();
-		if(res?.code == 200){
-			action_ticket = res.data.ticket;
-		}
-	}catch(err){
-	}
-	
-	if(action_ticket == null){
-		return result;
-	}
-	
-	try{
-		let url = `https://api-takumi.mihoyo.com/binding/api/getUserGameRoles?action_ticket=${action_ticket}&t=${new Date().getTime()}`;
-		let response = await fetch(url);
-		let res = await response.json();
-		if(res?.retcode == 0 && res?.data){
-			result.code = 1;
-			result.data = res.data?.list;
+		let options = {
+			method: 'GET',
+			headers: {
+				'Cookie': `login_ticket=${param.login_ticket};`
+			}
+		};
+		for(let index in web_apis){
+			let url = `${web_apis[index]}/Api/login_by_cookie?t=${new Date().getTime()}`;
+			let response = await fetch(url,options);
+			let res = await response.json();
+			if(res?.code == 200 && res.data?.status == 1){
+				api_index = index;
+				account_id = res.data.account_info?.account_id;
+				server_name = index == 0 ? '米哈游' : 'HoYoverse';
+				break;
+			}
 		}
 	}catch(err){}
-	
-	return result;
+	return {
+		api_index: api_index,
+		api: api_index == -1 ? '' : apis[api_index],
+		web_api: api_index == -1 ? '' : web_apis[api_index],
+		account_id: account_id,
+		server_name: server_name
+	};
 }
 
 function getCookieMap(cookie) {
