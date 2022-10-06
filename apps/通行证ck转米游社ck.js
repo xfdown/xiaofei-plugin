@@ -3,6 +3,8 @@ import { segment } from "oicq";
 import fetch from 'node-fetch'
 import fs from 'node:fs'
 import {Path, Plugin_Path} from '../components/index.js'
+import gsCfg from '../../genshin/model/gsCfg.js'
+import lodash from 'lodash'
 
 export class xiaofei_mysck extends plugin {
 	constructor () {
@@ -14,7 +16,15 @@ export class xiaofei_mysck extends plugin {
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
-			priority: -1//防止禁用私聊功能后无法绑定通行证ck
+			priority: -1,//防止禁用私聊功能后无法绑定通行证ck
+			rule: [
+				{
+					/** 命令正则匹配 */
+					reg: '^#?获取stoken$',
+					/** 执行方法 */
+					fnc: 'get_stoken'
+				}
+			]
 		});
 	}
 	
@@ -24,6 +34,65 @@ export class xiaofei_mysck extends plugin {
 			return false;
 		}
 		await this.mysck();
+	}
+	
+	async get_stoken(){
+		if (this.e.isGroup) {
+			this.e.reply('请私聊发送该指令！', false, { at: true });
+			return true;
+		}
+		
+		let info = {
+			nickname: Bot.nickname,
+			user_id: Bot.uin
+		};
+		let MsgList = [];
+		
+		let result = await query_mysck(this.e);
+		if(result.code != 1){
+			await this.e.reply(result.msg);
+			return true;
+		}
+		let ck_list = result.data; ck_list = ck_list ? ck_list : [];
+
+		for(let ck of ck_list){
+			if(ck.uid){
+				let cookie = '';
+				let uid = ck.uid;
+				if(ck.login_ticket){
+					let param = {
+						login_ticket: ck.login_ticket
+					};
+					let result = await get_server_api(param);
+					if(result.api_index < 0){
+						cookie = '获取stoken失败，login_ticket已失效！';
+					}else{
+						param = {
+							...param,
+							...result
+						};
+						param.login_uid = String(param.account_id);
+						
+						result = await get_stoken(param);
+						if(result?.code != 1){
+							cookie = '获取stoken失败！';
+						}else{
+							let stoken_data = result.data;
+							cookie = stoken_data.cookies;
+						}
+					}
+				}else{
+					cookie = '获取stoken失败，没有找到login_ticket！';
+				}
+				MsgList.push({
+					...info,
+					message: `uid：${uid}\ncookie：${cookie}`
+				});
+			}
+		}
+		let forwardMsg = await Bot.makeForwardMsg(MsgList);
+		await this.e.reply(forwardMsg);
+		return true;
 	}
 	
 	async mysck(){
@@ -103,7 +172,24 @@ export class xiaofei_mysck extends plugin {
 	}
 }
 
-
+async function query_mysck(e){
+	let cks = gsCfg.getBingCkSingle(e.user_id);
+    if (lodash.isEmpty(cks)) {
+      return {code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程'};
+    }
+	let list = [];
+	for(let uid in cks){
+		let ck = cks[uid];
+		if (!lodash.isEmpty(ck)) {
+			list.push(ck);
+		}
+	}
+	
+	if(list.length < 1){
+		return {code: -1, msg: '获取Cookie失败！'};
+	}
+	return {code: 1, msg: '获取成功！', data: list};
+}
 
 async function get_stoken(param){
 	let result = {
