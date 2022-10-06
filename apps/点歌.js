@@ -205,7 +205,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
-		if(data[key]?.msg_results){
+		if(data[key]?.msg_results && page < 2){
 			recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
 		}
 		
