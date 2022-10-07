@@ -2,6 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import { segment } from "oicq";
 import fetch from "node-fetch";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
+import { Version } from '../components/index.js'
 
 export class xiaofei_weather extends plugin {
 	constructor () {
@@ -32,23 +33,33 @@ export class xiaofei_weather extends plugin {
 }
 
 async function weather(e,search){
-	if(typeof(search) == 'string') search = search.replace(/ /g,'');
-	if(search == '' || search == '地区'){
+	if(search.replace(/ /g,'') == '' || search == '地区'){
 		e.reply("格式：#地区天气\r\n例如：#北京天气",true);
 		return true;
 	}
 	var area_id = -1,reg = null, province = '', city = '', district = '';
+	search = search.replace(/\s\s/g,' ').replace(/\s\s/g,' ');
 	reg = /((.*)省)?((.*)市)?((.*)区)?/.exec(search);
-	if(reg[2]) province = reg[2]; search = search.replace(province+'省','');
-	if(reg[4]) city = reg[4];
-	if(reg[6]) district = reg[6];
-
-	let url = `https://wis.qq.com/city/matching?source=xw&city=${encodeURI(search)}`;//地区名取area_id接口
-	let response = await fetch(url); //获取area_id列表
+	if(reg[2]){ province = reg[2]; search = search.replace(province+'省',' '); }
+	if(reg[4]){ city = reg[4]; search = search.replace('市',' '); }
+	if(reg[6]){ district = reg[6];  search = search.replace('区',' '); }
+	
 	let res = null;
-	try{
-		res = await response.json();
-	}catch(err){}
+	let arr = search.trim().split(' ').reverse();
+	arr.push(search.trim());
+
+	for(let value of arr){
+		let url = `https://wis.qq.com/city/matching?source=xw&city=${encodeURI(value)}`;//地区名取area_id接口
+		let response = await fetch(url); //获取area_id列表
+		try{
+			res = await response.json();
+		}catch(err){}
+		if(res == null || res.status != 200 || !res.data?.internal || res.data?.internal.length < 1){
+			continue;
+		}
+		break;
+	}
+
 	if(res == null || res.status != 200 || !res.data?.internal || res.data?.internal.length < 1){
 		e.reply('没有查询到该地区的天气！',true);
 		return true;
@@ -112,6 +123,8 @@ async function weather(e,search){
 		await page.evaluate(() => {
 			$('#ct-footer').remove();//删除底部导航栏
 		});
+
+		await page.evaluate(`$('body').append('<p style="text-align: center;font-size: 15px;margin-top: -25px;">Created By Yunzai-Bot ${Version.yunzai} &amp; xiaofei-Plugin ${Version.ver}</p><br>');`);//增加版本号显示
 		
 		buff = await page.screenshot({
 			fullPage: true,

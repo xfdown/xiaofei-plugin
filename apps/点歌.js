@@ -2,9 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import cfg from '../../../lib/config/config.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
-import { text } from 'stream/consumers';
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
@@ -326,7 +324,7 @@ async function sharemusic_HtmlList(list, page, page_size, source = ''){//来自�
 		background_path: `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
-		sub_title: `Created By Yunzai-Bot v${cfg.package.version} & xiaofei-Plugin ${Version.ver}`,
+		sub_title: `Created By Yunzai-Bot v${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
 	
