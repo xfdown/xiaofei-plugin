@@ -31,6 +31,10 @@ export const helpList = [
     title: '#点歌 #多选点歌',
     desc: '支持使用QQ、网易、酷狗、酷我源点播，例如：#多选酷我点歌周杰伦'
   },{
+    icon: 33,
+    title: '#QQ个性电台',
+    desc: '根据你当前QQ的听歌口味推荐一首歌'
+  },{
     icon: 71,
     title: '#天气',
     desc: '例如：#北京天气'
