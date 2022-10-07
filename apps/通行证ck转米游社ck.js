@@ -1,8 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
-import { segment } from "oicq";
 import fetch from 'node-fetch'
-import fs from 'node:fs'
-import {Path, Plugin_Path} from '../components/index.js'
 import gsCfg from '../../genshin/model/gsCfg.js'
 import lodash from 'lodash'
 

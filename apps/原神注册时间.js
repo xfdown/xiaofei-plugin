@@ -2,7 +2,6 @@
 import lodash from 'lodash'
 import fetch from 'node-fetch'
 import fs from 'node:fs'
-import User from '../../genshin/model/user.js'
 import gsCfg from '../../genshin/model/gsCfg.js'
 import {Plugin_Path} from '../components/index.js'
 

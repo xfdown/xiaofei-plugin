@@ -1,7 +1,4 @@
 import plugin from '../../../lib/plugins/plugin.js'
-import cfg from '../../../lib/config/config.js'
-import { segment } from "oicq";
-import fetch from 'node-fetch'
 
 export class xiaofei_replace extends plugin {
 	constructor () {
