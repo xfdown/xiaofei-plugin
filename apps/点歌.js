@@ -324,7 +324,7 @@ async function sharemusic_HtmlList(list, page, page_size, source = ''){//来自�
 		background_path: `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
-		sub_title: `Created By Yunzai-Bot v${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
+		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
 	
