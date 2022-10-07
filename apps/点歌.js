@@ -4,6 +4,7 @@ import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
+import { text } from 'stream/consumers';
 
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
@@ -25,6 +26,7 @@ var music_cookies = {
 		}
 	}
 };
+const music_reg = '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页|个性电台)(.*)$';
 
 export class xiaofei_music extends plugin {
 	constructor () {
@@ -40,9 +42,9 @@ export class xiaofei_music extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页).*$',
+					reg: music_reg,
 					/** 执行方法 */
-					fnc: 'message'
+					fnc: 'music'
 				}
 			]
 		});
@@ -63,16 +65,16 @@ export class xiaofei_music extends plugin {
 		}catch(err){}
 	}
 
-	async message(){
+	async music(){
 		return music_message(this.e);
 	}
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
 		if(/^(\d+)$/.test(this.e.msg)){
-			return music_message(this.e);
+			music_message(this.e);
 		}
-		return false;
+		return;
 	}
 }
 
@@ -82,7 +84,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(/^#?(小飞)?(多选)?(qq|QQ|腾讯|网易(云)?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页).*$/.test(e.msg) || /^(\d+)$/.test(e.msg)){
+	if(RegExp(music_reg).test(e.msg) || /^(\d+)$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -141,8 +143,7 @@ async function music_message(e){
 		return false;
 	}
 	
-	
-	reg = /^#?(小飞)?(多选)?(.*)?(点播音乐|点播|点歌|播放|来一?首|下一页)(.*)$/.exec(e.msg);
+	reg = RegExp(music_reg).exec(e.msg);
 	let search = reg[5];
 	let source = '';
 	if(!reg[2]) reg[2] = '';
@@ -168,10 +169,10 @@ async function music_message(e){
 			source = 'qq';
 			break;
 	}
-	
+
 	source = [source, reg[3]];
-	
-	if(search == '' && reg[4] != '下一页'){
+
+	if(search == '' && reg[4] != '下一页' && reg[4] != '个性电台'){
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help,true);
 		return true;
@@ -180,6 +181,16 @@ async function music_message(e){
 	let temp_data = {};
 	let page = reg[2] == '多选' ? 1 : 0;
 	let page_size = reg[2] == '多选' ? _page_size : 10;
+
+	if(reg[4] == '个性电台'){
+		if(source[0] != 'qq'){
+			await e.reply(`暂不支持${source[1]}个性电台！`,true);
+			return true;
+		}
+		search = e.user_id;
+		source = ['qq_radio','QQ个性电台'];
+		page = 0;
+	}
 	
 	if(reg[4] == '下一页'){
 		let key = get_MusicListId(e);
@@ -201,7 +212,6 @@ async function music_message(e){
 async function music_handle(e, search, source, page = 0, page_size = 10, temp_data = {}){
 	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if(result && result.data && result.data.length > 0){
-		
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
 		if(data[key]?.msg_results && page < 2){
@@ -279,6 +289,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
 		}else{
 			let music = result.data[0];
+			if(source[0] == 'qq_radio'){
+				music.name = music.name + ' - ' + music.artist;
+				music.artist = 'QQ音乐个性电台';
+			}
 			await SendMusicShare(e,music);
 		}
 	}else{
@@ -502,6 +516,10 @@ async function music_search(search,source,page = 1,page_size = 10){
 		case 'kugou':
 			result = await kugou_search(search,page,page_size);
 			break;
+		case 'qq_radio':
+			source = 'qq';
+			result = await qqmusic_radio(search);
+			break;
 		case 'qq':
 		default:
 			source = 'qq';
@@ -556,7 +574,11 @@ async function SendMusicShare(e,data,to_uin = null){
 			break;
 	}
 	
-	var title = data.name, singer = data.artist, prompt = '[分享]', jumpUrl, preview, musicUrl;
+	var text = '',title = data.name, singer = data.artist, prompt = '[分享]', jumpUrl, preview, musicUrl;
+
+	if(data.text){
+		text = data.text;
+	}
 	
 	let types = [];
 	if(data.url == null){types.push('url')};
@@ -610,6 +632,7 @@ async function SendMusicShare(e,data,to_uin = null){
 			3: appname,
 			4: appsign,
 		},
+		6: text,
 		10: send_type,
 		11: recv_uin,
 		12: {
@@ -665,67 +688,110 @@ async function is_qqmusic_vip(uin){
 }
 
 async function kugou_search(search,page = 1,page_size = 10){
-	let url = `http://msearchcdn.kugou.com/api/v3/search/song?page=${page}&pagesize=${page_size}&keyword=${encodeURI(search)}`;
-	let response = await fetch(url,{ method: "get" }); //调用接口获取数据
-	let res = await response.json(); //结果json字符串转对象
-	if(!res.data || res.data.info < 1){
-		return [];
-	}
-	return {page: page,data: res.data.info};
+	try{
+		let url = `http://msearchcdn.kugou.com/api/v3/search/song?page=${page}&pagesize=${page_size}&keyword=${encodeURI(search)}`;
+		let response = await fetch(url,{ method: "get" }); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		if(!res.data || res.data.info < 1){
+			return [];
+		}
+		return {page: page,data: res.data.info};
+	}catch(err){}
+	
+	return null;
+}
+
+async function qqmusic_radio(uin){
+	try{
+		let json_body = {"comm":{"_channelid":"19","_os_version":"6.2.9200-2","ct":"19","cv":"1782","guid":"1234567890","patch":"118","tmeAppID":"qqmusic","tmeLoginType":2,"uin":"0","wid":"0"},"req_0":{"method":"get_radio_track","module":"pc_track_radio_svr","param":{"id":99,"num":1}}};
+		json_body.comm.guid = md5(String(new Date().getTime()),32);
+		json_body.comm.uin = uin;
+	
+		let options = {
+			method: 'POST',//post请求 
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+			body: JSON.stringify(json_body)
+		};
+		
+		let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		
+		if(res.code != '0' && res.req_0.code != '0'){
+			return null;
+		}
+	
+		let data = res.req_0?.data?.tracks;
+		data = data ? data : [];
+		return {page: 1,data: data};
+	}catch(err){}
+	
+	return null;
 }
 
 async function qqmusic_search(search,page = 1,page_size = 10){
-	let qq_search_json = {"search":{"module":"music.search.SearchBrokerCgiServer","method":"DoSearchForQQMusicMobile","param":{"query":"","highlight":1,"searchid":"123456789","sub_searchid":0,"search_type":0,"nqc_flag":0,"sin":0,"ein":30,"page_num":1,"num_per_page":10,"cat":2,"grp":1,"remoteplace":"search.android.defaultword","multi_zhida":1,"sem":0}}};
+	try{
+		let qq_search_json = {"search":{"module":"music.search.SearchBrokerCgiServer","method":"DoSearchForQQMusicMobile","param":{"query":"","highlight":1,"searchid":"123456789","sub_searchid":0,"search_type":0,"nqc_flag":0,"sin":0,"ein":30,"page_num":1,"num_per_page":10,"cat":2,"grp":1,"remoteplace":"search.android.defaultword","multi_zhida":1,"sem":0}}};
 	
-	qq_search_json['search']['param']['searchid'] = new Date().getTime();
-	qq_search_json['search']['param']['query'] = search;
-	qq_search_json['search']['param']['page_num'] = page;
-	qq_search_json['search']['param']['num_per_page'] = page_size;
+		qq_search_json['search']['param']['searchid'] = new Date().getTime();
+		qq_search_json['search']['param']['query'] = search;
+		qq_search_json['search']['param']['page_num'] = page;
+		qq_search_json['search']['param']['num_per_page'] = page_size;
+		
+		let options = {
+			method: 'POST',//post请求 
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+			body: JSON.stringify(qq_search_json)
+		};
+		
+		let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
 	
-	let options = {
-		method: 'POST',//post请求 
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
-		body: JSON.stringify(qq_search_json)
-	};
-	
-	let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let response = await fetch(url,options); //调用接口获取数据
+		
+		let res = await response.json(); //结果json字符串转对象
+		
+		if(res.code != '0'){
+			return null;
+		}
+		return {page: page,data: res.search.data.body.item_song};
+	}catch(err){}
 
-	let response = await fetch(url,options); //调用接口获取数据
-	
-	let res = await response.json(); //结果json字符串转对象
-	
-	if(res.code != '0'){
-		return [];
-	}
-	return {page: page,data: res.search.data.body.item_song};
+	return null;
 }
 
 async function netease_search(search,page = 1,page_size = 10){
-	let url = 'http://music.163.com/api/cloudsearch/pc';
-	let options = {
-		method: 'POST',//post请求 
-		headers: { 'Content-Type': ' application/x-www-form-urlencoded'},
-		body: `offset=${page-1}&limit=${page_size}&type=1&s=${encodeURI(search)}`
-	};
+	try{
+		let url = 'http://music.163.com/api/cloudsearch/pc';
+		let options = {
+			method: 'POST',//post请求 
+			headers: { 'Content-Type': ' application/x-www-form-urlencoded'},
+			body: `offset=${page-1}&limit=${page_size}&type=1&s=${encodeURI(search)}`
+		};
 
-	let response = await fetch(url,options); //调用接口获取数据
-	let res = await response.json(); //结果json字符串转对象
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		
+		if(res.result.songs < 1){
+		return null;
+		}
+		return {page: page,data: res.result.songs};
+	}catch(err){}
 	
-	if(res.result.songs < 1){
-	  return [];
-	}
-	return {page: page,data: res.result.songs};
+	return null;
 }
 	
 async function kuwo_search(search,page = 1,page_size = 10){
-	let url = `http://search.kuwo.cn/r.s?user=&android_id=&prod=kwplayer_ar_10.1.2.1&corp=kuwo&newver=3&vipver=10.1.2.1&source=kwplayer_ar_10.1.2.1_40.apk&p2p=1&q36=&loginUid=&loginSid=&notrace=0&client=kt&all=${search}&pn=${page-1}&rn=${page_size}&uid=&ver=kwplayer_ar_10.1.2.1&vipver=1&show_copyright_off=1&newver=3&correct=1&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&vermerge=1&mobi=1&searchapi=5&issubtitle=1&province=&city=&latitude=&longtitude=&userIP=&searchNo=&spPrivilege=0`;
-	
-	let response = await fetch(url,{ method: "get" }); //调用接口获取数据
-	let res = await response.json(); //结果json字符串转对象
-	if(res.abslist.length < 1){
-		return [];
-	}
-	return {page: page,data:res.abslist};
+	try{
+		let url = `http://search.kuwo.cn/r.s?user=&android_id=&prod=kwplayer_ar_10.1.2.1&corp=kuwo&newver=3&vipver=10.1.2.1&source=kwplayer_ar_10.1.2.1_40.apk&p2p=1&q36=&loginUid=&loginSid=&notrace=0&client=kt&all=${search}&pn=${page-1}&rn=${page_size}&uid=&ver=kwplayer_ar_10.1.2.1&vipver=1&show_copyright_off=1&newver=3&correct=1&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&vermerge=1&mobi=1&searchapi=5&issubtitle=1&province=&city=&latitude=&longtitude=&userIP=&searchNo=&spPrivilege=0`;
+		let response = await fetch(url,{ method: "get" }); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		if(res.abslist.length < 1){
+			return null;
+		}
+		return {page: page,data:res.abslist};
+	}catch(err){}
+
+	return null;
 }
 
 function random(min,max){
