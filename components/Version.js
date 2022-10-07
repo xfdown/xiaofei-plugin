@@ -9,7 +9,7 @@ const yunzai_ver = `v${cfg.package.version}`;
 let logs = {}
 let changelogs = []
 let currentVersion
-let versionCount = 6
+let versionCount = 10
 
 const getLine = function (line) {
   line = line.replace(/(^\s*\*|\r)/g, '')
@@ -28,7 +28,7 @@ try {
     let temp = {};
     let lastLine = {}
     lodash.forEach(logs, (line) => {
-      if (versionCount <= -1) {
+      if (versionCount < 1) {
         return false
       }
       let versionRet = /^#\s*([0-9a-zA-Z\\.~\s]+?)\s*$/.exec(line.trim())

@@ -4,6 +4,7 @@ import lodash from 'lodash'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import cfg from '../../../lib/config/config.js'
 import { Version, Plugin_Path} from '.././components/index.js'
+import moment from 'moment'
 /** redis key */
 const keyPre = 'Yz:genshin:mys:';
 const key = {
@@ -35,13 +36,13 @@ export class xiaofei_userck_statistics extends plugin {
 					/** 命令正则匹配 */
 					reg: '^#?用户(ck)?统计(uid)?$',
 					/** 执行方法 */
-					fnc: 'new_query_user_statistics'
+					fnc: 'query_user_statistics'
 				}
 			]
 		});
 	}
 	
-	async new_query_user_statistics(){
+	async query_user_statistics(){
 		let e = this.e;
 		let {uids, noteCount, botCount} = await this.get_all();
 		let set = GsCfg.getConfig('mys', 'set');
@@ -63,7 +64,7 @@ export class xiaofei_userck_statistics extends plugin {
 				uid.uid = hideUid(uid.uid);
 			}
 			uidCount++;
-			if (uid.count > 30) {
+			if (uid.count > 27) {
 				disable++;
 			} else {
 				available++;
@@ -117,13 +118,7 @@ export class xiaofei_userck_statistics extends plugin {
 
 		for(let uid in bindck_list){
 			let ltuid = bindck_list[uid].ltuid;
-			let count;
-			if(false){
-				count = -1;
-			}else{
-				count = await redis.get(`${key.ckNum}${ltuid}`)
-			}
-			
+			let count = await redis.get(`${key.ckNum}${ltuid}`);
 			count = Number(count);
 			
 			if(ck_info[ltuid]){
@@ -137,7 +132,7 @@ export class xiaofei_userck_statistics extends plugin {
 					ck_count: 1
 				};
 			}
-			bindck_use_count += count == -1 ? 27 : count;
+			bindck_use_count += count;
 			//bindck_count++;
 		}
 		
@@ -154,11 +149,7 @@ export class xiaofei_userck_statistics extends plugin {
 				count = ck_info[ltuid].count;
 				ck_count = ck_info[ltuid].ck_count + 1;
 			}else{
-				if(false){
-					count = -1;
-				}else{
-					count = await redis.get(`${key.ckNum}${ltuid}`)
-				}
+				count = await redis.get(`${key.ckNum}${ltuid}`);
 				count = Number(count);
 				ck_count = 1;
 			}
@@ -166,7 +157,7 @@ export class xiaofei_userck_statistics extends plugin {
 				count: count,
 				ck_count: ck_count
 			};
-			pub_use_count += count == -1 ? 27 : count;
+			pub_use_count += count;
 		}
 		pub_count = Object.keys(pub_ck_info).length;
 		
@@ -184,125 +175,9 @@ export class xiaofei_userck_statistics extends plugin {
 		return {uids, noteCount, botCount};
 	}
 	
-	async query_user_statistics(){
-		let msg = [];
-		let res = await GsCfg.getBingCk();
-		let bingCkUid = res.ck
-		
-		let pubCk = GsCfg.getConfig('mys', 'pubCk') || [];
-		let pub_list = [];
-		for (let v of pubCk) {
-			let [ltuid = ''] = v.match(/ltuid=(\w{0,9})/g)
-			if (!ltuid) continue
-			ltuid = String(lodash.trim(ltuid, 'ltuid='))
-			if (isNaN(ltuid)) continue
-			pub_list.push(ltuid);
-		}
-		
-		let bindck_list = bingCkUid;
-		
-		let ck_info = {};
-		let bindck_use_count = 0;
-		let bindck_count = 0;
-
-		for(let uid in bindck_list){
-			let ltuid = bindck_list[uid]?.ltuid;
-			let count;
-			if(false){
-				count = -1;
-			}else{
-				count = await redis.get(`${key.ckNum}${uid}`)
-			}
-			
-			count = Number(count);
-			
-			if(ck_info[ltuid]){
-				ck_info[ltuid] = {
-					count: count,
-					ck_count: ck_info[ltuid].ck_count + 1
-				};
-			}else{
-				ck_info[ltuid] = {
-					count: count,
-					ck_count: 1
-				};
-			}
-			bindck_use_count += count == -1 ? 27 : count;
-			bindck_count++;
-		}
-		
-		let pub_count = 0;
-		let pub_use_count = 0;
-		let pub_ck_info = {};
-		
-		for(let uid of pub_list){
-			let count;
-			if(ck_info[uid]){
-				count = ck_info[uid].count;
-			}else{
-				if(false){
-					count = -1;
-				}else{
-					count = await redis.get(`${key.ckNum}${uid}`)
-				}
-				count = Number(count);
-			}
-			pub_ck_info[uid] = {
-				count: count
-			};
-			pub_use_count += count == -1 ? 27 : count;
-		}
-		pub_count = Object.keys(pub_ck_info).length;
-		
-		let set = GsCfg.getConfig('mys', 'set')
-		
-		msg.push('---用户ck统计---');
-		msg.push(`绑定ck数：${bindck_count}`);
-		msg.push(`绑定ck使用次数：${bindck_use_count}`);
-		msg.push(`公共ck数：${pub_count}`);
-		msg.push(`公共ck使用次数：${pub_use_count}`);
-		if (set.allowUseCookie == 1) {
-			msg.push(`已开启公共查询使用用户ck`);
-		}else{
-			msg.push(`未开启公共查询使用用户ck`);
-		}
-		
-		//await this.e.reply(msg.join('\r\n'));
-		//return true;
-		
-		let info = {
-			nickname: Bot.nickname,
-			user_id: Bot.uin
-		};
-		
-		let MsgList = [{
-			...info,
-			message: String(msg.join('\r\n')),
-		}];
-		
-		try{
-			//Object.assign(ck_info,pub_ck_info);
-			msg = [];
-			msg.push('---用户ck统计列表---');
-			for(let uid in ck_info){
-				
-				msg.push('['+uid+']'+(ck_info[uid].ck_count > 1 ? '['+ck_info[uid].ck_count+']' : '')+'使用次数：'+ck_info[uid].count)
-			}
-			msg.push('---公共ck统计列表---');
-			for(let uid in pub_ck_info){
-				msg.push('['+uid+']使用次数：'+pub_ck_info[uid].count)
-			}
-			
-			MsgList.push({
-				...info,
-				message: String(msg.join('\r\n')),
-			});
-		}catch(err){
-		}
-		
-		let forwardMsg = await Bot.makeForwardMsg(MsgList);
-		await this.e.reply(forwardMsg);
-		return true;
+	getEnd () {
+		let end = moment().endOf('day').format('X')
+		return end - moment().format('X')
 	}
 }
 
