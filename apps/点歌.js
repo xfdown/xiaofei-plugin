@@ -291,6 +291,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			let music = result.data[0];
 			if(source[0] == 'qq_radio'){
 				music.name = music.name + ' - ' + music.artist;
+				music.prompt = music.name;
 				music.artist = 'QQ音乐个性电台';
 			}
 			await SendMusicShare(e,music);
@@ -600,7 +601,11 @@ async function SendMusicShare(e,data,to_uin = null){
 		musicUrl = '';
 	}
 	
-	prompt = '[分享]' + title + '-' + singer;
+	if(data.prompt){
+		prompt = '[分享]' + data.prompt;
+	}else{
+		prompt = '[分享]' + title + '-' + singer;
+	}
 	
 	let recv_uin = 0;
 	let send_type = 0;
