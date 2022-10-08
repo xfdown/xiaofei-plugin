@@ -48,7 +48,8 @@ async function weather(e,search){
 	let arr = search.trim().split(' ').reverse();
 	arr.push(search.trim());
 
-	for(let value of arr){
+	for(let index in arr){
+		let value = arr[index];
 		let url = `https://wis.qq.com/city/matching?source=xw&city=${encodeURI(value)}`;//地区名取area_id接口
 		let response = await fetch(url); //获取area_id列表
 		try{
@@ -57,7 +58,17 @@ async function weather(e,search){
 		if(res == null || res.status != 200 || !res.data?.internal || res.data?.internal.length < 1){
 			continue;
 		}
-		break;
+		let internal = res.data.internal;
+		for(let key in internal){
+			for(let i = parseInt(index)+1; i < arr.length; i++){
+				if(internal[key].includes(arr[i]) || arr[i].includes(internal[key])){
+					area_id = key;
+					break;
+				}
+			}
+			if(area_id != -1) break;
+		}
+		if(area_id != -1) break;
 	}
 
 	if(res == null || res.status != 200 || !res.data?.internal || res.data?.internal.length < 1){
@@ -67,7 +78,13 @@ async function weather(e,search){
 	
 	let internal = res.data.internal;
 	for(let key in internal){
+		if(area_id != -1){
+			if(key != area_id){
+				continue;
+			}
+		}
 		let arr = internal[key].split(', ');
+
 		if(province && arr[0]){
 			if(arr[0].indexOf(province) == -1){
 				continue;
