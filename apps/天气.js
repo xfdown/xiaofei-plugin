@@ -18,7 +18,7 @@ export class xiaofei_weather extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#(.*)天气$',
+					reg: '^#?(.*)天气$',
 					/** 执行方法 */
 					fnc: 'query_weather'
 				}
@@ -34,7 +34,7 @@ export class xiaofei_weather extends plugin {
 
 async function weather(e,search){
 	if(search.replace(/ /g,'') == '' || search == '地区'){
-		e.reply("格式：#地区天气\r\n例如：#北京天气",true);
+		if(e.msg.includes('#')) e.reply("格式：#地区天气\r\n例如：#北京天气",true);
 		return true;
 	}
 	var area_id = -1,reg = null, province = '', city = '', district = '';
@@ -61,7 +61,7 @@ async function weather(e,search){
 	}
 
 	if(res == null || res.status != 200 || !res.data?.internal || res.data?.internal.length < 1){
-		e.reply('没有查询到该地区的天气！',true);
+		if(e.msg.includes('#')) e.reply('没有查询到该地区的天气！',true);
 		return true;
 	}
 	
@@ -94,7 +94,7 @@ async function weather(e,search){
 	}
 	
 	if(area_id == -1){
-		e.reply('没有查询到该地区的天气！',true);
+		if(e.msg.includes('#')) e.reply('没有查询到该地区的天气！',true);
 		return true;
 	}
 	
@@ -139,7 +139,7 @@ async function weather(e,search){
 	}
 	
 	if(!buff){
-		await e.reply('[小飞插件]天气截图失败！');
+		if(e.msg.includes('#')) await e.reply('[小飞插件]天气截图失败！');
 		return false;
 	}
 	
