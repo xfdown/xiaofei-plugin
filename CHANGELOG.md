@@ -1,4 +1,4 @@
-﻿#1.7.18
+﻿# 1.7.18
 * `#点歌`
 	* QQ音乐源支持配置绿钻账号cookie
 	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
