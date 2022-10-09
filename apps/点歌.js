@@ -919,7 +919,9 @@ async function qqmusic_refresh_token(cookies){
 				result.data = map;
 			}
 		}
-	}catch(err){}
+	}catch(err){
+		logger.error(err);
+	}
 	return result;
 }
 
