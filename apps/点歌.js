@@ -173,7 +173,7 @@ async function update_qqmusic_ck(){
 		let psrf_musickey_createtime = Number(ck_map.get("psrf_musickey_createtime") || 0) * 1000;
 		let refresh_num = Number(ck_map.get("refresh_num") || 0);
 		if(((new Date().getTime() - psrf_musickey_createtime) > (1000 * 60 * 60 * 12) || !authst) && refresh_num < 3){
-			let result = await qqmusic_refresh_token(ck_map);
+			let result = await qqmusic_refresh_token(ck_map,type);
 			if(result.code == 1){
 				ck_map = result.data;
 				logger.info(`【小飞插件_QQ音乐ck】已刷新！`);
@@ -837,7 +837,7 @@ async function kugou_search(search,page = 1,page_size = 10){
 }
 
 
-async function qqmusic_refresh_token(cookies){
+async function qqmusic_refresh_token(cookies,type){
 	let result = {code: -1};
 	let json_body = {
 		...music_cookies.qqmusic.body,
@@ -858,13 +858,13 @@ async function qqmusic_refresh_token(cookies){
 		}
 	};
 	let req_0 = json_body.req_0;
-	if(cookies.get("type") == 0){
+	if(type == 0){
 		req_0.param.appid = 100497308;
 		req_0.param.musicid = cookies.get("uin") || '';
 		req_0.param.openid = cookies.get("psrf_qqopenid") || '';
 		req_0.param.refresh_token = cookies.get("psrf_qqrefresh_token") || '';
 		req_0.param.unionid = cookies.get("psrf_qqunionid") || '';
-	}else if(cookies.get("type") == 1){
+	}else if(type == 1){
 		req_0.param.strAppid = "wx48db31d50e334801";
 		req_0.param.musicid = cookies.get("wxuin") || '';
 		req_0.param.openid = cookies.get("wxopenid") || '';
@@ -889,7 +889,7 @@ async function qqmusic_refresh_token(cookies){
 		if(res.req_0?.code == '0'){
 			let map = new Map();
 			let data = res.req_0?.data;
-			if(cookies.get("type") == 0){
+			if(type == 0){
 				map.set("psrf_qqopenid",data.openid);
 				map.set("psrf_qqrefresh_token",data.wxrefresh_token);
 				map.set("psrf_qqaccess_token",data.access_token);
@@ -904,7 +904,7 @@ async function qqmusic_refresh_token(cookies){
 				map.set("tmeLoginType",2);
 				result.code = 1;
 				result.data = map;
-			}else if(cookies.get("type") == 1){
+			}else if(type == 1){
 				map.set("wxopenid",data.openid);
 				map.set("wxrefresh_token",data.wxrefresh_token);
 				map.set("wxuin",String(data.musicid));
