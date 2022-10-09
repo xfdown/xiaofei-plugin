@@ -877,7 +877,8 @@ async function qqmusic_refresh_token(cookies,type){
 		req_0.param.unionid = cookies.get("psrf_qqunionid") || '';
 	}else if(type == 1){
 		req_0.param.strAppid = "wx48db31d50e334801";
-		req_0.param.musicid = Number(cookies.get("wxuin") || '0');
+		req_0.param.access_token = cookies.get("wxaccess_token") || '';
+		req_0.param.str_musicid = cookies.get("wxuin") || '0';
 		req_0.param.openid = cookies.get("wxopenid") || '';
 		req_0.param.refresh_token = cookies.get("wxrefresh_token") || '';
 		req_0.param.unionid = cookies.get("wxunionid") || '';
@@ -904,7 +905,7 @@ async function qqmusic_refresh_token(cookies,type){
 				map.set("psrf_qqrefresh_token",data.refresh_token);
 				map.set("psrf_qqaccess_token",data.access_token);
 				map.set("psrf_access_token_expiresAt",data.expired_at);
-				map.set("uin",String(data.musicid));
+				map.set("uin",String(data.str_musicid || data.musicid) || '0');
 				map.set("qqmusic_key",data.musickey);
 				map.set("qm_keyst",data.musickey);
 				map.set("psrf_musickey_createtime",data.musickeyCreateTime);
@@ -917,7 +918,8 @@ async function qqmusic_refresh_token(cookies,type){
 			}else if(type == 1){
 				map.set("wxopenid",data.openid);
 				map.set("wxrefresh_token",data.refresh_token);
-				map.set("wxuin",String(data.musicid));
+				map.set("wxaccess_token",data.access_token);
+				map.set("wxuin",String(data.str_musicid || data.musicid) || '0');
 				map.set("qqmusic_key",data.musickey);
 				map.set("qm_keyst",data.musickey);
 				map.set("psrf_musickey_createtime",data.musickeyCreateTime);

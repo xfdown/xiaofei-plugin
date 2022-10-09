@@ -3,6 +3,7 @@
 	* QQ音乐源支持配置绿钻账号cookie
 	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
 	* 支持自动刷新qqmusic_key
+	* 修复微信登录的QQ音乐ck无法刷新key问题
 	
 # 1.7.0~1.7.17
 * `#天气`
