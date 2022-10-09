@@ -154,9 +154,8 @@ async function update_qqmusic_ck(){
 			return;
 		}
 		music_cookies.qqmusic.update_time = new Date().getTime();
-		let cookies = music_cookies.qqmusic.ck;
 		let type = -1;//QQ:0,微信:1
-		let ck_map = getCookieMap(cookies);
+		let ck_map = music_cookies.qqmusic.ck || new Map();
 		if(ck_map.get('wxunionid')){
 			type = 1;
 		}else if(ck_map.get('psrf_qqunionid')){
@@ -186,7 +185,9 @@ async function update_qqmusic_ck(){
 		if(type == 0) comm.uin = ck_map.get('uin') || '';
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
 		comm.authst = authst;
-	}catch(err){}
+	}catch(err){
+		logger.error(err);
+	}
 }
 
 async function music_task(){
@@ -199,7 +200,9 @@ async function music_task(){
 	}
 	try{
 		await update_qqmusic_ck();
-	}catch(err){}
+	}catch(err){
+		logger.error(err);
+	}
 }
 
 async function recallMusicMsg(key,msg_results){
@@ -880,6 +883,7 @@ async function qqmusic_refresh_token(cookies){
 	try{
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json(); //结果json字符串转对象
+		logger.info(res);
 		if(res.req_0?.code == '0'){
 			let map = new Map();
 			let data = res.req_0?.data;
