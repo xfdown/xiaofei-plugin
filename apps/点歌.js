@@ -35,7 +35,7 @@ var music_cookies = {
 				let data = Config.getConfig('music','cookies');
 				data = data ? data : {};
 				data.qqmusic = cookies;
-				Config.save('music','cookies',data);
+				Config.saveConfig('music','cookies',data);
 				return;
 			}catch(err){
 				logger.error(err);
