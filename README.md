@@ -38,6 +38,21 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 【版本】可用命令：【#小飞版本】
 
+#### 免责声明
+
+1.  功能仅限内部交流与小范围使用，严禁将xiaofei-Plugin用于任何商业用途或盈利。
+
+2.  图片与其他素材均来自于网络，仅供交流学习使用，如有侵权请联系，会立即删除。
+
+#### 联系方式
+
+QQ：203017966
+
+Q群：938326742
+
+邮箱：w22649@139.com
+
+
 #### 参与贡献
 
 1.  Fork 本仓库
