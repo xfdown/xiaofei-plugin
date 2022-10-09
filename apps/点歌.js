@@ -188,6 +188,7 @@ async function update_qqmusic_ck(){
 		let comm = music_cookies.qqmusic.body.comm;
 		if(type == 0) comm.uin = ck_map.get('uin') || '';
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
+		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
 		comm.authst = authst;
 	}catch(err){
 		logger.error(err);
@@ -576,7 +577,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 						...music_cookies.qqmusic.body,
 						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"5298743403","songmid":[],"songtype":[0],"uin":"0"}}
 					};
-					json_body.req_0.songmid = [data.mid];
+					json_body.req_0.param.songmid = [data.mid];
 
 					let options = {
 						method: 'POST',//post请求 
@@ -938,6 +939,7 @@ async function qqmusic_radio(uin){
 		};
 		json_body.comm.guid = md5(String(new Date().getTime()),32);
 		json_body.comm.uin = uin;
+		json_body.comm.tmeLoginType = 2;
 		json_body.comm.authst = '';
 	
 		let options = {
