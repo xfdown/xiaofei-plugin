@@ -887,6 +887,7 @@ async function qqmusic_refresh_token(cookies,type){
 	try{
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json(); //结果json字符串转对象
+		logger.info(options);
 		logger.info(res);
 		if(res.req_0?.code == '0'){
 			let map = new Map();
