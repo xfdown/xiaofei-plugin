@@ -241,7 +241,8 @@ async function music_message(e){
 		let index = Number(reg[1]) - 1;
 		if(data[key].data.length > index && index > -1){
 			let music = data[key].data[index];
-			await SendMusicShare(e,music);
+			let body = await CreateMusicShare(e,music);
+			await SendMusicShare(body);
 			//await recallMusicMsg(key,data[key].msg_results);
 			//delete data[key];
 			return true;
@@ -400,7 +401,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				music.prompt = music.name;
 				music.artist = 'QQ音乐个性电台';
 			}
-			await SendMusicShare(e,music);
+			let body = await CreateMusicShare(e,music);
+			await SendMusicShare(body);
 		}
 	}else{
 		if(page > 1){
@@ -689,7 +691,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 	return {page: page,data: list};
 }
 
-async function SendMusicShare(e,data,to_uin = null){
+async function CreateMusicShare(e,data,to_uin = null){
 	let appid, appname, appsign, style = 4;
 	switch(data.source){
 		case 'netease':
@@ -785,8 +787,11 @@ async function SendMusicShare(e,data,to_uin = null){
 		},
 		19: recv_guild_id
 	};
-	
-	
+	return body;
+}
+
+async function SendMusicShare(body){
+
 	let payload = await Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 	
 	let result = core.pb.decode(payload);
