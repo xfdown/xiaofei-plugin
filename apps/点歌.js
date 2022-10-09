@@ -184,12 +184,13 @@ async function update_qqmusic_ck(){
 				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
 			}
 			music_cookies.qqmusic.ck = ck_map;
+			authst = ck_map.get('music_key') || ck_map.get('qm_keyst');
 		}
 		let comm = music_cookies.qqmusic.body.comm;
-		if(type == 0) comm.uin = ck_map.get('uin') || '';
-		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
+		if(type == 0) comm.uin = ck_map.get('uin') || '',comm.psrf_qqunionid = ck_map.get('psrf_qqunionid') || '';
+		if(type == 1) comm.wid = ck_map.get('wxuin') || '',comm.psrf_qqunionid = ck_map.get('wxunionid') || '';
 		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
-		comm.authst = authst;
+		comm.authst = authst || '';
 	}catch(err){
 		logger.error(err);
 	}
@@ -578,7 +579,6 @@ async function music_search(search,source,page = 1,page_size = 10){
 						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"5298743403","songmid":[],"songtype":[0],"uin":"0"}}
 					};
 					json_body.req_0.param.songmid = [data.mid];
-
 					let options = {
 						method: 'POST',//post请求 
 						headers: {
@@ -865,6 +865,7 @@ async function qqmusic_refresh_token(cookies,type){
 	let req_0 = json_body.req_0;
 	if(type == 0){
 		req_0.param.appid = 100497308;
+		req_0.param.access_token = cookies.get("psrf_qqrefresh_token") || '';
 		req_0.param.musicid = Number(cookies.get("uin") || '0');
 		req_0.param.openid = cookies.get("psrf_qqopenid") || '';
 		req_0.param.refresh_token = cookies.get("psrf_qqrefresh_token") || '';
@@ -890,8 +891,6 @@ async function qqmusic_refresh_token(cookies,type){
 	try{
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json(); //结果json字符串转对象
-		logger.info(options);
-		logger.info(res);
 		if(res.req_0?.code == '0'){
 			let map = new Map();
 			let data = res.req_0?.data;
@@ -940,6 +939,7 @@ async function qqmusic_radio(uin){
 		json_body.comm.guid = md5(String(new Date().getTime()),32);
 		json_body.comm.uin = uin;
 		json_body.comm.tmeLoginType = 2;
+		json_body.comm.psrf_qqunionid = '';
 		json_body.comm.authst = '';
 	
 		let options = {
