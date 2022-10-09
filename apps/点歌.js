@@ -75,6 +75,8 @@ var music_cookies = {
 	}
 };
 
+global.music_cookies = music_cookies;
+
 const music_reg = '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页|个性电台)(.*)$';
 
 export class xiaofei_music extends plugin {
@@ -181,7 +183,7 @@ async function update_qqmusic_ck(){
 			}
 			music_cookies.qqmusic.ck = ck_map;
 		}
-		let comm = music_map.qqmusic.body.comm;
+		let comm = music_cookies.qqmusic.body.comm;
 		if(type == 0) comm.uin = ck_map.get('uin') || '';
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
 		comm.authst = authst;
@@ -476,7 +478,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let url = 'http://music.163.com/song/media/outer/url?id=' + data.id;
 				if(data.privilege && data.privilege.plLevel == 'none'){
 					try{
-						let cookie = music_map.netease?.ck;
+						let cookie = music_cookies.netease?.ck;
 						cookie = cookie ? cookie : '';
 						let options = {
 							method: 'POST',//post请求 
@@ -569,7 +571,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
 				if(data.pay?.pay_play == 1){//需要付费
 					let json_body = {
-						...music_map.qqmusic.body,
+						...music_cookies.qqmusic.body,
 						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"5298743403","songmid":[],"songtype":[0],"uin":"0"}}
 					};
 					json_body.req_0.songmid = [data.mid];
@@ -838,7 +840,7 @@ async function kugou_search(search,page = 1,page_size = 10){
 async function qqmusic_refresh_token(cookies){
 	let result = {code: -1};
 	let json_body = {
-		...music_map.qqmusic.body,
+		...music_cookies.qqmusic.body,
 		req_0: {
 			"method" : "Login",
 			"module" : "music.login.LoginServer",
@@ -924,7 +926,7 @@ async function qqmusic_refresh_token(cookies){
 async function qqmusic_radio(uin){
 	try{
 		let json_body = {
-			...JSON.parse(JSON.stringify(music_map.qqmusic.body)),
+			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
 			"req_0":{"method":"get_radio_track","module":"pc_track_radio_svr","param":{"id":99,"num":1}}
 		};
 		json_body.comm.guid = md5(String(new Date().getTime()),32);
