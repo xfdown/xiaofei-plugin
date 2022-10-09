@@ -894,7 +894,7 @@ async function qqmusic_refresh_token(cookies,type){
 			let data = res.req_0?.data;
 			if(type == 0){
 				map.set("psrf_qqopenid",data.openid);
-				map.set("psrf_qqrefresh_token",data.wxrefresh_token);
+				map.set("psrf_qqrefresh_token",data.refresh_token);
 				map.set("psrf_qqaccess_token",data.access_token);
 				map.set("psrf_access_token_expiresAt",data.expired_at);
 				map.set("uin",String(data.musicid));
@@ -909,7 +909,7 @@ async function qqmusic_refresh_token(cookies,type){
 				result.data = map;
 			}else if(type == 1){
 				map.set("wxopenid",data.openid);
-				map.set("wxrefresh_token",data.wxrefresh_token);
+				map.set("wxrefresh_token",data.refresh_token);
 				map.set("wxuin",String(data.musicid));
 				map.set("qqmusic_key",data.musickey);
 				map.set("qm_keyst",data.musickey);
