@@ -1,6 +1,7 @@
 import YAML from 'yaml'
 import chokidar from 'chokidar'
 import fs from 'node:fs'
+import lodash from 'lodash'
 
 const Path = process.cwd();
 const Plugin_Name = 'xiaofei-plugin'
@@ -95,7 +96,6 @@ class Config {
 
     this.watcher[type][key] = watcher
   }
-  
   
   save (app, name, type, data) {
 	let file = this.getFilePath(app, name, type)
