@@ -182,7 +182,7 @@ async function update_qqmusic_ck(){
 				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
 			}
 			music_cookies.qqmusic.ck = ck_map;
-		}e
+		}
 		let comm = music_cookies.qqmusic.body.comm;
 		if(type == 0) comm.uin = ck_map.get('uin') || '';
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
