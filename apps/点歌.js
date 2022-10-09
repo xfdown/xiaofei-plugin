@@ -862,13 +862,13 @@ async function qqmusic_refresh_token(cookies,type){
 	let req_0 = json_body.req_0;
 	if(type == 0){
 		req_0.param.appid = 100497308;
-		req_0.param.musicid = cookies.get("uin") || '';
+		req_0.param.musicid = Number(cookies.get("uin") || '0');
 		req_0.param.openid = cookies.get("psrf_qqopenid") || '';
 		req_0.param.refresh_token = cookies.get("psrf_qqrefresh_token") || '';
 		req_0.param.unionid = cookies.get("psrf_qqunionid") || '';
 	}else if(type == 1){
 		req_0.param.strAppid = "wx48db31d50e334801";
-		req_0.param.musicid = cookies.get("wxuin") || '';
+		req_0.param.musicid = Number(cookies.get("wxuin") || '0');
 		req_0.param.openid = cookies.get("wxopenid") || '';
 		req_0.param.refresh_token = cookies.get("wxrefresh_token") || '';
 		req_0.param.unionid = cookies.get("wxunionid") || '';
