@@ -170,8 +170,8 @@ async function update_qqmusic_ck(){
 			return;
 		}
 		let authst = ck_map.get('music_key') || ck_map.get('qm_keyst');
-		let psrf_musickey_createtime = Number(ck_map.get("psrf_musickey_createtime")) * 1000;
-		let refresh_num = Number(ck_map.get("refresh_num"));
+		let psrf_musickey_createtime = Number(ck_map.get("psrf_musickey_createtime") || 0) * 1000;
+		let refresh_num = Number(ck_map.get("refresh_num") || 0);
 		if(((new Date().getTime() - psrf_musickey_createtime) > (1000 * 60 * 60 * 12) || !authst) && refresh_num < 3){
 			let result = await qqmusic_refresh_token(ck_map);
 			if(result.code == 1){
@@ -182,7 +182,7 @@ async function update_qqmusic_ck(){
 				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
 			}
 			music_cookies.qqmusic.ck = ck_map;
-		}
+		}e
 		let comm = music_cookies.qqmusic.body.comm;
 		if(type == 0) comm.uin = ck_map.get('uin') || '';
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
