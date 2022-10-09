@@ -865,7 +865,7 @@ async function qqmusic_refresh_token(cookies,type){
 	let req_0 = json_body.req_0;
 	if(type == 0){
 		req_0.param.appid = 100497308;
-		req_0.param.access_token = cookies.get("psrf_qqrefresh_token") || '';
+		req_0.param.access_token = cookies.get("psrf_qqaccess_token") || '';
 		req_0.param.musicid = Number(cookies.get("uin") || '0');
 		req_0.param.openid = cookies.get("psrf_qqopenid") || '';
 		req_0.param.refresh_token = cookies.get("psrf_qqrefresh_token") || '';
