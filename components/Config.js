@@ -87,8 +87,9 @@ class Config {
 
     const watcher = chokidar.watch(file)
     watcher.on('change', path => {
-      delete this[type][key]
+      delete this.config[type][key]
       logger.mark(`[修改配置文件][${type}][${app}][${name}]`)
+      this.getYaml(type, app, type)//重新读取文件
       if (this[`change_${app}${name}`]) {
         this[`change_${app}${name}`]()
       }
