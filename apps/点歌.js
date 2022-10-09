@@ -592,9 +592,11 @@ async function music_search(search,source,page = 1,page_size = 10){
 						let response = await fetch(url,options); //调用接口获取数据
 						let res = await response.json();
 						if(res.req_0 && res.req_0?.code == '0'){
-							let data = res.req_0.data?.infoMap?.[uin];
-							if(data.iVipFlag == 1 || data.iSuperVip == 1 || data.iNewVip == 1 || data.iNewSuperVip == 1){
-								return true;
+							let midurlinfo = res.req_0.data.midurlinfo;
+							let purl = '';
+							if(midurlinfo && midurlinfo.length > 0){
+								purl = midurlinfo[0].purl;
+								if(purl) play_url = 'http://ws.stream.qqmusic.qq.com/' + purl;
 							}
 						}
 					}catch(err){}
