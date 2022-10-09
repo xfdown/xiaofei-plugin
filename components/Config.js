@@ -28,6 +28,10 @@ class Config {
 	return this.getYaml(app, name, 'config')
   }
 
+  saveConfig (app, name, data) {
+    return this.save(app, name, 'config',data)
+  }
+
   /**
    * 获取配置yaml
    * @param app 功能
@@ -93,7 +97,7 @@ class Config {
   }
   
   
-  save (app, name, type) {
+  save (app, name, type, data) {
 	let file = this.getFilePath(app, name, type)
     if (lodash.isEmpty(data)) {
       fs.existsSync(file) && fs.unlinkSync(file)

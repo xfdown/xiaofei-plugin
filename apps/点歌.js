@@ -9,8 +9,58 @@ var _page_size = 30;
 
 var music_cookies = {
 	qqmusic: {
-		ck: '',
-		time: 0
+		get ck(){
+			try{
+				let data = Config.getConfig('music','cookies');
+				if(data?.qqmusic){
+					return getCookieMap(data?.qqmusic);
+				}
+			}catch(err){}
+			return null;
+		},
+		set ck(cookies){
+			try{
+				if(typeof(cookies) == 'object'){
+					try{
+						let cks = [];
+						for(let key of cookies.keys()){
+							let value = cookies.get(key);
+							if(value){
+								cks.push(`${key}=${value}`);
+							}
+						}
+						cookies = cks.join('; ');
+					}catch(err){}
+				}
+				let data = Config.getConfig('music','cookies');
+				data = data ? data : {};
+				data.qqmusic = cookies;
+				Config.save('music','cookies',data);
+				return true;
+			}catch(err){}
+			return;
+		},
+		body: {
+			comm: {
+				"_channelid" : "19",
+				"_os_version" : "6.2.9200-2",
+				"authst" : "",
+				"ct" : "19",
+				"cv" : "1891",
+				"guid" : "1234567890",
+				"patch" : "118",
+				"psrf_access_token_expiresAt" : 0,
+				"psrf_qqaccess_token" : "",
+				"psrf_qqopenid" : "",
+				"psrf_qqunionid" : "",
+				"tmeAppID" : "qqmusic",
+				"tmeLoginType" : 2,
+				"uin" : "0",
+				"wid" : "0"
+			}
+		},
+		init: false,
+		update_time: 0
 	},
 	netease: {
 		get ck(){
@@ -24,6 +74,7 @@ var music_cookies = {
 		}
 	}
 };
+
 const music_reg = '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页|个性电台)(.*)$';
 
 export class xiaofei_music extends plugin {
@@ -47,19 +98,22 @@ export class xiaofei_music extends plugin {
 			]
 		});
 		
-		this.task = {
-			cron: '*/10 * * * * ?',
-			name: '[小飞插件_点歌]默认任务',
-			fnc: music_task,
-			log: false
-		};
+		this.task = [
+			{
+				cron: '*/10 * * * * ?',
+				name: '[小飞插件_点歌]默认任务',
+				fnc: music_task,
+				log: false
+			}
+		];
 	}
 	
 	async init(){
 		try{
 			for(let key in music_cookies){
-				music_cookies[key].ck;
+				let ck = music_cookies[key].ck;
 			}
+			await update_qqmusic_ck();
 		}catch(err){}
 	}
 
@@ -93,6 +147,48 @@ if(!Bot.xiaofei_music_temp_data){
 	Bot.xiaofei_music_temp_data = {};
 }
 
+async function update_qqmusic_ck(){
+	try{
+		let update_time = music_cookies.qqmusic.update_time;
+		if((new Date().getTime() - update_time) < (1000 * 60 * 10)){
+			return;
+		}
+		music_cookies.qqmusic.update_time = new Date().getTime();
+		let cookies = music_cookies.qqmusic.ck;
+		let type = -1;//QQ:0,微信:1
+		let ck_map = getCookieMap(cookies);
+		if(ck_map.get('wxunionid')){
+			type = 1;
+		}else if(ck_map.get('psrf_qqunionid')){
+			type = 0;
+		}else{
+			if(!music_cookies.qqmusic.init){
+				music_cookies.qqmusic.init = true;
+				logger.info(`【小飞插件_QQ音乐ck】未设置QQ音乐ck！`);
+			}
+			return;
+		}
+		let authst = ck_map.get('music_key') || ck_map.get('qm_keyst');
+		let psrf_musickey_createtime = Number(ck_map.get("psrf_musickey_createtime")) * 1000;
+		let refresh_num = Number(ck_map.get("refresh_num"));
+		if(((new Date().getTime() - psrf_musickey_createtime) > (1000 * 60 * 60 * 12) || !authst) && refresh_num < 3){
+			let result = await qqmusic_refresh_token(ck_map);
+			if(result.code == 1){
+				ck_map = result.data;
+				logger.info(`【小飞插件_QQ音乐ck】已刷新！`);
+			}else{
+				ck_map.set("refresh_num",refresh_num+1);
+				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
+			}
+			music_cookies.qqmusic.ck = ck_map;
+		}
+		let comm = music_map.qqmusic.body.comm;
+		if(type == 0) comm.uin = ck_map.get('uin') || '';
+		if(type == 1) comm.wid = ck_map.get('wxuin') || '';
+		comm.authst = authst;
+	}catch(err){}
+}
+
 async function music_task(){
 	let data = Bot.xiaofei_music_temp_data;
 	for(let key in data){
@@ -101,6 +197,9 @@ async function music_task(){
 			delete data[key];
 		}
 	}
+	try{
+		await update_qqmusic_ck();
+	}catch(err){}
 }
 
 async function recallMusicMsg(key,msg_results){
@@ -374,7 +473,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let url = 'http://music.163.com/song/media/outer/url?id=' + data.id;
 				if(data.privilege && data.privilege.plLevel == 'none'){
 					try{
-						let cookie = music_cookies.netease?.ck;
+						let cookie = music_map.netease?.ck;
 						cookie = cookie ? cookie : '';
 						let options = {
 							method: 'POST',//post请求 
@@ -462,10 +561,38 @@ async function music_search(search,source,page = 1,page_size = 10){
 				}
 				return purl;
 			},
-			url: (data) => {
+			url: async (data) => {
 				let code = md5(`${data.mid}q;z(&l~sdf2!nK`,32).substring(0,5).toLocaleUpperCase();
-				let url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
-				return url;
+				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
+				if(data.pay?.pay_play == 1){//需要付费
+					let json_body = {
+						...music_map.qqmusic.body,
+						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"5298743403","songmid":[],"songtype":[0],"uin":"0"}}
+					};
+					json_body.req_0.songmid = [data.mid];
+
+					let options = {
+						method: 'POST',//post请求 
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'Cookie': ''
+						},
+						body: JSON.stringify(json_body)
+					};
+					
+					let url = `http://u6.y.qq.com/cgi-bin/musicu.fcg`;
+					try{
+						let response = await fetch(url,options); //调用接口获取数据
+						let res = await response.json();
+						if(res.req_0 && res.req_0?.code == '0'){
+							let data = res.req_0.data?.infoMap?.[uin];
+							if(data.iVipFlag == 1 || data.iSuperVip == 1 || data.iNewVip == 1 || data.iNewSuperVip == 1){
+								return true;
+							}
+						}
+					}catch(err){}
+				}
+				return play_url;
 			}
 		},
 		kugou: {
@@ -704,11 +831,101 @@ async function kugou_search(search,page = 1,page_size = 10){
 	return null;
 }
 
+
+async function qqmusic_refresh_token(cookies){
+	let result = {code: -1};
+	let json_body = {
+		...music_map.qqmusic.body,
+		req_0: {
+			"method" : "Login",
+			"module" : "music.login.LoginServer",
+			"param" : {
+			   "access_token" : "",
+			   "expired_in" : 0,
+			   "forceRefreshToken" : 0,
+			   "musicid" : 0,
+			   "musickey" : "",
+			   "onlyNeedAccessToken" : 0,
+			   "openid" : "",
+			   "refresh_token" : "",
+			   "unionid" : ""
+			}
+		}
+	};
+	let req_0 = json_body.req_0;
+	if(cookies.get("type") == 0){
+		req_0.param.appid = 100497308;
+		req_0.param.musicid = cookies.get("uin") || '';
+		req_0.param.openid = cookies.get("psrf_qqopenid") || '';
+		req_0.param.refresh_token = cookies.get("psrf_qqrefresh_token") || '';
+		req_0.param.unionid = cookies.get("psrf_qqunionid") || '';
+	}else if(cookies.get("type") == 1){
+		req_0.param.strAppid = "wx48db31d50e334801";
+		req_0.param.musicid = cookies.get("wxuin") || '';
+		req_0.param.openid = cookies.get("wxopenid") || '';
+		req_0.param.refresh_token = cookies.get("wxrefresh_token") || '';
+		req_0.param.unionid = cookies.get("wxunionid") || '';
+	}else{
+		return result;
+	}
+	req_0.param.musickey = (cookies.get("qqmusic_key") || cookies.get("qm_keyst")) || '';
+
+	let options = {
+		method: 'POST',//post请求 
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+		body: JSON.stringify(json_body)
+	};
+	
+	let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+	try{
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		if(res.req_0?.code == '0'){
+			let map = new Map();
+			let data = res.req_0?.data;
+			if(cookies.get("type") == 0){
+				map.set("psrf_qqopenid",data.openid);
+				map.set("psrf_qqrefresh_token",data.wxrefresh_token);
+				map.set("psrf_qqaccess_token",data.access_token);
+				map.set("psrf_access_token_expiresAt",data.expired_at);
+				map.set("uin",String(data.musicid));
+				map.set("qqmusic_key",data.musickey);
+				map.set("qm_keyst",data.musickey);
+				map.set("psrf_musickey_createtime",data.musickeyCreateTime);
+				map.set("psrf_qqunionid",data.unionid);
+				map.set("euin",data.encryptUin);
+				map.set("login_type",1);
+				map.set("tmeLoginType",2);
+				result.code = 1;
+				result.data = map;
+			}else if(cookies.get("type") == 1){
+				map.set("wxopenid",data.openid);
+				map.set("wxrefresh_token",data.wxrefresh_token);
+				map.set("wxuin",String(data.musicid));
+				map.set("qqmusic_key",data.musickey);
+				map.set("qm_keyst",data.musickey);
+				map.set("psrf_musickey_createtime",data.musickeyCreateTime);
+				map.set("wxunionid",data.unionid);
+				map.set("euin",data.encryptUin);
+				map.set("login_type",2);
+				map.set("tmeLoginType",1);
+				result.code = 1;
+				result.data = map;
+			}
+		}
+	}catch(err){}
+	return result;
+}
+
 async function qqmusic_radio(uin){
 	try{
-		let json_body = {"comm":{"_channelid":"19","_os_version":"6.2.9200-2","ct":"19","cv":"1782","guid":"1234567890","patch":"118","tmeAppID":"qqmusic","tmeLoginType":2,"uin":"0","wid":"0"},"req_0":{"method":"get_radio_track","module":"pc_track_radio_svr","param":{"id":99,"num":1}}};
+		let json_body = {
+			...JSON.parse(JSON.stringify(music_map.qqmusic.body)),
+			"req_0":{"method":"get_radio_track","module":"pc_track_radio_svr","param":{"id":99,"num":1}}
+		};
 		json_body.comm.guid = md5(String(new Date().getTime()),32);
 		json_body.comm.uin = uin;
+		json_body.comm.authst = '';
 	
 		let options = {
 			method: 'POST',//post请求 
@@ -795,6 +1012,18 @@ async function kuwo_search(search,page = 1,page_size = 10){
 	}catch(err){}
 
 	return null;
+}
+
+function getCookieMap(cookie) {
+	let cookiePattern = /^(\S+)=(\S+)$/;
+	let cookieArray = cookie.replace(/\s*/g, "").split(";");
+	let cookieMap = new Map();
+	for (let item of cookieArray) {
+		let entry = item.split("=");
+		if (!entry[0]) continue;
+		cookieMap.set(entry[0], entry[1]);
+	}
+	return cookieMap||{};
 }
 
 function random(min,max){
