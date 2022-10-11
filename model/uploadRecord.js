@@ -2,7 +2,7 @@ import { core } from "oicq"
 import common from "oicq"
 import Contactable from "oicq"
 import querystring from "querystring"
-import axios from "axios"
+import fetch from "node-fetch"
 import fs from "fs"
 import path from "path"
 import errors from "oicq"
@@ -20,6 +20,7 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
     }
     let buf = result.buffer;
     if(seconds == 0 && result.time) seconds = result.time.seconds;
+	console.log(result.time,seconds);
 	const hash = (0, md5)(buf);
     const codec = String(buf.slice(0, 7)).includes("SILK") ? (transcoding ? 1 : 0) : 0;
     const body = core.pb.encode({
@@ -61,7 +62,12 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
 		"User-Agent": `QQ/${Bot.apk.version} CFNetwork/1126`,
 		"Net-Type": "Wifi"
 	};
-	await axios.post(url, buf, { headers });
+	await fetch(url,{
+		method: 'POST',//post请求 
+		headers: headers,
+		body: buf
+	});
+	//await axios.post(url, buf, { headers });
 	const fid = rsp[11].toBuffer();
 	const b = core.pb.encode({
 		1: 4,
@@ -69,6 +75,7 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
 		3: fid,
 		4: hash,
 		5: hash.toString("hex") + ".amr",
+		6: seconds,
 		11: 1,
 		18: fid,
 		19: seconds,
@@ -105,14 +112,17 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
     }
     else if (file.startsWith("http://") || file.startsWith("https://")) {
         // 网络文件
-        const readable = (await axios.get(file, { responseType: "stream" })).data;
+        //const readable = (await axios.get(file, { responseType: "stream" })).data;
+		let response = await fetch(file);
+		const buf = await response.buffer();
         const tmpfile = path.join(TMP_DIR, (0, uuid)());
-        await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
+		await fs.promises.writeFile(tmpfile, buf);
+        //await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
         const head = await read7Bytes(tmpfile);
         let result = await getAudioTime(tmpfile,ffmpeg);
         if(result.code == 1) time = result.data;
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            const buf = await fs.promises.readFile(tmpfile);
+            //const buf = await fs.promises.readFile(tmpfile);
             fs.unlink(tmpfile,NOOP);
             buffer = buf;
         } else {
@@ -150,7 +160,8 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
                 }
                 resolve({code: 1,data: {
                     time: time,
-                    seconds: s
+                    seconds: s,
+					exec_text: stderr
                 }});
             }
             catch {
