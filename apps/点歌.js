@@ -127,7 +127,7 @@ export class xiaofei_music extends plugin {
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
-		if(/^(语音|高清语音)?(\d+)?$/.test(this.e.msg)){
+		if(/^#?(语音|高清语音)?(\d+)?$/.test(this.e.msg)){
 			music_message(this.e);
 		}
 		return;
@@ -140,7 +140,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(RegExp(music_reg).test(e.msg) || /^(\d+)$/.test(e.msg)){
+	if(RegExp(music_reg).test(e.msg) || /^#?(语音|高清语音)?(\d+)?$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -230,7 +230,7 @@ async function recallMusicMsg(key,msg_results){
 }
 
 async function music_message(e){
-	let reg = /^(语音|高清语音)?(\d+)?$/.exec(e.msg);
+	let reg = /^#?(语音|高清语音)?(\d+)?$/.exec(e.msg);
 	if(reg){
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
