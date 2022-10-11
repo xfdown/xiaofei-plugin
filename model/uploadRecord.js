@@ -14,7 +14,12 @@ import child_process from "child_process"
 
 
 async function uploadRecord(record_url, seconds = 0,transcoding = true) {
-	const buf = await getPttBuffer(record_url, Bot.config.ffmpeg_path, transcoding);
+	const result = await getPttBuffer(record_url, Bot.config.ffmpeg_path, transcoding);
+    if(!result.buffer){
+        return false;
+    }
+    let buf = result.buffer;
+    if(seconds == 0 && result.time) seconds = result.time.seconds;
 	const hash = (0, md5)(buf);
     const codec = String(buf.slice(0, 7)).includes("SILK") ? (transcoding ? 1 : 0) : 0;
     const body = core.pb.encode({
@@ -77,17 +82,25 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
 export default uploadRecord
 
 async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
+    let buffer;
+    let time;
     if (file instanceof Buffer || file.startsWith("base64://")) {
         // Buffer或base64
         const buf = file instanceof Buffer ? file : Buffer.from(file.slice(9), "base64");
         const head = buf.slice(0, 7).toString();
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            return buf;
-        }
-        else {
             const tmpfile = path.join(TMP_DIR, (0, uuid)());
             await fs.promises.writeFile(tmpfile, buf);
-            return audioTrans(tmpfile, ffmpeg);
+            let result = await getAudioTime(tmpfile,ffmpeg);
+            if(result.code == 1) time = result.data;
+            fs.unlink(tmpfile,NOOP);
+            buffer = buf;
+        }else {
+            const tmpfile = path.join(TMP_DIR, (0, uuid)());
+            let result = await getAudioTime(tmpfile,ffmpeg);
+            if(result.code == 1) time = result.data;
+            await fs.promises.writeFile(tmpfile, buf);
+            buffer = await audioTrans(tmpfile, ffmpeg);
         }
     }
     else if (file.startsWith("http://") || file.startsWith("https://")) {
@@ -96,13 +109,14 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
         const tmpfile = path.join(TMP_DIR, (0, uuid)());
         await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
         const head = await read7Bytes(tmpfile);
+        let result = await getAudioTime(tmpfile,ffmpeg);
+        if(result.code == 1) time = result.data;
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
             const buf = await fs.promises.readFile(tmpfile);
             fs.unlink(tmpfile,NOOP);
-            return buf;
-        }
-        else {
-            return audioTrans(tmpfile, ffmpeg);
+            buffer = buf;
+        } else {
+            buffer = await audioTrans(tmpfile, ffmpeg);
         }
     }
     else {
@@ -110,16 +124,43 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
         file = String(file).replace(/^file:\/{2}/, "");
         IS_WIN && file.startsWith("/") && (file = file.slice(1));
         const head = await read7Bytes(file);
+        let result = getAudioTime(file,ffmpeg);
+        if(result.code == 1) time = result.data;
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            return fs.promises.readFile(file);
-        }
-        else {
-            return audioTrans(file, ffmpeg);
+            buffer = fs.promises.readFile(file);
+        } else {
+            buffer = await audioTrans(file, ffmpeg);
         }
     }
+    return {buffer: buffer, time: time}
 }
 
-function audioTrans(file, ffmpeg = "ffmpeg") {
+async function getAudioTime(file, ffmpeg = "ffmpeg") {
+    return new Promise((resolve, reject) => {
+        (0, child_process.exec)(`${ffmpeg} -i "${file}"`, async (error, stdout, stderr) => {
+            try {
+				let time = stderr.split('Duration:')[1]?.split(',')[0].trim();
+                let arr = time?.split(':');
+                arr.reverse();
+                let n = 1;
+                let s = 0;
+                for(let val of arr){
+                    if(parseInt(val) > 0) s += parseInt(val) * n;
+                    n *= 60;
+                }
+                resolve({code: 1,data: {
+                    time: time,
+                    seconds: s
+                }});
+            }
+            catch {
+                resolve({code: -1});
+            }
+        });
+    });
+}
+
+async function audioTrans(file, ffmpeg = "ffmpeg") {
     return new Promise((resolve, reject) => {
         const tmpfile = path.join(TMP_DIR, (0, uuid)());
         (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -ac 1 -ar 8000 -f amr "${tmpfile}"`, async (error, stdout, stderr) => {
