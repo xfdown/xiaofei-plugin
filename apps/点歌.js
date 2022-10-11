@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
-
+import uploadRecord from '../model/uploadRecord.js'
 const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
 var _page_size = 30;
 
@@ -127,7 +127,7 @@ export class xiaofei_music extends plugin {
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
-		if(/^(\d+)$/.test(this.e.msg)){
+		if(/^(语音|高清语音)?(\d+)?$/.test(this.e.msg)){
 			music_message(this.e);
 		}
 		return;
@@ -230,7 +230,7 @@ async function recallMusicMsg(key,msg_results){
 }
 
 async function music_message(e){
-	let reg = /^(\d+)$/.exec(e.msg);
+	let reg = /^(语音|高清语音)?(\d+)?$/.exec(e.msg);
 	if(reg){
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
@@ -238,10 +238,26 @@ async function music_message(e){
 			return false;
 		}
 		
-		let index = Number(reg[1]) - 1;
+		if(reg[1]?.includes('语音') && !reg[2]){
+			reg[2] = String(data[key].index + 1);
+		}
+		
+		let index = Number(reg[2]) - 1;		
+		
 		if(data[key].data.length > index && index > -1){
+			
+			if(data[key].page < 1 && !reg[1]?.includes('语音')){
+				return false;
+			}
+			data[key].index = index;
 			let music = data[key].data[index];
 			let body = await CreateMusicShare(e,music);
+			if(reg[1] && reg[1].includes('语音')){
+				await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
+				await e.reply(await uploadRecord(body[12][16],0,!reg[1].includes('高清')));
+				return true;
+			}
+			
 			await SendMusicShare(body);
 			//await recallMusicMsg(key,data[key].msg_results);
 			//delete data[key];
@@ -302,7 +318,7 @@ async function music_message(e){
 	if(reg[4] == '下一页'){
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
-		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60)){
+		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60) || data[key].page < 1){
 			return false;
 		}
 		data[key].time = new Date().getTime();//续期，防止搜索时清除
@@ -324,6 +340,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		if(data[key]?.msg_results && page < 2){
 			recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
 		}
+		
+		data = {};
 		
 		if(page > 0){
 			let message = [`---${source[1]}点歌列表---`];
@@ -369,7 +387,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				
 				msg_result = await e.reply(forwardMsg);
 			}
-			let data = {};
+			
 			if(page > 1){
 				let list_data = temp_data.data; list_data = list_data ? list_data : [];
 				list_data = list_data.concat(result.data);
@@ -381,7 +399,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					page: result.page,
 					msg_results: msg_results,
 					search: search,
-					source: source
+					source: source,
+					index: -1
 				};
 			}else{
 				data = {
@@ -390,12 +409,23 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					page: result.page,
 					msg_results: [msg_result],
 					search: search,
-					source: source
+					source: source,
+					index: -1
 				};
 			}
-			Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
 		}else{
+			
 			let music = result.data[0];
+			data = {
+				time: new Date().getTime(),
+				data: [music],
+				page: 0,
+				msg_results: [],
+				search: search,
+				source: source,
+				index: 0
+			};
+			
 			if(source[0] == 'qq_radio'){
 				music.name = music.name + ' - ' + music.artist;
 				music.prompt = music.name;
@@ -404,6 +434,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			let body = await CreateMusicShare(e,music);
 			await SendMusicShare(body);
 		}
+		Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
 	}else{
 		if(page > 1){
 			await e.reply('没有找到更多歌曲！',true);
@@ -732,6 +763,8 @@ async function CreateMusicShare(e,data,to_uin = null){
 	typeof(data.url) == 'function' ? musicUrl = await data.url(data.data) : musicUrl = data.url;
 	typeof(data.pic) == 'function' ? preview = await data.pic(data.data) : preview = data.pic;
 	typeof(data.link) == 'function' ? jumpUrl = await data.link(data.data) : jumpUrl = data.link;
+	
+	data.url = musicUrl;
 	
 	if(typeof(musicUrl) != 'string' || musicUrl == ''){
 		style = 0;
