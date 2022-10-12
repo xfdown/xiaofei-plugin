@@ -61,22 +61,24 @@ async function ArkSign(json){
 				}catch(err){}
 				
 				if(extra && extra.msg_seq == msg_seq){
+					Bot.off('message',json_handle);
 					clearTimeout(timer);
 					delete json['extra'];
 					result.code = 1;
 					result.msg = '签名成功！';
 					result.data = JSON.stringify(json);
 					resolve(result);
+					
 				}
-				Bot.off('message',json_handle);
+				
 			}
 		}
 		
 		let timer = setTimeout(function(){
+			Bot.off('message',json_handle);
 			result.code = -1;
 			result.msg = '签名失败，请稍后再试！';
 			resolve(result);
-			Bot.off('message',json_handle);
 		},3000);
 		
 		Bot.on('message',json_handle);
