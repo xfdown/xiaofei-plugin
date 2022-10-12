@@ -4,7 +4,7 @@ import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
-const no_pic = 'https://h5static.kuwo.cn/upload/image/4f768883f75b17a426c95b93692d98bec7d3ee9240f77f5ea68fc63870fdb050.png';
+const no_pic = '';
 var _page_size = 30;
 
 var music_cookies = {
@@ -584,7 +584,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 			pic: (data) => {
 				let album_mid = data.album ? data.album.mid : '';
 				let singer_mid = data.singer ? data.singer[0].mid : '';
-				let pic = album_mid != '' ? `T002R150x150M000${album_mid}` : (singer_mid != '' ? `T001R150x150M000${singer_mid}` : '');
+				let pic = (data.vs[1] && data.vs[1] != '') ? `T062R150x150M000${data.vs[1]}` : (album_mid != '' ? `T002R150x150M000${album_mid}` : (singer_mid != '' ? `T001R150x150M000${singer_mid}` : ''));
 				let url = pic == '' ? no_pic : `http://y.gtimg.cn/music/photo_new/${pic}.jpg`;
 				return url;
 			},
