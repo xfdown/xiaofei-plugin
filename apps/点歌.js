@@ -4,6 +4,7 @@ import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
+import { segment } from "oicq";
 const no_pic = '';
 var _page_size = 30;
 
@@ -313,6 +314,7 @@ async function music_message(e){
 		search = e.user_id;
 		source = ['qq_radio','QQ个性电台'];
 		page = 0;
+		page_size = 5;
 	}
 	
 	if(reg[4] == '下一页'){
@@ -414,25 +416,61 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 			}
 		}else{
-			
-			let music = result.data[0];
-			data = {
-				time: new Date().getTime(),
-				data: [music],
-				page: 0,
-				msg_results: [],
-				search: search,
-				source: source,
-				index: 0
-			};
-			
 			if(source[0] == 'qq_radio'){
-				music.name = music.name + ' - ' + music.artist;
-				music.prompt = music.name;
-				music.artist = 'QQ音乐个性电台';
+				let user_info = {
+					nickname: Bot.nickname,
+					user_id: Bot.uin
+				};
+				let MsgList = [{
+					...user_info,
+					message: '为您推荐以下歌曲'
+				}];
+				let index = 1;
+				for(let music of result.data){
+					let body = await CreateMusicShare(e,music);
+					let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"https:\/\/p.qpic.cn\/qqconnect\/0\/app_100497308_1626060999\/100?max-age=2592000&t=0","source_url":"","tag":"QQ音乐个性电台","title":""}},"config":{"type":"normal","forward":0,"showSender":0}};
+					music = music_json.meta.music;
+					music.desc = body[12][11];
+					music.jumpUrl = body[12][13];
+					music.musicUrl = body[12][16];
+					music.preview = body[12][14];
+					music.title = body[12][10];
+					music.tag = index + '.' + music.tag;
+					MsgList.push({
+						...user_info,
+						message: segment.json(music_json)
+					});
+					index++;
+				}
+				let forwardMsg = await Bot.makeForwardMsg(MsgList);
+				forwardMsg.data = forwardMsg.data
+				.replace(/\n/g, '')
+				.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+				.replace(/___+/, '<title color="#777777" size="26">根据您的当前QQ的听歌口味为您推荐</title>');
+				await e.reply(forwardMsg);
+				data = {
+					time: new Date().getTime(),
+					data: result.data,
+					page: 0,
+					msg_results: [],
+					search: search,
+					source: source,
+					index: -1
+				};
+			}else{
+				let music = result.data[0];
+				data = {
+					time: new Date().getTime(),
+					data: [music],
+					page: 0,
+					msg_results: [],
+					search: search,
+					source: source,
+					index: 0
+				};
+				let body = await CreateMusicShare(e,music);
+				await SendMusicShare(body);
 			}
-			let body = await CreateMusicShare(e,music);
-			await SendMusicShare(body);
 		}
 		Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
 	}else{
@@ -687,7 +725,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 			break;
 		case 'qq_radio':
 			source = 'qq';
-			result = await qqmusic_radio(search);
+			result = await qqmusic_radio(search,page_size);
 			break;
 		case 'qq':
 		default:
@@ -970,7 +1008,7 @@ async function qqmusic_refresh_token(cookies,type){
 	return result;
 }
 
-async function qqmusic_radio(uin){
+async function qqmusic_radio(uin,page_size){
 	try{
 		let json_body = {
 			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
@@ -981,6 +1019,7 @@ async function qqmusic_radio(uin){
 		json_body.comm.tmeLoginType = 2;
 		json_body.comm.psrf_qqunionid = '';
 		json_body.comm.authst = '';
+		json_body.req_0.param.num = page_size;
 	
 		let options = {
 			method: 'POST',//post请求 
