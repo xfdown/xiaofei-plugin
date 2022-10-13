@@ -446,7 +446,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				forwardMsg.data = forwardMsg.data
 				.replace(/\n/g, '')
 				.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-				.replace(/___+/, '<title color="#777777" size="26">根据您的当前QQ的听歌口味为您推荐</title>');
+				.replace(/___+/, '<title color="#777777" size="26">根据您当前QQ的听歌口味为您推荐</title>');
 				await e.reply(forwardMsg);
 				data = {
 					time: new Date().getTime(),
