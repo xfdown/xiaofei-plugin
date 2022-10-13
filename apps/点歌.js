@@ -428,6 +428,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					user_id: e.user_id
 				};
 
+				let MsgList = [];
 				let index = 1;
 				for(let music of result.data){
 					let body = await CreateMusicShare(e,music);
