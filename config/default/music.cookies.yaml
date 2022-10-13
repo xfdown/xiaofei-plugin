@@ -1,4 +1,5 @@
-# 网易云cookie
+# 网易云cookie说明：
+# 必须参数：MUSIC_U=;
 # 请在下面填写ck！
 netease: MUSIC_U=;
 # QQ音乐cookie说明：
