@@ -417,14 +417,17 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			}
 		}else{
 			if(source[0] == 'qq_radio'){
+				let nickname = e.sender.nickname;
+				if(e.isGroup){
+					let info = await Bot.getGroupMemberInfo(e.group_id, e.user_id)
+					nickname = info.card || info.nickname;
+				}
+				
 				let user_info = {
-					nickname: Bot.nickname,
-					user_id: Bot.uin
+					nickname: nickname,
+					user_id: e.user_id
 				};
-				let MsgList = [{
-					...user_info,
-					message: '为您推荐以下歌曲'
-				}];
+
 				let index = 1;
 				for(let music of result.data){
 					let body = await CreateMusicShare(e,music);
