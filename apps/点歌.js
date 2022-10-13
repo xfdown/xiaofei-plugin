@@ -103,11 +103,16 @@ export class xiaofei_music extends plugin {
 			]
 		});
 		
+		try{
+			let setting = Config.getdefSet('setting','system') || {};
+			this.priority = setting['music'] == true ? 10 : 2000;
+		}catch(err){}
+		
 		this.task = [
 			{
 				cron: '*/10 * * * * ?',
 				name: '[小飞插件_点歌]默认任务',
-				fnc: music_task,
+				fnc: this.music_task,
 				log: false
 			}
 		];
@@ -120,6 +125,21 @@ export class xiaofei_music extends plugin {
 			}
 			await update_qqmusic_ck();
 		}catch(err){}
+	}
+	
+	async music_task(){
+		let data = Bot.xiaofei_music_temp_data;
+		for(let key in data){
+			if((new Date().getTime() - data[key].time) > (1000 * 60)){
+				await recallMusicMsg(key,data[key].msg_results);
+				delete data[key];
+			}
+		}
+		try{
+			await update_qqmusic_ck();
+		}catch(err){
+			logger.error(err);
+		}
 	}
 
 	async music(){
@@ -192,21 +212,6 @@ async function update_qqmusic_ck(){
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '',comm.psrf_qqunionid = ck_map.get('wxunionid') || '';
 		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
 		comm.authst = authst || '';
-	}catch(err){
-		logger.error(err);
-	}
-}
-
-async function music_task(){
-	let data = Bot.xiaofei_music_temp_data;
-	for(let key in data){
-		if((new Date().getTime() - data[key].time) > (1000 * 60)){
-			await recallMusicMsg(key,data[key].msg_results);
-			delete data[key];
-		}
-	}
-	try{
-		await update_qqmusic_ck();
 	}catch(err){
 		logger.error(err);
 	}

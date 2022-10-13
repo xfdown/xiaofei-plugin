@@ -6,9 +6,14 @@ import lodash from 'lodash'
 const Path = process.cwd();
 const Plugin_Name = 'xiaofei-plugin'
 const Plugin_Path = `${Path}/plugins/${Plugin_Name}`;
+
+if(!Bot.xiaofei_plugin) Bot.xiaofei_plugin = {};
+
 class Config {
 	constructor () {
     this.config = {}
+	
+	Bot.xiaofei_plugin['config'] = this.config;
 
     /** 监听文件 */
     this.watcher = {}
@@ -56,7 +61,7 @@ class Config {
 
     this.watch(file, app, name, type)
 
-    return this[type][key]
+    return this.config[type][key]
   }
 
   getFilePath (app, name, type) {

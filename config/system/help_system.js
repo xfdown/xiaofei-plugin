@@ -62,6 +62,10 @@ export const helpList = [
     title: '#代发言',
     desc: '例如：#代@小飞 抽卡记录'
   },{
+    icon: 32,
+    title: '#小飞设置',
+    desc: '配置小飞功能'
+  },{
     icon: 35,
     title: '#小飞更新 #小飞强制更新',
     desc: '更新小飞插件'

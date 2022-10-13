@@ -1,0 +1,29 @@
+{{extend defaultLayout}}
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{_res_path}}/admin/index.css"/>
+{{/block}}
+{{block 'main'}}
+
+<div class="info_box">
+  <div class="head-box type{{bgType}}">
+    <div class="label">小飞管理面板</div>
+    <div class="title">#小飞设置</div>
+  </div>
+</div>
+<div class="cfg-box">
+  <div class="cfg-group">系统设置</div>
+  <ul class="cfg-ul">
+  
+    <li class="cfg-li">
+      <div class="cfg-line">
+        小飞点歌作为默认点歌
+        <span class="cfg-hint">#小飞设置点歌 + 开启/关闭 </span>
+        {{@music}}
+      </div>
+      <div class="cfg-desc">如有多个点歌插件，开启后将使用小飞点歌作为的默认点歌(重启生效)</div>
+    </li>
+	
+  </ul>
+
+</div>
+{{/block}}
