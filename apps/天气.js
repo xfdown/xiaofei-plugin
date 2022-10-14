@@ -59,7 +59,8 @@ async function weather(e,search){
 			continue;
 		}
 		let internal = res.data.internal;
-		for(let key in internal){
+		let keys = Object.keys(internal).reverse();
+		for(let key of keys){
 			for(let i = parseInt(index)+1; i < arr.length; i++){
 				if(internal[key].includes(arr[i]) || arr[i].includes(internal[key])){
 					area_id = key;
