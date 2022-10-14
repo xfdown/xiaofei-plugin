@@ -77,7 +77,8 @@ async function weather(e,search){
 	}
 	
 	let internal = res.data.internal;
-	for(let key in internal){
+	let keys = Object.keys(internal).reverse();
+	for(let key of keys){
 		if(area_id != -1){
 			if(key != area_id){
 				continue;
