@@ -52,10 +52,6 @@ async function ArkSign(json){
 		
 		let json_handle = function(e){
 			if(Bot.uin == e.user_id && e?.message[0]?.type == 'json'){
-				try{
-					Bot.recallMsg(e.message_id);
-				}catch(err){}
-				
 				let json_str = e.message[0].data;
 				let json = null;
 				let extra = null;
