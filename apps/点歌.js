@@ -5,6 +5,7 @@ import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
+import ArkSign from '../model/ArkSign.js'
 const no_pic = '';
 var _page_size = 30;
 
@@ -257,14 +258,22 @@ async function music_message(e){
 			}
 			data[key].index = index;
 			let music = data[key].data[index];
-			let body = await CreateMusicShare(e,music);
+
+			let music_json = await CreateMusicShareJSON(music);
 			if(reg[1] && reg[1].includes('语音')){
 				await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
-				await e.reply(await uploadRecord(body[12][16],0,!reg[1].includes('高清')));
+				await e.reply(await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清')));
 				return true;
 			}
+
+			let json_sign = await ArkSign(JSON.stringify(music_json));
+			if(json_sign.code == 1){
+				await e.reply(segment.json(json_sign.data));
+			}else{
+				let body = await CreateMusicShare(e,music);
+				await SendMusicShare(body);
+			}
 			
-			await SendMusicShare(body);
 			//await recallMusicMsg(key,data[key].msg_results);
 			//delete data[key];
 			return true;
@@ -436,14 +445,13 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				let MsgList = [];
 				let index = 1;
 				for(let music of result.data){
-					let body = await CreateMusicShare(e,music);
-					let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"https:\/\/p.qpic.cn\/qqconnect\/0\/app_100497308_1626060999\/100?max-age=2592000&t=0","source_url":"","tag":"QQ音乐个性电台","title":""}},"config":{"type":"normal","forward":0,"showSender":0}};
+					let music_json = await CreateMusicShareJSON({
+						...music,
+						"config":{"type":"normal","forward":0,"showSender":0},
+						app_name: 'QQ音乐个性电台'
+					});
+
 					music = music_json.meta.music;
-					music.desc = body[12][11];
-					music.jumpUrl = body[12][13];
-					music.musicUrl = body[12][16];
-					music.preview = body[12][14];
-					music.title = body[12][10];
 					music.tag = index + '.' + music.tag;
 					MsgList.push({
 						...user_info,
@@ -478,8 +486,15 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					source: source,
 					index: 0
 				};
-				let body = await CreateMusicShare(e,music);
-				await SendMusicShare(body);
+
+				let music_json = await CreateMusicShareJSON(music);
+				let json_sign = await ArkSign(JSON.stringify(music_json));
+				if(json_sign.code == 1){
+					await e.reply(segment.json(json_sign.data));
+				}else{
+					let body = await CreateMusicShare(e,music);
+					await SendMusicShare(body);
+				}
 			}
 		}
 		Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
@@ -768,6 +783,83 @@ async function music_search(search,source,page = 1,page_size = 10){
 		}
 	}
 	return {page: page,data: list};
+}
+
+async function CreateMusicShareJSON(data){
+	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal"}};
+	music = music_json.meta.music;
+
+	let appid, app_name, app_icon;
+	switch(data.source){
+		case 'netease':
+			appid = 100495085;
+			app_name = '网易云音乐';
+			app_icon = 'https://i.gtimg.cn/open/app_icon/00/49/50/85/100495085_100_m.png';
+			
+			break;
+		case 'kuwo':
+			appid = 100243533
+			app_name = '酷我音乐';
+			app_icon = 'https://p.qpic.cn/qqconnect/0/app_100243533_1636374695/100?max-age=2592000&t=0';
+			break;
+		case 'kugou':
+			appid = 205141;
+			app_name = '酷狗音乐';
+			app_name = 'https://open.gtimg.cn/open/app_icon/00/20/51/41/205141_100_m.png?t=0';
+			break;
+		case 'qq':
+		default:
+			appid = 100497308;
+			app_name = 'QQ音乐';
+			app_icon = 'https://p.qpic.cn/qqconnect/0/app_100497308_1626060999/100?max-age=2592000&t=0';
+			
+			break;
+	}
+	
+	var title = data.name, singer = data.artist, prompt = '[分享]', jumpUrl, preview, musicUrl;
+
+	let types = [];
+	if(data.url == null){types.push('url')};
+	if(data.pic == null){types.push('pic')};
+	if(data.link == null){types.push('link')};
+	if(types.length > 0 && typeof(data.api) == 'function'){
+		let {url,pic,link} = await data.api(data.data,types);
+		if(url){data.url = url;}
+		if(pic){data.pic = pic;}
+		if(link){data.link = link;}
+	}
+	
+	typeof(data.url) == 'function' ? musicUrl = await data.url(data.data) : musicUrl = data.url;
+	typeof(data.pic) == 'function' ? preview = await data.pic(data.data) : preview = data.pic;
+	typeof(data.link) == 'function' ? jumpUrl = await data.link(data.data) : jumpUrl = data.link;
+	
+	data.url = musicUrl;
+	
+	if(typeof(musicUrl) != 'string' || musicUrl == ''){
+		style = 0;
+		musicUrl = '';
+	}
+	
+	if(data.prompt){
+		prompt = '[分享]' + data.prompt;
+	}else{
+		prompt = '[分享]' + title + '-' + singer;
+	}
+
+	app_name = data.app_name || app_name;
+	if(typeof(data.config) == 'object') music_json.config = data.config;
+
+	music.desc = singer;
+	music.jumpUrl = jumpUrl;
+	music.musicUrl = musicUrl;
+	music.preview = preview;
+	music.title = title;
+	music.appid = appid;
+	music.tag = `小飞插件[${app_name}]`;
+	music.source_icon = app_icon;
+	music_json.prompt = prompt;
+	
+	return music_json;
 }
 
 async function CreateMusicShare(e,data,to_uin = null){

@@ -70,9 +70,8 @@ async function ArkSign(json){
 					delete json['extra'];
 					result.code = 1;
 					result.msg = '签名成功！';
-					result.data = JSON.stringify(json);
+					result.data = json;
 					resolve(result);
-					
 				}
 				
 			}
