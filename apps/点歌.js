@@ -447,7 +447,6 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				for(let music of result.data){
 					let music_json = await CreateMusicShareJSON({
 						...music,
-						"config":{"type":"normal","forward":0,"showSender":0},
 						app_name: 'QQ音乐个性电台'
 					});
 
@@ -786,7 +785,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 }
 
 async function CreateMusicShareJSON(data){
-	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal"}};
+	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal","forward":true}};
 	let music = music_json.meta.music;
 
 	let appid, app_name, app_icon;
