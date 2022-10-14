@@ -787,7 +787,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 
 async function CreateMusicShareJSON(data){
 	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal"}};
-	music = music_json.meta.music;
+	let music = music_json.meta.music;
 
 	let appid, app_name, app_icon;
 	switch(data.source){
