@@ -80,29 +80,18 @@ async function weather(e,search){
 	let internal = res.data.internal;
 	let keys = Object.keys(internal).reverse();
 	for(let key of keys){
-		if(area_id != -1){
-			if(key != area_id){
-				continue;
-			}
-		}
 		let arr = internal[key].split(', ');
 
-		if(province && arr[0]){
-			if(arr[0].indexOf(province) == -1){
-				continue;
-			}
+		if(province && !province.includes(arr[0])){
+			continue;
 		}
 		
-		if(city && arr[1]){
-			if(arr[1].indexOf(city) == -1){
-				continue;
-			}
+		if(city && !city.includes(arr[1])){
+			continue;
 		}
 		
-		if(district && arr[2]){
-			if(arr[2].indexOf(district) == -1){
-				continue;
-			}
+		if(district && !district.includes(arr[2])){
+			continue;
 		}
 		
 		if(arr[0]) province = arr[0];
