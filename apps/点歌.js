@@ -804,14 +804,13 @@ async function CreateMusicShareJSON(data){
 		case 'kugou':
 			appid = 205141;
 			app_name = '酷狗音乐';
-			app_name = 'https://open.gtimg.cn/open/app_icon/00/20/51/41/205141_100_m.png?t=0';
+			app_icon = 'https://open.gtimg.cn/open/app_icon/00/20/51/41/205141_100_m.png?t=0';
 			break;
 		case 'qq':
 		default:
 			appid = 100497308;
 			app_name = 'QQ音乐';
 			app_icon = 'https://p.qpic.cn/qqconnect/0/app_100497308_1626060999/100?max-age=2592000&t=0';
-			
 			break;
 	}
 	
