@@ -347,6 +347,7 @@ async function music_message(e){
 		source = ['qq_radio','QQ个性电台'];
 		page = 0;
 		page_size = 5;
+		e.reply('请稍候。。。',true);
 	}
 	
 	if(reg[4] == '下一页'){
@@ -470,6 +471,11 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 					music = music_json.meta.music;
 					music.tag = index + '.' + music.tag;
+					
+					let json_sign = await ArkMsg.Sign(JSON.stringify(music_json));
+					if(json_sign.code == 1){
+						music_json = json_sign.data;
+					}
 					MsgList.push({
 						...user_info,
 						message: segment.json(music_json)
