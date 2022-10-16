@@ -287,7 +287,7 @@ async function music_message(e){
 				return true;
 			}
 
-			let ArkSend = await ArkMsg.ArkSend(JSON.stringify(music_json),e);
+			let ArkSend = await ArkMsg.Share(JSON.stringify(music_json),e);
 			if(ArkSend.code != 1){
 				let body = await CreateMusicShare(e,music);
 				await SendMusicShare(body);
@@ -505,7 +505,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 
 				let music_json = await CreateMusicShareJSON(music);
-				let ArkSend = await ArkMsg.ArkSend(JSON.stringify(music_json),e);
+				let ArkSend = await ArkMsg.Share(JSON.stringify(music_json),e);
 				if(ArkSend.code != 1){
 					let body = await CreateMusicShare(e,music);
 					await SendMusicShare(body);

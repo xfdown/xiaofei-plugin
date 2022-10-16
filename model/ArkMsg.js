@@ -1,6 +1,6 @@
 import { core } from "oicq"
 
-async function ArkSign(json){
+async function Sign(json){
 	return new Promise((resolve, reject) => {
 		let result = {code: -1};
 		let json_data = null;
@@ -109,7 +109,7 @@ async function ArkSign(json){
 	});
 }
 
-async function ArkSend(json, e, to_uin = null){
+async function Share(json, e, to_uin = null){
 	let result = {code: -1};
 	let json_data = null;
 	try{
@@ -194,8 +194,8 @@ async function ArkSend(json, e, to_uin = null){
 }
 
 export default {
-	ArkSign,
-	ArkSend
+	Sign,
+	Share
 }
 
 function random(min,max){
