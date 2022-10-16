@@ -5,7 +5,7 @@ import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
-import ArkSign from '../model/ArkSign.js'
+import ArkMsg from '../model/ArkMsg.js'
 const no_pic = '';
 var _page_size = 30;
 
@@ -287,14 +287,11 @@ async function music_message(e){
 				return true;
 			}
 
-			let json_sign = await ArkSign(JSON.stringify(music_json));
-			if(json_sign.code == 1){
-				await e.reply(segment.json(json_sign.data));
-			}else{
+			let ArkSend = await ArkMsg.ArkSend(JSON.stringify(music_json),e);
+			if(ArkSend.code != 1){
 				let body = await CreateMusicShare(e,music);
 				await SendMusicShare(body);
 			}
-			
 			//await recallMusicMsg(key,data[key].msg_results);
 			//delete data[key];
 			return true;
@@ -508,10 +505,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 
 				let music_json = await CreateMusicShareJSON(music);
-				let json_sign = await ArkSign(JSON.stringify(music_json));
-				if(json_sign.code == 1){
-					await e.reply(segment.json(json_sign.data));
-				}else{
+				let ArkSend = await ArkMsg.ArkSend(JSON.stringify(music_json),e);
+				if(ArkSend.code != 1){
 					let body = await CreateMusicShare(e,music);
 					await SendMusicShare(body);
 				}
