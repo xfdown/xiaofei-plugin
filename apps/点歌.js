@@ -239,6 +239,27 @@ async function recallMusicMsg(key,msg_results){
 async function music_message(e){
 	let reg = /^#?(语音|高清语音)?(\d+)?$/.exec(e.msg);
 	if(reg){
+
+		if(e.source && reg[1]?.includes('语音')){
+			let source;
+			if (e.isGroup) {
+				source = (await e.group.getChatHistory(e.source.seq, 1)).pop();
+			} else {
+				source = (await e.friend.getChatHistory(e.source.time, 1)).pop();
+			}
+			if(source && source['message'][0]['type'] == 'json'){
+				try{
+					let music_json = JSON.parse(source['message'][0]['data']);
+					if(music_json['view'] == 'music'){
+						let music = music_json.meta.music;
+						await e.reply('开始上传['+music.title + '-' + music.desc+']。。。');
+						await e.reply(await uploadRecord(music.musicUrl,0,!reg[1].includes('高清')));
+					}
+				}catch(err){}
+				return true;
+			}
+		}
+
 		let key = get_MusicListId(e);
 		let data = Bot.xiaofei_music_temp_data;
 		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60)){

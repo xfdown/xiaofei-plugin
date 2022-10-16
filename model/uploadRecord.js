@@ -20,8 +20,7 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
     }
     let buf = result.buffer;
     if(seconds == 0 && result.time) seconds = result.time.seconds;
-	console.log(result.time,seconds);
-	const hash = (0, md5)(buf);
+    const hash = (0, md5)(buf);
     const codec = String(buf.slice(0, 7)).includes("SILK") ? (transcoding ? 1 : 0) : 0;
     const body = core.pb.encode({
 		1: 3,
