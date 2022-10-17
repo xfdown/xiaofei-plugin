@@ -19,31 +19,37 @@ export class xiaofei extends plugin {
 		
 		this.e.reply = async function(msgs, quote, data){
 			if(!Array.isArray(msgs)) msgs = [msgs];
-			
-			for(let msg of msgs){
-				if(msg && msg?.type == 'xml' && msg?.data){
-					msg.data = msg.data.replace(/^<\?xml.*version=.*?>/g,'<?xml version="1.0" encoding="utf-8" ?>');
-				}
-			}
-			
 			let result = await old_reply(msgs,quote,data);
 			
 			if(!result || !result.message_id){
-				let MsgList = [{
-					message: msgs,
-					nickname: Bot.nickname,
-					user_id: Bot.uin
-				}];
-					
-				let forwardMsg = await Bot.makeForwardMsg(MsgList);
+				let isxml = false;
 				
-				forwardMsg.data = forwardMsg.data
-				.replace('<?xml version="1.0" encoding="utf-8"?>','<?xml version="1.0" encoding="utf-8" ?>')
-				.replace(/\n/g, '')
-				.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-				.replace(/___+/, '<title color="#777777" size="26">请点击查看内容</title>');
-				msgs = forwardMsg;
-				result = await old_reply(msgs,quote,data);
+				for(let msg of msgs){
+					if(msg && msg?.type == 'xml' && msg?.data){
+						msg.data = msg.data.replace(/^<\?xml.*version=.*?>/g,'<?xml version="1.0" encoding="utf-8" ?>');
+						isxml = true;
+					}
+				}
+
+				if(isxml){
+					result = await old_reply(msgs,quote,data);
+				}else{
+					let MsgList = [{
+						message: msgs,
+						nickname: Bot.nickname,
+						user_id: Bot.uin
+					}];
+						
+					let forwardMsg = await Bot.makeForwardMsg(MsgList);
+					
+					forwardMsg.data = forwardMsg.data
+					.replace('<?xml version="1.0" encoding="utf-8"?>','<?xml version="1.0" encoding="utf-8" ?>')
+					.replace(/\n/g, '')
+					.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+					.replace(/___+/, '<title color="#777777" size="26">请点击查看内容</title>');
+					msgs = forwardMsg;
+					result = await old_reply(msgs,quote,data);
+				}
 			}
 			return result;
 		}
