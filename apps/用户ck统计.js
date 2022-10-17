@@ -34,7 +34,7 @@ export class xiaofei_userck_statistics extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?用户(ck)?统计(uid)?$',
+					reg: '^#?用户ck统计(uid)?$',
 					/** 执行方法 */
 					fnc: 'query_user_statistics'
 				}
