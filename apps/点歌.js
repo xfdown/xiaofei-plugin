@@ -340,6 +340,9 @@ async function music_message(e){
 		await e.reply(help,true);
 		return true;
 	}
+
+	let setting = Config.getdefSet('setting','system') || {};
+	if(setting['is_list'] == true) reg[2] = '多选';
 	
 	let temp_data = {};
 	let page = reg[2] == '多选' ? 1 : 0;

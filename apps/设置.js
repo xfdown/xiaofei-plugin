@@ -5,6 +5,7 @@ import {Config, Common} from '../components/index.js'
 
 const cfgMap = {
   '点歌': 'system.music',
+  '多选点歌': 'system.is_list'
 };
 
 const CfgReg = `^#?小飞(插件)?设置\\s*(${lodash.keys(cfgMap).join('|')})?\\s*(.*)$`;
