@@ -14,20 +14,30 @@ export class xiaofei_weather extends plugin {
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
-			priority: 100,
+			priority: 2000,
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(.*)天气$',
+					reg: '^（#小飞|小飞|#)?(.*)天气$',
 					/** 执行方法 */
 					fnc: 'query_weather'
 				}
 			]
 		});
+
+		try{
+			let setting = Config.getdefSet('setting','system') || {};
+			this.priority = setting['weather'] == true ? 10 : 2000;
+		}catch(err){}
+
 	}
 	
 	async query_weather(){
-		return await weather(this.e,this.e.msg.replace('#','').replace('天气',''));
+		let msg = this.e.msg
+		.replace('#','')
+		.replace('小飞','')
+		.replace('天气','');
+		return await weather(this.e,msg);
 	}
 	
 }
