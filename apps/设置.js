@@ -64,7 +64,7 @@ async function setting(e) {
   // 渲染图像
   return await Common.render('admin/index', {
     ...cfg
-  }, { e, scale: 1.4 });
+  }, { e, scale: 1});
 
 }
 
