@@ -59,7 +59,7 @@ export const helpList = [
   auth: 'master',
   list: [{
     icon: 85,
-    title: '#用户统计',
+    title: '#用户ck统计',
     desc: '查询已绑定ck用户的ck使用状态'
   },{
     icon: 80,
