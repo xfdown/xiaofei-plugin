@@ -18,7 +18,7 @@ export class xiaofei_weather extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^（#小飞|小飞|#)?(.*)天气$',
+					reg: '^#?（小飞)?(.*)天气$',
 					/** 执行方法 */
 					fnc: 'query_weather'
 				}
