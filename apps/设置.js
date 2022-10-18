@@ -5,7 +5,7 @@ import {Config, Common} from '../components/index.js'
 
 const cfgMap = {
   '点歌': 'system.music',
-  '多选点歌': 'system.is_list'
+  '默认多选点歌': 'system.is_list'
 };
 
 const CfgReg = `^#?小飞(插件)?设置\\s*(${lodash.keys(cfgMap).join('|')})?\\s*(.*)$`;
@@ -56,6 +56,7 @@ async function setting(e) {
 
   let cfg = {
     music: getStatus(cfgMap['点歌']),
+	is_list: getStatus(cfgMap['默认多选点歌'])
   }
 
   // 渲染图像
