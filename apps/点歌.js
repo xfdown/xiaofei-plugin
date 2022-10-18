@@ -79,8 +79,6 @@ var music_cookies = {
 	}
 };
 
-global.music_cookies = music_cookies;
-
 const music_reg = '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗)?(点播音乐|点播|点歌|播放|来一?首|下一页|个性电台)(.*)$';
 
 export class xiaofei_music extends plugin {
@@ -123,6 +121,9 @@ export class xiaofei_music extends plugin {
 		try{
 			for(let key in music_cookies){
 				let ck = music_cookies[key].ck;
+				if(key == 'netease' && (!ck || ck?.includes('MUSIC_U=;'))){
+					logger.info(`【小飞插件_网易云音乐ck】未设置网易云音乐ck！`);
+				}
 			}
 			await update_qqmusic_ck();
 		}catch(err){}
@@ -203,10 +204,16 @@ async function update_qqmusic_ck(){
 				logger.info(`【小飞插件_QQ音乐ck】已刷新！`);
 			}else{
 				ck_map.set("refresh_num",refresh_num+1);
+				music_cookies.qqmusic.init = false;
 				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
 			}
 			music_cookies.qqmusic.ck = ck_map;
 			authst = ck_map.get('music_key') || ck_map.get('qm_keyst');
+		}else if(refresh_num > 2){
+			if(!music_cookies.qqmusic.init){
+				music_cookies.qqmusic.init = true;
+				logger.error(`【小飞插件_QQ音乐ck】ck已失效！`);
+			}
 		}
 		let comm = music_cookies.qqmusic.body.comm;
 		if(type == 0) comm.uin = ck_map.get('uin') || '',comm.psrf_qqunionid = ck_map.get('psrf_qqunionid') || '';
