@@ -20,7 +20,8 @@ export const helpCfg = {
     headerBgColor: 'rgba(6, 21, 31, .4)',
     rowBgColor1: 'rgba(6, 21, 31, .2)',
     rowBgColor2: 'rgba(6, 21, 31, .35)'
-  }
+  },
+  bgBlur: false
 }
 
 export const helpList = [
