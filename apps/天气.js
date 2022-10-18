@@ -2,8 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import { segment } from "oicq";
 import fetch from "node-fetch";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import { Version } from '../components/index.js'
-
+import {Config, Version } from '../components/index.js'
 export class xiaofei_weather extends plugin {
 	constructor () {
 		super({
