@@ -38,6 +38,8 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 【版本】可用命令：【#小飞版本】
 
+【Yunzai-Bot插件库查询】可用命令：【#插件库】【#插件索引】
+
 #### 免责声明
 
 1.  功能仅限内部交流与小范围使用，严禁将xiaofei-Plugin用于任何商业用途或盈利。
