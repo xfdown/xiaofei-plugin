@@ -7,7 +7,7 @@ import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
 import ArkMsg from '../model/ArkMsg.js'
 const no_pic = '';
-var _page_size = 10;
+var _page_size = 20;
 
 var music_cookies = {
 	qqmusic: {
