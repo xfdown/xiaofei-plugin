@@ -547,7 +547,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 
 async function ShareMusic_JSONList(list, page, page_size, source = ''){
-	let json = {"app":"com.tencent.bot.task.deblock","desc":"","view":"index","ver":"2.0.4.0","prompt":"","appID":"","sourceName":"","actionData":"","actionData_A":"","sourceUrl":"","meta":{"detail":{"iconLeft":[],"appID":"","battleDesc":"","botName":"Yunzai-Bot","cmdList":[],"cmdTitle":"","content":"","guildID":"","iconRight":[],"receiverName":"","subGuildID":"SUBGUILDID#","title":"","titleColor":""}},"config":{"autosize":1},"text":"","sourceAd":"","extra":""};
+	let json = {"app":"com.tencent.bot.task.deblock","desc":"","view":"index","ver":"2.0.4.0","prompt":"","appID":"","sourceName":"","actionData":"","actionData_A":"","sourceUrl":"","meta":{"detail":{"iconLeft":[],"appID":"","battleDesc":"","botName":"Yunzai-Bot","cmdList":[],"cmdTitle":"","content":"","guildID":"","iconRight":[],"receiverName":"","subGuildID":"SUBGUILDID#","title":"","titleColor":""}},"config":{"autosize":true,"type":"normal","forward":true},"text":"","sourceAd":"","extra":""};
 	json.prompt = `${source}点歌列表`;
 	json.meta.detail.title = `---${source}点歌列表---`;
 
