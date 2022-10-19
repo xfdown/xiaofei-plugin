@@ -405,7 +405,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			let msg_result = [];
 
 			let setting = Config.getdefSet('setting','system') || {};
-			if(setting['is_cardlist'] == true) msg_result.push(await e.reply(await ShareMusic_JSONList(result.data, page, page_size, source[1])));
+			if(setting['is_cardlist'] == true) msg_result.push(await e.reply(await ShareMusic_JSONList(e,result.data, page, page_size, source[1])));
 			
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
 				msg_result.push(await e.reply(message.join("\r\n")));
