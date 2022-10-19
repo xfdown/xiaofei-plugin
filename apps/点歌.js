@@ -546,19 +546,68 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 }
 
 
-async function ShareMusic_JSONList(list, page, page_size, source = ''){
-	let json = {"app":"com.tencent.bot.task.deblock","desc":"","view":"index","ver":"2.0.4.0","prompt":"","appID":"","sourceName":"","actionData":"","actionData_A":"","sourceUrl":"","meta":{"detail":{"iconLeft":[],"appID":"","battleDesc":"","botName":"Yunzai-Bot","cmdList":[],"cmdTitle":"","content":"","guildID":"","iconRight":[],"receiverName":"","subGuildID":"SUBGUILDID#","title":"","titleColor":""}},"config":{"autosize":true,"type":"normal","forward":true},"text":"","sourceAd":"","extra":""};
+async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
+	let json ={
+		"app": "com.tencent.bot.create.role",
+		"ver": "2.0.4.0",
+		"actionData_A": "",
+		"sourceUrl": "",
+		"view": "create",
+		"meta": {"detail": {
+		  "nick": "",
+		  "nickSub": "---QQ点歌列表---",
+		  "properList": [
+		  ],
+		  "receiverName":"",
+		  "botName": "Yunzai-Bot",
+		  "cmdList": [
+			{
+			  "cmdDesc": "进行点歌",
+			  "cmd": " 歌曲序号",
+			  "cmdTitle": "请在1分钟内发送"
+			},
+			{
+			  "cmdDesc": "查看更多",
+			  "cmd": " #下一页",
+			  "cmdTitle": "发送"
+			}
+		  ],
+		  "appID": "",
+		  "avatar": "",
+		  "contentColor": "yellow",
+		  "guildID": "",
+		  "subGuildID": "SUBGUILDID#",
+		  "cmdTitle": "可执行操作:"
+		}},
+		"appID": "",
+		"actionData": "",
+		"from": 1,
+		"sourceName": "",
+		"prompt": "",
+		"config": {
+		  "showSender": 1,
+		  "type": "normal",
+		  "autosize": 1
+		},
+		"desc": ""
+	};
 	json.prompt = `${source}点歌列表`;
-	json.meta.detail.title = `---${source}点歌列表---`;
-
-	let music_list = [];
+	json.meta.detail.avatar = `http://q1.qlogo.cn/g?b=qq&nk=${e.user_id}&s=100`;
+	json.meta.detail.nick = e.nickname;
+	json.meta.detail.nickSub = `---${source}点歌列表---`;
+	//let music_list = [];
+	let properList = json.meta.detail.properList;
 	for(let i in list){
 		let music = list[i];
 		let index = Number(i) + 1;
 		if(page > 1){
 			index = ((page - 1) * page_size) + index;
 		}
-		music_list.push(`${index}.${music.name}-${music.artist}`);
+		properList.push({
+			"type": "4",
+			"desc": `${index}.${music.name}-${music.artist}`
+		  });
+		//music_list.push(`${index}.${music.name}-${music.artist}`);
 	}
 
 	json.meta.detail.content = music_list.join('\n');
