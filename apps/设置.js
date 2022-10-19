@@ -6,7 +6,8 @@ import {Config, Common} from '../components/index.js'
 const cfgMap = {
   '点歌': 'system.music',
   '多选点歌': 'system.is_list',
-  '天气': 'system.weather'
+  '天气': 'system.weather',
+  '卡片多选点歌': 'system.is_cardlist',
 };
 
 const CfgReg = `^#?小飞(插件)?设置\\s*(${lodash.keys(cfgMap).join('|')})?\\s*(.*)$`;
@@ -55,10 +56,11 @@ async function setting(e) {
     }
   }
 
-  let cfg = {
-    music: getStatus(cfgMap['点歌']),
-	is_list: getStatus(cfgMap['多选点歌']),
-	weather: getStatus(cfgMap['天气'])
+  
+  let cfg = {};
+  for(let name in cfgMap){
+	let key = cfgMap[name].split('.')[1];
+	cfg[key] = getStatus(cfgMap[name]);
   }
 
   // 渲染图像
