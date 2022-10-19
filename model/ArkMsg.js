@@ -1,6 +1,6 @@
 import { core } from "oicq"
 
-async function Sign(json){
+async function Sign(json, client_info = null){
 	return new Promise((resolve, reject) => {
 		let result = {code: -1};
 		let json_data = null;
@@ -16,23 +16,31 @@ async function Sign(json){
 		}
 		delete json_data['extra'];
 		
-		let appid = 100951776, style = 10, appname = 'tv.danmaku.bili', appsign = '7194d531cbe7960a22007b9f6bdaa38b';
-		let send_type = 0, recv_uin = Bot.uin, recv_guild_id = 0;
+		if(!client_info || !client_info.miniapp_appid){
+			client_info = {
+				appid: 100951776,
+				appname: 'tv.danmaku.bili',
+				appsign: '7194d531cbe7960a22007b9f6bdaa38b',
+				miniapp_appid: 1109937557
+			};
+		}
+			
+		let style = 10;
 		
 		let time = new Date().getTime();
 		let msg_seq = parseInt(`${time}${random(100,999)}`);
-		
+			
 		result.msg_seq = msg_seq;
 		
 		let body = {
-			1: appid,
+			1: client_info.appid,
 			2: 1,
 			3: style,
 			5: {
 				1: 1,
 				2: "0.0.0",
-				3: appname,
-				4: appsign,
+				3: client_info.appname,
+				4: client_info.appsign,
 			},
 			7: {
 				15: msg_seq
@@ -40,7 +48,7 @@ async function Sign(json){
 			10: send_type,
 			11: recv_uin,
 			18: {
-				1: 1109937557,
+				1: client_info.miniapp_appid,
 				2: {
 					14: 'pages',
 				},
@@ -109,7 +117,7 @@ async function Sign(json){
 	});
 }
 
-async function Share(json, e, to_uin = null){
+async function Share(json, e, to_uin = null, client_info = null){
 	let result = {code: -1};
 	let json_data = null;
 	try{
@@ -143,8 +151,16 @@ async function Share(json, e, to_uin = null){
 		send_type = 0;
 	}
 	
+	if(!client_info && client_info.miniapp_appid){
+		client_info = {
+			appid: 100951776,
+			appname: 'tv.danmaku.bili',
+			appsign: '7194d531cbe7960a22007b9f6bdaa38b',
+			miniapp_appid: 1109937557
+		};
+	}
 		
-	let appid = 100951776, style = 10, appname = 'tv.danmaku.bili', appsign = '7194d531cbe7960a22007b9f6bdaa38b';
+	let style = 10;
 	
 	let time = new Date().getTime();
 	let msg_seq = parseInt(`${time}${random(100,999)}`);
@@ -152,14 +168,14 @@ async function Share(json, e, to_uin = null){
 	result.msg_seq = msg_seq;
 	
 	let body = {
-		1: appid,
+		1: client_info.appid,
 		2: 1,
 		3: style,
 		5: {
 			1: 1,
 			2: "0.0.0",
-			3: appname,
-			4: appsign,
+			3: client_info.appname,
+			4: client_info.appsign,
 		},
 		7: {
 			15: msg_seq
@@ -167,7 +183,7 @@ async function Share(json, e, to_uin = null){
 		10: send_type,
 		11: recv_uin,
 		18: {
-			1: 1109937557,
+			1: client_info.miniapp_appid,
 			2: {
 				14: 'pages',
 			},

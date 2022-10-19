@@ -817,7 +817,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 }
 
 async function CreateMusicShareJSON(data){
-	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":100497308,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal","forward":true}};
+	let music_json = {"app":"com.tencent.structmsg","desc":"音乐","view":"music","ver":"0.0.0.1","prompt":"","meta":{"music":{"app_type":1,"appid":0,"desc":"","jumpUrl":"","musicUrl":"","preview":"","sourceMsgId":"0","source_icon":"","source_url":"","tag":"","title":""}},"config":{"type":"normal","forward":true}};
 	let music = music_json.meta.music;
 
 	let appid, app_name, app_icon;
@@ -879,6 +879,7 @@ async function CreateMusicShareJSON(data){
 	app_name = data.app_name || app_name;
 	if(typeof(data.config) == 'object') music_json.config = data.config;
 
+	music.appid = appid;
 	music.desc = singer;
 	music.jumpUrl = jumpUrl;
 	music.musicUrl = musicUrl;
@@ -950,7 +951,6 @@ async function CreateMusicShare(e,data,to_uin = null){
 	let recv_uin = 0;
 	let send_type = 0;
 	let recv_guild_id = 0;
-	let ShareMusic_Guild_id = false;
 	
 	if(e.isGroup && to_uin == null){//群聊
 		recv_uin = e.group.gid;
