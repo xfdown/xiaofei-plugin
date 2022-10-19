@@ -151,7 +151,7 @@ async function Share(json, e, to_uin = null, client_info = null){
 		send_type = 0;
 	}
 	
-	if(!client_info && client_info.miniapp_appid){
+	if(!client_info || !client_info.miniapp_appid){
 		client_info = {
 			appid: 100951776,
 			appname: 'tv.danmaku.bili',
