@@ -24,7 +24,9 @@ async function Sign(json, client_info = null){
 				miniapp_appid: 1109937557
 			};
 		}
-			
+		let recv_uin = Bot.uin;
+		let send_type = 0;
+		let recv_guild_id = 0;
 		let style = 10;
 		
 		let time = new Date().getTime();
