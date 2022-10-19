@@ -610,20 +610,6 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 		//music_list.push(`${index}.${music.name}-${music.artist}`);
 	}
 
-	json.meta.detail.content = music_list.join('\n');
-
-	json.meta.detail.cmdList.push({
-		cmdTitle: '请在1分钟内发送',
-		cmd: ' 歌曲序号',
-		cmdDesc: '进行点歌！'
-	});
-
-	json.meta.detail.cmdList.push({
-		cmdTitle: '请在1分钟内发送',
-		cmd: ' #下一页',
-		cmdDesc: '查看更多！'
-	});
-
 	let json_sign = await ArkMsg.Sign(JSON.stringify(json));
 	if(json_sign.code == 1){
 		return segment.json(json_sign.data);
