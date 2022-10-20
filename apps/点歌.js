@@ -191,7 +191,7 @@ export class xiaofei_music extends plugin {
 		}
 		let MsgList = [];
 		let user_info = {
-			nickname: nickname,
+			nickname: Bot.nickname,
 			user_id: Bot.uin
 		};
 		MsgList.push({
