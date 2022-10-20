@@ -422,7 +422,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					resolve(await e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
 				}));
 			}
-			
+
 			if(msg_result.length < 1){//消息发送失败，使用转发消息发送
 				let nickname = Bot.nickname;
 				if (e.isGroup) {
@@ -614,7 +614,7 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 
 	json.meta.detail.content = music_list.join("\n");
 
-	return json;
+	return {data: json};
 	let json_sign = await ArkMsg.Sign(JSON.stringify(json));
 	if(json_sign.code == 1){
 		return segment.json(json_sign.data);
