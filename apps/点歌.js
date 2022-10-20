@@ -75,6 +75,18 @@ var music_cookies = {
 				}
 			}catch(err){}
 			return '';
+		},
+		set ck(cookies){
+			try{
+				let data = Config.getConfig('music','cookies');
+				data = data ? data : {};
+				data.netease = cookies;
+				Config.saveConfig('music','cookies',data);
+				return;
+			}catch(err){
+				logger.error(err);
+			}
+			return;
 		}
 	}
 };
