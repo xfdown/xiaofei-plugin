@@ -547,68 +547,65 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 
 async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
-	let json ={
-		"app": "com.tencent.bot.create.role",
-		"ver": "2.0.4.0",
-		"actionData_A": "",
-		"sourceUrl": "",
-		"view": "create",
-		"meta": {"detail": {
-		  "nick": "",
-		  "nickSub": "---QQ点歌列表---",
-		  "properList": [
-		  ],
-		  "receiverName":"",
-		  "botName": "Yunzai-Bot",
-		  "cmdList": [
-			{
-			  "cmdDesc": "进行点歌",
-			  "cmd": " 歌曲序号",
-			  "cmdTitle": "请在1分钟内发送"
-			},
-			{
-			  "cmdDesc": "查看更多",
-			  "cmd": " #下一页",
-			  "cmdTitle": "发送"
-			}
-		  ],
-		  "appID": "",
-		  "avatar": "",
-		  "contentColor": "yellow",
-		  "guildID": "",
-		  "subGuildID": "SUBGUILDID#",
-		  "cmdTitle": "可执行操作:"
-		}},
-		"appID": "",
-		"actionData": "",
-		"from": 1,
-		"sourceName": "",
-		"prompt": "",
+	let json = {
+		"app": "com.tencent.bot.task.deblock",
 		"config": {
-		  "showSender": 1,
-		  "type": "normal",
-		  "autosize": 1
+			"autosize": 1,
+			"type": "normal"
 		},
-		"desc": ""
+		"meta": {
+			"detail": {
+				"appID": "",
+				"battleDesc": "",
+				"botName": "",
+				"cmdList": [{
+					"cmdDesc": "进行点歌",
+					"cmd": " 歌曲序号",
+					"cmdTitle": "发送"
+				  },
+				  {
+					"cmdDesc": "查看更多",
+					"cmd": " #下一页",
+					"cmdTitle": "发送"
+				  },{
+					"cmdDesc": "播放语音",
+					"cmd": " #语音+歌曲序号",
+					"cmdTitle": "发送"
+				  },{
+					"cmdDesc": "播放高清语音",
+					"cmd": " #高清语音+歌曲序号",
+					"cmdTitle": "发送"
+				  }],
+				"cmdTitle": "可在一分钟内执行以下指令:",
+				"content": "",
+				"guildID": "",
+				"iconLeft": [],
+				"iconRight": [],
+				"receiverName": "@小飞",
+				"subGuildID": "SUBGUILDID#",
+				"title": "",
+				"titleColor": ""
+			}
+		},
+		"prompt": "",
+		"ver": "2.0.4.0",
+		"view": "index"
 	};
 	json.prompt = `${source}点歌列表`;
-	json.meta.detail.avatar = `http://q1.qlogo.cn/g?b=qq&nk=${e.user_id}&s=100`;
-	json.meta.detail.nick = e.nickname;
-	json.meta.detail.nickSub = `---${source}点歌列表---`;
-	//let music_list = [];
-	let properList = json.meta.detail.properList;
+	json.meta.detail.receiverName = `@${e.nickname}`;
+	json.meta.detail.title = `---${source}点歌列表---`;
+	let music_list = [];
+	
 	for(let i in list){
 		let music = list[i];
 		let index = Number(i) + 1;
 		if(page > 1){
 			index = ((page - 1) * page_size) + index;
 		}
-		properList.push({
-			"type": "4",
-			"desc": `${index}.${music.name}-${music.artist}`
-		  });
-		//music_list.push(`${index}.${music.name}-${music.artist}`);
+		music_list.push(`${index}.${music.name}-${music.artist}`);
 	}
+
+	json.meta.detail.content = music_list.join("\n");
 
 	let json_sign = await ArkMsg.Sign(JSON.stringify(json));
 	if(json_sign.code == 1){
