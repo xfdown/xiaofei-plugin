@@ -557,7 +557,7 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 			"detail": {
 				"appID": "",
 				"battleDesc": "",
-				"botName": "",
+				"botName": "Yunzai-Bot",
 				"cmdList": [{
 					"cmdDesc": "进行点歌",
 					"cmd": " 歌曲序号",

@@ -18,6 +18,7 @@ export class xiaofei extends plugin {
 		let old_reply = this.e.reply;
 		
 		this.e.reply = async function(msgs, quote, data){
+			if(!msgs) return false;
 			if(!Array.isArray(msgs)) msgs = [msgs];
 			let result = await old_reply(msgs,quote,data);
 			
