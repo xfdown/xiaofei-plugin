@@ -63,6 +63,10 @@ export const helpList = [
     title: '#用户ck统计',
     desc: '查询已绑定ck用户的ck使用状态'
   },{
+    icon: 85,
+    title: '#音乐ck检查',
+    desc: '查询已设置的点歌ck状态'
+  },{
     icon: 80,
     title: '#代发言',
     desc: '例如：#代@小飞 抽卡记录'

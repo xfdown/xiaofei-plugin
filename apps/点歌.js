@@ -101,7 +101,7 @@ export class xiaofei_music extends plugin {
 				},
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(点歌|音乐)(ck|cookie)检查$',
+					reg: '^#?(点歌|音乐)(ck|cookie)(检查|状态)$',
 					/** 执行方法 */
 					fnc: 'music_ck_check',
 					permission: 'master'
@@ -177,15 +177,17 @@ export class xiaofei_music extends plugin {
 			}
 		];
 		for(let val of list){
+			msgs.push(`---${val.name}---`);
 			if(!val.ck){
-				msgs.push(`${val.name}：未设置ck！`);
+				msgs.push(`状态：未设置ck`);
 			}else{
 				let result = await val.user_info();
 				if(result.code == 1){
 					let data = result.data;
-					msgs.push(`${val.name}：ck状态正常！（${data.nickname}[${data.userid}]）`);
+					msgs.push(`用户：${data.nickname}[${data.userid}]`);
+					msgs.push(`状态：ck状态正常`);
 				}else{
-					msgs.push(`${val.name}：ck已失效！`);
+					msgs.push(`状态：ck已失效`);
 				}
 			}
 		}
