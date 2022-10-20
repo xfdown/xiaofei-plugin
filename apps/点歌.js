@@ -98,6 +98,13 @@ export class xiaofei_music extends plugin {
 					reg: music_reg,
 					/** 执行方法 */
 					fnc: 'music'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: '^#?(点歌|音乐)(ck|cookie)检查$',
+					/** 执行方法 */
+					fnc: 'music_ck_check',
+					permission: 'master'
 				}
 			]
 		});
@@ -154,6 +161,46 @@ export class xiaofei_music extends plugin {
 			music_message(this.e);
 		}
 		return;
+	}
+
+	async music_ck_check(e){
+		let msgs = [];
+		let list = [
+			{
+				name: 'QQ音乐',
+				ck: music_cookies.qqmusic.ck,
+				user_info: get_qqmusic_userinfo
+			},{
+				name: '网易云音乐',
+				ck: music_cookies.netease.ck?.includes('MUSIC_U=;'),
+				user_info: get_netease_userinfo
+			}
+		];
+		for(let val of list){
+			if(!val.ck){
+				msgs.push(`${val.name}：未设置ck！`);
+			}else{
+				let result = await val.user_info();
+				if(result.code == 1){
+					let data = result.data;
+					msgs.push(`${val.name}：ck状态正常！（${data.nickname}[${data.userid}]）`);
+				}else{
+					msgs.push(`${val.name}：ck已失效！`);
+				}
+			}
+		}
+		let MsgList = [];
+		let user_info = {
+			nickname: nickname,
+			user_id: Bot.uin
+		};
+		MsgList.push({
+			...user_info,
+			message: `---音乐ck状态---\n${msgs.join('\n')}`
+		});
+		let forwardMsg = await Bot.makeForwardMsg(MsgList);
+		await e.reply(forwardMsg);
+		return true;
 	}
 }
 
@@ -1088,6 +1135,65 @@ async function SendMusicShare(body){
 	if(result[3] != 0){
 		e.reply('歌曲分享失败：'+result[3],true);
 	}
+}
+
+async function get_netease_userinfo(){
+	try{
+		let url = 'https://interface.music.163.com/api/nuser/account/get';
+		let options = {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Cookie': music_cookies.netease.ck
+			}
+		};
+
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json();
+		if(res?.code == '200' && res.profile){
+			let profile = res.profile;
+			return {code: 1,data: {
+				userid: profile.userId,
+				nickname: profile.nickname
+			}};
+		}
+	}catch(err){}
+	return {code: -1};
+}
+
+
+async function get_qqmusic_userinfo(){
+	try{
+		let url = `https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&uin=0&g_tk_new_20200303=5381&g_tk=5381&cid=205360838&userid=0&reqfrom=1&reqtype=0&hostUin=0&loginUin=0`;
+
+		let ck = music_cookies.qqmusic.ck;
+		let cookies = [];
+		for(let key of ck.keys()){
+			let value = ck.get(key);
+			if(value){
+				cookies.push(`${key}=${value}`);
+			}
+		}
+
+		let options = {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Cookie': cookies.join('; ')
+			}
+		};
+
+		let response = await fetch(url,options); //调用接口获取数据
+		let res = await response.json();
+		if(res?.code == '0' && res.data?.creator){
+			let creator = res.data.creator;
+			return {code: 1,data: {
+				userid: ck.get('uin'),
+				nickname: creator.nick,
+			}};
+		}
+	}catch(err){}
+	return {code: -1};
 }
 
 async function is_qqmusic_vip(uin){
