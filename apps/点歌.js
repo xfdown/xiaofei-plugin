@@ -228,6 +228,7 @@ export class xiaofei_music extends plugin {
 					music_cookies.netease.ck = netease_cookies;
 					let data = result.data;
 					await e.reply(`网易云音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
+					return true;
 				}else if(cookies.get('wxunionid') || cookies.get('psrf_qqunionid')){
 					let qqmusic_ck = [];
 					for(let key of cookies.keys()){
@@ -250,35 +251,34 @@ export class xiaofei_music extends plugin {
 					}catch(err){}
 					let data = result.data;
 					await e.reply(`QQ音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
-				}else{
-					await e.reply(`未识别出ck类型，请检查输入是否正确！`);
+					return true;
 				}
 			}catch(err){
 				await e.reply(`ck解析出错，请检查输入是否正确！`);
 			}
-		}else{
-			let MsgList = [];
-			let user_info = {
-				nickname: Bot.nickname,
-				user_id: Bot.uin
-			};
-
-			let msgs = [];
-			msgs.push(`---QQ音乐ck说明---`);
-			msgs.push(`请前往：http://y.qq.com/ 获取以下ck：`);
-			msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;`);
-			msgs.push(`微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=;`);
-			msgs.push(`---网易云音乐ck说明---`);
-			msgs.push(`请前往：http://music.163.com/ 获取以下ck：`);
-			msgs.push(`必须参数：MUSIC_U=;`);
-			msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取，pc端请使用浏览器的开发人员工具获取。`);
-			MsgList.push({
-				...user_info,
-				message: `---提交音乐ck---\n${msgs.join('\n')}`
-			});
-			let forwardMsg = await Bot.makeForwardMsg(MsgList);
-			await e.reply(forwardMsg);
 		}
+		
+		let MsgList = [];
+		let user_info = {
+			nickname: Bot.nickname,
+			user_id: Bot.uin
+		};
+
+		let msgs = [];
+		msgs.push(`---QQ音乐ck说明---`);
+		msgs.push(`请前往：http://y.qq.com/ 获取以下ck：`);
+		msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;`);
+		msgs.push(`微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=;`);
+		msgs.push(`---网易云音乐ck说明---`);
+		msgs.push(`请前往：http://music.163.com/ 获取以下ck：`);
+		msgs.push(`必须参数：MUSIC_U=;`);
+		msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取，pc端请使用浏览器的开发人员工具获取。`);
+		MsgList.push({
+			...user_info,
+			message: `---提交音乐ck---\n${msgs.join('\n')}`
+		});
+		let forwardMsg = await Bot.makeForwardMsg(MsgList);
+		await e.reply(forwardMsg);
 		return true;
 	}
 }
