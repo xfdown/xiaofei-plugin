@@ -416,9 +416,9 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			}
 			
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
-				msg_result.push(await e.reply(message.join("\r\n")));
+				msg_result.push(e.reply(message.join("\r\n")));
 			}else{
-				msg_result.push(await e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
+				msg_result.push(e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
 			}
 			
 			if(msg_result.length < 1){//消息发送失败，使用转发消息发送
