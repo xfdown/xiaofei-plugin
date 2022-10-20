@@ -229,8 +229,14 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 					return false;
 				}
 				let get_message = async function(status = false){
+					let seq = 0;
 					for(let i = 0;i < 3;i++){
-						let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(0,20) : await Bot.pickFriend(recv_uin).getChatHistory(0,20);
+						let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(seq,20) : await Bot.pickFriend(recv_uin).getChatHistory(seq,20);
+						if(send_type == 1){
+							seq = ChatHistory[0]?.seq;
+						}else{
+							seq = ChatHistory[0]?.time;
+						}
 						ChatHistory.reverse();
 						for(let msg of ChatHistory){
 							if(json_handle(msg)){
