@@ -186,6 +186,7 @@ export class xiaofei_music extends plugin {
 					let data = result.data;
 					msgs.push(`用户：${data.nickname}[${data.userid}]`);
 					msgs.push(`状态：ck状态正常`);
+					msgs.push(`是否VIP：${data.is_vip ? '是' : '否'}`);
 				}else{
 					msgs.push(`状态：ck已失效`);
 				}
@@ -1154,9 +1155,11 @@ async function get_netease_userinfo(){
 		let res = await response.json();
 		if(res?.code == '200' && res.profile){
 			let profile = res.profile;
+			let account = res.account;
 			return {code: 1,data: {
 				userid: profile.userId,
-				nickname: profile.nickname
+				nickname: profile.nickname,
+				is_vip: account?.vipType != 0
 			}};
 		}
 	}catch(err){}
@@ -1192,13 +1195,14 @@ async function get_qqmusic_userinfo(){
 			return {code: 1,data: {
 				userid: ck.get('uin') || ck.get('wxuin'),
 				nickname: creator.nick,
+				is_vip: await is_qqmusic_vip(ck.get('uin') || ck.get('wxuin'))
 			}};
 		}
 	}catch(err){}
 	return {code: -1};
 }
 
-async function is_qqmusic_vip(uin){
+async function is_qqmusic_vip(uin,cookies = null){
 	let json = {"comm":{"cv":4747474,"ct":24,"format":"json","inCharset":"utf-8","outCharset":"utf-8","notice":0,"platform":"yqq.json","needNewCode":1,"uin":0,"g_tk_new_20200303":5381,"g_tk":5381},
 	"req_0":{"module":"userInfo.VipQueryServer",
 	"method":"SRFVipQuery_V2",
@@ -1210,7 +1214,7 @@ async function is_qqmusic_vip(uin){
 		method: 'POST',//post请求 
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Cookie': Bot.cookies['y.qq.com']
+			'Cookie': cookies || Bot.cookies['y.qq.com']
 			},
 		body: JSON.stringify(json)
 	};
