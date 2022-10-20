@@ -559,7 +559,8 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 		"app": "com.tencent.bot.task.deblock",
 		"config": {
 			"autosize": 1,
-			"type": "normal"
+			"type": "normal",
+			"showSender":0
 		},
 		"meta": {
 			"detail": {
