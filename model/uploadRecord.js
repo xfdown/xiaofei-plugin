@@ -112,21 +112,29 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
     else if (file.startsWith("http://") || file.startsWith("https://")) {
         // 网络文件
         //const readable = (await axios.get(file, { responseType: "stream" })).data;
-		let response = await fetch(file);
-		const buf = await response.buffer();
-        const tmpfile = path.join(TMP_DIR, (0, uuid)());
-		await fs.promises.writeFile(tmpfile, buf);
-        //await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
-        const head = await read7Bytes(tmpfile);
-        let result = await getAudioTime(tmpfile,ffmpeg);
-        if(result.code == 1) time = result.data;
-        if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            //const buf = await fs.promises.readFile(tmpfile);
-            fs.unlink(tmpfile,NOOP);
-            buffer = buf;
-        } else {
-            buffer = await audioTrans(tmpfile, ffmpeg);
-        }
+        try{
+            const headers = {
+                "User-Agent": `Dalvik/2.1.0 (Linux; U; Android 12; MI 9 Build/SKQ1.211230.001)`,
+            };
+            let response =  await fetch(file,{
+                method: 'GET',//post请求 
+                headers: headers
+            });
+            const buf = await response.buffer();
+            const tmpfile = path.join(TMP_DIR, (0, uuid)());
+            await fs.promises.writeFile(tmpfile, buf);
+            //await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
+            const head = await read7Bytes(tmpfile);
+            let result = await getAudioTime(tmpfile,ffmpeg);
+            if(result.code == 1) time = result.data;
+            if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
+                //const buf = await fs.promises.readFile(tmpfile);
+                fs.unlink(tmpfile,NOOP);
+                buffer = buf;
+            } else {
+                buffer = await audioTrans(tmpfile, ffmpeg);
+            }
+        }catch(err){}
     }
     else {
         // 本地文件
