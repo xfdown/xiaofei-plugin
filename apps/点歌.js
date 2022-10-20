@@ -172,7 +172,7 @@ export class xiaofei_music extends plugin {
 				user_info: get_qqmusic_userinfo
 			},{
 				name: '网易云音乐',
-				ck: music_cookies.netease.ck?.includes('MUSIC_U=;'),
+				ck: !music_cookies.netease.ck?.includes('MUSIC_U=;'),
 				user_info: get_netease_userinfo
 			}
 		];
