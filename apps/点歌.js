@@ -569,11 +569,7 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 					"cmdTitle": "发送"
 				  },{
 					"cmdDesc": "播放语音",
-					"cmd": " #语音+序号",
-					"cmdTitle": "发送"
-				  },{
-					"cmdDesc": "播放高清语音",
-					"cmd": " #高清语音+序号",
+					"cmd": " #(高清)语音+序号",
 					"cmdTitle": "发送"
 				  }],
 				"cmdTitle": "可在一分钟内发送以下指令:",
