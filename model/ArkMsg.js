@@ -198,70 +198,59 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 		19: recv_guild_id
 	};
 
-	if(get_message && send_type != 3){
-		result.message = new Promise((resolve, reject) => {
-			let result = {code: -1};
-			let json_handle = function(e){
-				if(Bot.uin == e.user_id && e?.message[0]?.type == 'json'){
-					let json_str = e.message[0].data;
-					let json = null;
-					let extra = null;
-					try{
-						json = JSON.parse(json_str);
-						extra = typeof(json.extra) == 'object' ? json.extra : JSON.parse(json.extra);
-					}catch(err){}
-					
-					if(extra && extra.msg_seq == msg_seq){
-						Bot.off('message.private',json_handle);
-						clearTimeout(timer);
-						clearTimeout(timer1);
-						delete json['extra'];
-						result.code = 1;
-						result.msg = '获取成功！';
-						result.data = json;
-						result.message_id = e.message_id;
-						resolve(result);
-						return true;
-					}
-				}
-				return false;
-			}
-			
-			let timer = setTimeout(async function(){
-				let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(0,20) : await Bot.pickFriend(recv_uin).getChatHistory(0,20);
-				ChatHistory.reverse();
-				for(let msg of ChatHistory){
-					if(json_handle(msg)){
-						return;
-					}
-				}
-				
-				Bot.off('message.private',json_handle);
-				result.code = -1;
-				result.msg = '签名失败，请稍后再试！';
-				resolve(result);
-			},3000);
-			
-			
-			let timer1 = setTimeout(async function(){
-				let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(0,20) : await Bot.pickFriend(recv_uin).getChatHistory(0,20);
-				ChatHistory.reverse();
-				for(let msg of ChatHistory){
-					if(json_handle(msg)){
-						return;
-					}
-				}
-			},1000);
-
-		});
-	}
-
 	
 	let payload = await Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 	result.data = core.pb.decode(payload);
-	
-	result.data = core.pb.decode(result.data);
+
 	if(result.data[0] == 0){
+		if(get_message && send_type != 3){
+			result.message = new Promise((resolve, reject) => {
+				let result = {code: -1};
+				let json_handle = function(e){
+					if(Bot.uin == e.user_id && e?.message[0]?.type == 'json'){
+						let json_str = e.message[0].data;
+						let json = null;
+						let extra = null;
+						try{
+							json = JSON.parse(json_str);
+							extra = typeof(json.extra) == 'object' ? json.extra : JSON.parse(json.extra);
+						}catch(err){}
+						
+						if(extra && extra.msg_seq == msg_seq){
+							clearTimeout(timer);
+							delete json['extra'];
+							result.code = 1;
+							result.msg = '获取成功！';
+							result.data = json;
+							result.message_id = e.message_id;
+							resolve(result);
+							return true;
+						}
+					}
+					return false;
+				}
+				let get_message = async function(status = false){
+					for(let i = 0;i < 3;i++){
+						let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(0,20) : await Bot.pickFriend(recv_uin).getChatHistory(0,20);
+						ChatHistory.reverse();
+						for(let msg of ChatHistory){
+							if(json_handle(msg)){
+								return;
+							}
+						}
+					}
+					if(!status){
+						timer = setTimeout(function(){
+							get_message(true);
+						},1000);
+					}else{
+						resolve(result);
+					}
+				};
+				let timer = setTimeout(get_message,1000);
+	
+			});
+		}
 		result.msg = '分享成功！';
 		result.code = 1;
 	}else{
