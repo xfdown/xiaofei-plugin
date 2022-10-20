@@ -231,14 +231,18 @@ async function recallMusicMsg(key,msg_results){
 			let arr = key.split('_');
 			let type = arr[0];
 			for(let val of msg_result){
-				let message_id = val?.message_id;
-				switch(type){
-					case 'group':
-						await Bot.pickGroup(arr[1]).recallMsg(message_id);
-						break;
-					case 'friend':
-						await Bot.pickFriend(arr[1]).recallMsg(message_id);
-						break;
+				try{
+					let message_id = (await val)?.message_id;
+					switch(type){
+						case 'group':
+							await Bot.pickGroup(arr[1]).recallMsg(message_id);
+							break;
+						case 'friend':
+							await Bot.pickFriend(arr[1]).recallMsg(message_id);
+							break;
+					}
+				}catch(err){
+					logger.error(err);
 				}
 			}
 		}
@@ -405,7 +409,11 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			let msg_result = [];
 
 			let setting = Config.getdefSet('setting','system') || {};
-			if(setting['is_cardlist'] == true) msg_result.push(await e.reply(await ShareMusic_JSONList(e,result.data, page, page_size, source[1])));
+			if(setting['is_cardlist'] == true){
+				let result = await ShareMusic_JSONList(e,result.data, page, page_size, source[1]);
+				result = await ArkMsg.Share(JSON.stringify(result.data),e,null,null,true);
+				msg_result.push(result.message);
+			}
 			
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
 				msg_result.push(await e.reply(message.join("\r\n")));
