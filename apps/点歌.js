@@ -410,9 +410,9 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 			let setting = Config.getdefSet('setting','system') || {};
 			if(setting['is_cardlist'] == true){
-				let result = await ShareMusic_JSONList(e,result.data, page, page_size, source[1]);
-				result = await ArkMsg.Share(JSON.stringify(result.data),e,null,null,true);
-				msg_result.push(result.message);
+				let json_result = await ShareMusic_JSONList(e,result.data, page, page_size, source[1]);
+				json_result = await ArkMsg.Share(JSON.stringify(json_result.data),e,null,null,true);
+				msg_result.push(json_result.message);
 			}
 			
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
