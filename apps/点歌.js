@@ -296,7 +296,11 @@ async function music_message(e){
 			let music_json = await CreateMusicShareJSON(music);
 			if(reg[1] && reg[1].includes('语音')){
 				await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
-				await e.reply(await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清')));
+				let result = await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清'));
+				if(!result){
+					result = '上传['+music.name + '-' + music.artist+']失败！\n'+music_json.meta.music.musicUrl;
+				}
+				await e.reply(result);
 				return true;
 			}
 
