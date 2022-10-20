@@ -48,7 +48,7 @@
 # 1.7.18
 * `#点歌`
 	* QQ音乐源支持配置绿钻账号cookie
-	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
+	* 配置路径：** plugins/xiaofei-plugin/config/music.cookies.yaml **
 	* 支持自动刷新qqmusic_key
 	* 修复微信登录的QQ音乐ck无法刷新key问题
 	
@@ -81,7 +81,7 @@
 	* 可使用`#小飞`前缀点歌
 	* 例如：`#小飞点歌周杰伦` `#小飞多选点歌周杰伦`
 	* 网易音乐源支持配置黑胶账号cookie
-	* 配置路径：plugins/xiaofei-plugin/config/music.cookies.yaml
+	* 配置路径：** plugins/xiaofei-plugin/config/music.cookies.yaml **
 * 移除`#获取抽卡链接`功能
 * `#原神注册时间`
 	* 增加自动缓存查询数据
