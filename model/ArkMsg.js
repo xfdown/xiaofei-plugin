@@ -201,7 +201,7 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 	
 	let payload = await Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 	result.data = core.pb.decode(payload);
-
+	result.data = core.pb.decode(result.data);
 	if(result.data[0] == 0){
 		if(get_message && send_type != 3){
 			result.message = new Promise((resolve, reject) => {
