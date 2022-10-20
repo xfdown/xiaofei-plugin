@@ -64,6 +64,10 @@ export const helpList = [
     desc: '查询已绑定ck用户的ck使用状态'
   },{
     icon: 85,
+    title: '#提交音乐ck',
+    desc: '设置点歌ck'
+  },{
+    icon: 85,
     title: '#音乐ck检查',
     desc: '查询已设置的点歌ck状态'
   },{
