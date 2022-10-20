@@ -217,7 +217,7 @@ export class xiaofei_music extends plugin {
 		if(reg){
 			let cookies;
 			try{
-				cookies = getCookieMap(reg[1]);
+				cookies = getCookieMap(reg[2]);
 				if(cookies.get('MUSIC_U')){
 					let netease_cookies = `MUSIC_U=${cookies.get('MUSIC_U')};`;
 					let result = await get_netease_userinfo(netease_cookies);
@@ -257,7 +257,7 @@ export class xiaofei_music extends plugin {
 				await e.reply(`ck解析出错，请检查输入是否正确！`);
 			}
 		}
-		
+
 		let MsgList = [];
 		let user_info = {
 			nickname: Bot.nickname,
