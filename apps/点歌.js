@@ -414,11 +414,13 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				json_result = await ArkMsg.Share(JSON.stringify(json_result.data),e,null,null,true);
 				msg_result.push(json_result.message);
 			}
-			
+
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
 				msg_result.push(e.reply(message.join("\r\n")));
 			}else{
-				msg_result.push(e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
+				msg_result.push(new Promise(async (resolve, reject) => {
+					resolve(await e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
+				}));
 			}
 			
 			if(msg_result.length < 1){//消息发送失败，使用转发消息发送
@@ -612,6 +614,7 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 
 	json.meta.detail.content = music_list.join("\n");
 
+	return json;
 	let json_sign = await ArkMsg.Sign(JSON.stringify(json));
 	if(json_sign.code == 1){
 		return segment.json(json_sign.data);
