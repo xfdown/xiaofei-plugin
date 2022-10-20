@@ -105,6 +105,13 @@ export class xiaofei_music extends plugin {
 					/** 执行方法 */
 					fnc: 'music_ck_check',
 					permission: 'master'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: '^#?提交(音乐|点歌)ck.*$',
+					/** 执行方法 */
+					fnc: 'submit_music_ck',
+					permission: 'master'
 				}
 			]
 		});
@@ -203,6 +210,75 @@ export class xiaofei_music extends plugin {
 		});
 		let forwardMsg = await Bot.makeForwardMsg(MsgList);
 		await e.reply(forwardMsg);
+		return true;
+	}
+	async submit_music_ck(e){
+		let reg = /^#?提交(音乐|点歌)ck(.*)$/.exec(e.msg);
+		if(reg){
+			let cookies;
+			try{
+				cookies = getCookieMap(reg[1]);
+				if(cookies.get('MUSIC_U')){
+					let netease_cookies = `MUSIC_U=${cookies.get('MUSIC_U')};`;
+					let result = await get_netease_userinfo(netease_cookies);
+					if(result.code != 1){
+						await e.reply(`网易云音乐ck不正确或已失效，请重新获取！`);
+						return true;
+					}
+					music_cookies.netease.ck = netease_cookies;
+					let data = result.data;
+					await e.reply(`网易云音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
+				}else if(cookies.get('wxunionid') || cookies.get('psrf_qqunionid')){
+					let qqmusic_ck = [];
+					for(let key of cookies.keys()){
+						let value = cookies.get(key);
+						if(value){
+							qqmusic_ck.push(`${key}=${value}`);
+						}
+					}
+					qqmusic_ck = qqmusic_ck.join('; ');
+					let result = await get_qqmusic_userinfo(qqmusic_ck);
+					if(result.code != 1){
+						await e.reply(`QQ音乐ck不正确或已失效，请重新获取！`);
+						return true;
+					}
+					cookies.set('psrf_musickey_createtime',0);
+					music_cookies.qqmusic.ck = cookies;
+					music_cookies.qqmusic.update_time = 0;
+					try{
+						update_qqmusic_ck();
+					}catch(err){}
+					let data = result.data;
+					await e.reply(`QQ音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
+				}else{
+					await e.reply(`未识别出ck类型，请检查输入是否正确！`);
+				}
+			}catch(err){
+				await e.reply(`ck解析出错，请检查输入是否正确！`);
+			}
+		}else{
+			let MsgList = [];
+			let user_info = {
+				nickname: Bot.nickname,
+				user_id: Bot.uin
+			};
+
+			let msgs = [];
+			msgs.push(`---QQ音乐ck说明---`);
+			msgs.push(`请前往：http://y.qq.com/ 获取以下ck：`);
+			msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;`);
+			msgs.push(`微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=;`);
+			msgs.push(`---网易云音乐ck说明---`);
+			msgs.push(`请前往：http://music.163.com/ 获取以下ck：`);
+			msgs.push(`必须参数：MUSIC_U=;`);
+			msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取，pc端请使用浏览器的开发人员工具获取。`);
+			MsgList.push({
+				...user_info,
+				message: `---提交音乐ck---\n${msgs.join('\n')}`
+			});
+			let forwardMsg = await Bot.makeForwardMsg(MsgList);
+			await e.reply(forwardMsg);
+		}
 		return true;
 	}
 }
@@ -1140,14 +1216,14 @@ async function SendMusicShare(body){
 	}
 }
 
-async function get_netease_userinfo(){
+async function get_netease_userinfo(ck = null){
 	try{
 		let url = 'https://interface.music.163.com/api/nuser/account/get';
 		let options = {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				'Cookie': music_cookies.netease.ck
+				'Cookie': ck || music_cookies.netease.ck
 			}
 		};
 
@@ -1167,24 +1243,25 @@ async function get_netease_userinfo(){
 }
 
 
-async function get_qqmusic_userinfo(){
+async function get_qqmusic_userinfo(ck = null){
 	try{
 		let url = `https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&uin=0&g_tk_new_20200303=5381&g_tk=5381&cid=205360838&userid=0&reqfrom=1&reqtype=0&hostUin=0&loginUin=0`;
-
-		let ck = music_cookies.qqmusic.ck;
 		let cookies = [];
-		for(let key of ck.keys()){
-			let value = ck.get(key);
-			if(value){
-				cookies.push(`${key}=${value}`);
+		try{
+			let ck = music_cookies.qqmusic.ck;
+			for(let key of ck.keys()){
+				let value = ck.get(key);
+				if(value){
+					cookies.push(`${key}=${value}`);
+				}
 			}
-		}
-
+		}catch(err){}
+		
 		let options = {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				'Cookie': cookies.join('; ')
+				'Cookie': ck || cookies.join('; ')
 			}
 		};
 
