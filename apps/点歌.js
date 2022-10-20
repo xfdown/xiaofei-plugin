@@ -1190,7 +1190,7 @@ async function get_qqmusic_userinfo(){
 		if(res?.code == '0' && res.data?.creator){
 			let creator = res.data.creator;
 			return {code: 1,data: {
-				userid: ck.get('uin'),
+				userid: ck.get('uin') || ck.get('wxuin'),
 				nickname: creator.nick,
 			}};
 		}
