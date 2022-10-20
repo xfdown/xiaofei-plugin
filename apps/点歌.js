@@ -242,15 +242,7 @@ export class xiaofei_music extends plugin {
 					await e.reply(`网易云音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
 					return true;
 				}else if(cookies.get('wxunionid') || cookies.get('psrf_qqunionid')){
-					let qqmusic_ck = [];
-					for(let key of cookies.keys()){
-						let value = cookies.get(key);
-						if(value){
-							qqmusic_ck.push(`${key}=${value}`);
-						}
-					}
-					qqmusic_ck = qqmusic_ck.join('; ');
-					let result = await get_qqmusic_userinfo(qqmusic_ck);
+					let result = await get_qqmusic_userinfo(cookies);
 					if(result.code != 1){
 						await e.reply(`QQ音乐ck不正确或已失效，请重新获取！`);
 						return true;
@@ -1259,21 +1251,20 @@ async function get_qqmusic_userinfo(ck = null){
 	try{
 		let url = `https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&uin=0&g_tk_new_20200303=5381&g_tk=5381&cid=205360838&userid=0&reqfrom=1&reqtype=0&hostUin=0&loginUin=0`;
 		let cookies = [];
-		try{
-			let ck = music_cookies.qqmusic.ck;
-			for(let key of ck.keys()){
-				let value = ck.get(key);
-				if(value){
-					cookies.push(`${key}=${value}`);
-				}
+		ck = ck || music_cookies.qqmusic.ck;
+
+		for(let key of ck.keys()){
+			let value = ck.get(key);
+			if(value){
+				cookies.push(`${key}=${value}`);
 			}
-		}catch(err){}
+		}
 		
 		let options = {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				'Cookie': ck || cookies.join('; ')
+				'Cookie': cookies.join('; ')
 			}
 		};
 
