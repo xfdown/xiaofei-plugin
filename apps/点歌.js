@@ -958,10 +958,18 @@ async function music_search(search,source,page = 1,page_size = 10){
 				}
 				return play_url;
 			},
-			lrc: async (data)=> {
+			lrc: async (data) => {
 				let url = `https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=1&uin=0&g_tk_new_20200303=5381&g_tk=5381&loginUin=0&songmid=${data.mid}`;
 				try{
-					let response = await fetch(url); //调用接口获取数据
+					let options = {
+						method: 'GET',//post请求 
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
+							'Referer': 'https://y.qq.com/'
+						}
+					};
+					let response = await fetch(url,options); //调用接口获取数据
 					let res = await response.json();
 					console.log(res);
 					if(res.lyric){
