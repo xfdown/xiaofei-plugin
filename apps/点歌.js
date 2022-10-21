@@ -422,7 +422,7 @@ async function music_message(e){
 			data[key].index = index;
 			let music = data[key].data[index];
 
-			if(!reg[1].includes('歌词')){
+			if(!reg[1]?.includes('歌词')){
 				let music_json = await CreateMusicShareJSON(music);
 				if(reg[1] && reg[1].includes('语音')){
 					await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
