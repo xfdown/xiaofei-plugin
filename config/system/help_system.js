@@ -43,10 +43,6 @@ export const helpList = [
     icon: 91,
     title: '#原神注册时间',
     desc: '查询当前绑定ck的原神注册时间'
-  },{
-    icon: 74,
-    title: '#插件库 #插件索引',
-    desc: '查看Yunzai-Bot插件库的插件列表'
   }]
 },{
   group: '其他查询指令',
