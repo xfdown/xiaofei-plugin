@@ -445,7 +445,7 @@ async function music_message(e){
 				try{
 					typeof(music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
 					if(music.lrc == null && typeof(music.api) == 'function'){
-						await data.api(music.data,['lrc'],music);
+						await music.api(music.data,['lrc'],music);
 					}
 				}catch(err){}
 				
