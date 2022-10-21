@@ -935,7 +935,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 					let res = await response.json();
 					if(res.data?.lrclist){
 						let lrc = [];
-						for(let val of data.data.lrclist){
+						for(let val of res.data.lrclist){
 							let i = parseInt((Number(val.time) / 60) % 60); if(String(i).length < 2) i = `0${i}`;
 							let s = parseInt(Number(val.time) % 60); if(String(s).length < 2) s = `0${s}`;
 							let ms = val.time.split('.')[1] || '00'; if(ms.length > 3) ms.substring(0,3);
