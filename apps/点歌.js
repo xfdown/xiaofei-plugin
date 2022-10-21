@@ -971,7 +971,6 @@ async function music_search(search,source,page = 1,page_size = 10){
 					};
 					let response = await fetch(url,options); //调用接口获取数据
 					let res = await response.json();
-					console.log(res);
 					if(res.lyric){
 						return  Buffer.from(res.lyric,'base64').toString();
 					}
