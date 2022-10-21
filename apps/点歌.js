@@ -176,7 +176,7 @@ export class xiaofei_music extends plugin {
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
-		if(/^#?(语音|高清语音|歌词)?(\d+)?$/.test(this.e.msg)){
+		if(/^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.test(this.e.msg)){
 			music_message(this.e);
 		}
 		return;
@@ -293,7 +293,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(RegExp(music_reg).test(e.msg) || /^#?(语音|高清语音|歌词)?(\d+)?$/.test(e.msg)){
+	if(RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -380,7 +380,7 @@ async function recallMusicMsg(key,msg_results){
 }
 
 async function music_message(e){
-	let reg = /^#?(语音|高清语音|歌词)?(\d+)?$/.exec(e.msg);
+	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.exec(e.msg);
 	if(reg){
 
 		if(e.source && reg[1]?.includes('语音')){
@@ -739,6 +739,10 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 				  },{
 					"cmdDesc": "播放语音",
 					"cmd": " #(高清)语音+序号",
+					"cmdTitle": "发送"
+				  },{
+					"cmdDesc": "查看歌词",
+					"cmd": " #歌词+序号",
 					"cmdTitle": "发送"
 				  }],
 				"cmdTitle": "可在一分钟内发送以下指令:",
