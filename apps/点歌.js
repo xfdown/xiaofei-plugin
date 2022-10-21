@@ -1039,6 +1039,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 			let pic = value[source].pic;pic = typeof(pic) == 'function' ? pic/*await pic(data)*/ : data[pic];
 			let link = value[source].link;link = typeof(link) == 'function' ? link(data) : data[link];
 			let url = value[source].url;url = typeof(url) == 'function' ? url/*await url(data)*/ : data[url];
+			let lrc = value[source].lrc;lrc = typeof(lrc) == 'function' ? lrc/*await lrc(data)*/ : data[lrc];
 			list.push({
 				id: id,
 				name: name,
@@ -1046,6 +1047,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				pic: pic,
 				link: link,
 				url: url,
+				lrc: lrc,
 				source: source,
 				data: data,
 				api: value[source].api
