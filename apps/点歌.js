@@ -1030,7 +1030,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 					//music_data.url = data.play_url ? data.play_url : result.url;
 				}
 				if(types.indexOf('lrc') > -1){
-					music_data.lrc = data.lrc?.lyric || '没有查询到这首歌的歌词！';
+					music_data.lrc = data.lyrics || '没有查询到这首歌的歌词！';
 				}
 				return music_data;
 			}
