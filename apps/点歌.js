@@ -51,7 +51,7 @@ var music_cookies = {
 				"authst" : "",
 				"ct" : "19",
 				"cv" : "1891",
-				"guid" : "1234567890",
+				"guid" : md5(String(new Date().getTime()),32),
 				"patch" : "118",
 				"psrf_access_token_expiresAt" : 0,
 				"psrf_qqaccess_token" : "",
@@ -350,6 +350,7 @@ async function update_qqmusic_ck(){
 		if(type == 1) comm.wid = ck_map.get('wxuin') || '',comm.psrf_qqunionid = ck_map.get('wxunionid') || '';
 		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
 		comm.authst = authst || '';
+		comm.guid = md5(String(comm.authst + comm.uin + comm.wid),32);
 	}catch(err){
 		logger.error(err);
 	}
@@ -981,7 +982,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				if(data.pay?.pay_play == 1){//需要付费
 					let json_body = {
 						...music_cookies.qqmusic.body,
-						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"5298743403","songmid":[],"songtype":[0],"uin":"0"}}
+						"req_0":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":md5(String(new Date().getTime()),32),"songmid":[],"songtype":[0],"uin":"0"}}
 					};
 					json_body.req_0.param.songmid = [data.mid];
 					let options = {
