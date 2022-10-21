@@ -451,8 +451,8 @@ async function music_message(e){
 				lrc = `---${music.name}-${music.artist}---\n${lrc}`; 
 				
 				let user_info = {
-					nickname: nickname,
-					user_id: e.user_id
+					nickname: Bot.nickname,
+					user_id: Bot.uin
 				};
 
 				let MsgList = [{
