@@ -409,7 +409,7 @@ async function music_message(e){
 			return false;
 		}
 		
-		if(reg[1]?.includes('语音') && !reg[2]){
+		if((reg[1]?.includes('语音') || reg[1]?.includes('歌词')) && !reg[2]){
 			reg[2] = String(data[key].index + 1);
 		}
 		
@@ -871,10 +871,10 @@ async function music_search(search,source,page = 1,page_size = 10){
 				return url;
 			},
 			lrc: async (data) => {
+				let url = `https://music.163.com/api/song/lyric?id=${data.id}&lv=-1&tv=-1`;
 				try{
-					let url = `https://music.163.com/api/song/lyric?id=${data.id}&lv=-1&tv=-1`;
 					let options = {
-						method: 'GET',//post请求 
+						method: 'GET',
 						headers: {
 							'Content-Type': 'application/x-www-form-urlencoded',
 							'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
@@ -895,7 +895,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 			pic1: async (data) => {
 				let url = `http://artistpicserver.kuwo.cn/pic.web?type=rid_pic&pictype=url&content=list&size=320&rid=${data.MUSICRID.substring(6)}`;
 				let response = await fetch(url); //调用接口获取数据
-				let res = await response.text(); //结果json字符串转对象
+				let res = await response.text();
 				url = '';
 				if(res && res.indexOf('http') != -1){
 					url = res;
@@ -919,6 +919,32 @@ async function music_search(search,source,page = 1,page_size = 10){
 					url = res.url;
 				}
 				return url;
+			},
+			lrc: async (data) => {
+				try{
+					let url = `http://m.kuwo.cn/newh5/singles/songinfoandlrc?musicId=${data.MUSICRID.substring(6)}`;
+					let options = {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
+							'Referer': 'http://www.kuwo.cn/'
+						}
+					};
+					let response = await fetch(url,options); //调用接口获取数据
+					let res = await response.json();
+					if(res.data?.lrclist){
+						let lrc = [];
+						for(let val of data.data.lrclist){
+							let i = parseInt((Number(val.time) / 60) % 60); if(String(i).length < 2) i = `0${i}`;
+							let s = parseInt(Number(val.time) % 60); if(String(s).length < 2) s = `0${s}`;
+							let ms = val.time.split('.')[1] || '00'; if(ms.length > 3) ms.substring(0,3);
+							lrc.push(`[${i}:${s}.${ms}]${val.lineLyric}`);
+						}
+						return lrc.join('\n');
+					}
+				}catch(err){}
+				return '没有查询到这首歌的歌词！';
 			}
 		},
 		qq: {
@@ -983,7 +1009,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let url = `https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=1&uin=0&g_tk_new_20200303=5381&g_tk=5381&loginUin=0&songmid=${data.mid}`;
 				try{
 					let options = {
-						method: 'GET',//post请求 
+						method: 'GET',
 						headers: {
 							'Content-Type': 'application/x-www-form-urlencoded',
 							'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
