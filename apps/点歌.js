@@ -867,6 +867,25 @@ async function music_search(search,source,page = 1,page_size = 10){
 					}catch(err){}
 				}
 				return url;
+			},
+			lrc: async (data) => {
+				try{
+					let url = `https://music.163.com/api/song/lyric?id=${data.id}&lv=-1&tv=-1`;
+					let options = {
+						method: 'GET',//post请求 
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
+							'Referer': 'https://music.163.com/'
+						}
+					};
+					let response = await fetch(url,options); //调用接口获取数据
+					let res = await response.json();
+					if(res.code == 200 && res.lrc?.lyric){
+						return res.lrc.lyric;
+					}
+				}catch(err){}
+				return '没有查询到这首歌的歌词！';
 			}
 		},
 		kuwo: {
@@ -972,7 +991,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 					let response = await fetch(url,options); //调用接口获取数据
 					let res = await response.json();
 					if(res.lyric){
-						return  Buffer.from(res.lyric,'base64').toString();
+						return Buffer.from(res.lyric,'base64').toString();
 					}
 				}catch(err){}
 				return '没有查询到这首歌的歌词！';
