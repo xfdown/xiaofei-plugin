@@ -176,7 +176,7 @@ export class xiaofei_music extends plugin {
 	
 	/** 接受到消息都会先执行一次 */
 	accept () {
-		if(/^#?(语音|高清语音)?(\d+)?$/.test(this.e.msg)){
+		if(/^#?(语音|高清语音|歌词)?(\d+)?$/.test(this.e.msg)){
 			music_message(this.e);
 		}
 		return;
@@ -293,7 +293,7 @@ if(Bot.xiaofei_music_guild){
 
 Bot.xiaofei_music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if(RegExp(music_reg).test(e.msg) || /^#?(语音|高清语音)?(\d+)?$/.test(e.msg)){
+	if(RegExp(music_reg).test(e.msg) || /^#?(语音|高清语音|歌词)?(\d+)?$/.test(e.msg)){
 		music_message(e);
 	}
 };
@@ -380,7 +380,7 @@ async function recallMusicMsg(key,msg_results){
 }
 
 async function music_message(e){
-	let reg = /^#?(语音|高清语音)?(\d+)?$/.exec(e.msg);
+	let reg = /^#?(语音|高清语音|歌词)?(\d+)?$/.exec(e.msg);
 	if(reg){
 
 		if(e.source && reg[1]?.includes('语音')){
@@ -416,31 +416,53 @@ async function music_message(e){
 		let index = Number(reg[2]) - 1;		
 		
 		if(data[key].data.length > index && index > -1){
-			
-			if(data[key].page < 1 && !reg[1]?.includes('语音')){
+			if(data[key].page < 1 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))){
 				return false;
 			}
 			data[key].index = index;
 			let music = data[key].data[index];
 
-			let music_json = await CreateMusicShareJSON(music);
-			if(reg[1] && reg[1].includes('语音')){
-				await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
-				let result = await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清'));
-				if(!result){
-					result = '上传['+music.name + '-' + music.artist+']失败！\n'+music_json.meta.music.musicUrl;
+			if(!reg[1].includes('歌词')){
+				let music_json = await CreateMusicShareJSON(music);
+				if(reg[1] && reg[1].includes('语音')){
+					await e.reply('开始上传['+music.name + '-' + music.artist+']。。。');
+					let result = await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清'));
+					if(!result){
+						result = '上传['+music.name + '-' + music.artist+']失败！\n'+music_json.meta.music.musicUrl;
+					}
+					await e.reply(result);
+					return true;
 				}
-				await e.reply(result);
-				return true;
-			}
 
-			let ArkSend = await ArkMsg.Share(JSON.stringify(music_json),e);
-			if(ArkSend.code != 1){
-				let body = await CreateMusicShare(e,music);
-				await SendMusicShare(body);
+				let ArkSend = await ArkMsg.Share(JSON.stringify(music_json),e);
+				if(ArkSend.code != 1){
+					let body = await CreateMusicShare(e,music);
+					await SendMusicShare(body);
+				}
+				//await recallMusicMsg(key,data[key].msg_results);
+				//delete data[key];
+			}else if(music.lrc){
+				
+				try{
+					typeof(music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
+				}catch(err){}
+				
+				let lrc = music.lrc || '没有查询到这首歌的歌词！';
+				lrc = `---${music.name}-${music.artist}---\n${lrc}`; 
+				
+				let user_info = {
+					nickname: nickname,
+					user_id: e.user_id
+				};
+
+				let MsgList = [{
+					...user_info,
+					message: lrc
+				}];
+				let forwardMsg = await Bot.makeForwardMsg(MsgList);
+				await e.reply(forwardMsg);
 			}
-			//await recallMusicMsg(key,data[key].msg_results);
-			//delete data[key];
+			
 			return true;
 		}
 		return false;
@@ -902,17 +924,6 @@ async function music_search(search,source,page = 1,page_size = 10){
 				let url = 'https://y.qq.com/n/yqq/song/' + data.mid + '.html';
 				return url;
 			},
-			url1: async (data) => {
-				let url = `http://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&uin=0&format=json&data={"comm":{"ct":23,"cv":0},"url_mid":{"module":"vkey.GetVkeyServer","method":"CgiGetVkey","param":{"guid":"1234567890","songmid":["${data.mid}"],"songtype":[0],"uin":"0","loginflag":1,"platform":"23"}}}&_=${new Date().getTime()}`;
-				let response = await fetch(url); //调用接口获取数据
-				let res = await response.json(); //结果json字符串转对象
-				let midurlinfo = res.url_mid.data.midurlinfo;
-				let purl = '';
-				if(midurlinfo && midurlinfo.length > 0){
-					purl = midurlinfo[0].purl;
-				}
-				return purl;
-			},
 			url: async (data) => {
 				let code = md5(`${data.mid}q;z(&l~sdf2!nK`,32).substring(0,5).toLocaleUpperCase();
 				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
@@ -946,6 +957,18 @@ async function music_search(search,source,page = 1,page_size = 10){
 					}catch(err){}
 				}
 				return play_url;
+			},
+			lrc: async (data)=> {
+				let url = `https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=1&uin=0&g_tk_new_20200303=5381&g_tk=5381&loginUin=0&songmid=${data.mid}`;
+				try{
+					let response = await fetch(url); //调用接口获取数据
+					let res = await response.json();
+					console.log(res);
+					if(res.lyric){
+						return  Buffer.from(res.lyric,'base64').toString();
+					}
+				}catch(err){}
+				return '没有查询到这首歌的歌词！';
 			}
 		},
 		kugou: {
