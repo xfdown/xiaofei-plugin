@@ -441,8 +441,7 @@ async function music_message(e){
 				}
 				//await recallMusicMsg(key,data[key].msg_results);
 				//delete data[key];
-			}else if(music.lrc){
-				
+			}else{
 				try{
 					typeof(music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
 					if(music.lrc == null && typeof(music.api) == 'function'){
