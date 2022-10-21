@@ -445,6 +445,9 @@ async function music_message(e){
 				
 				try{
 					typeof(music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
+					if(music.lrc == null && typeof(music.api) == 'function'){
+						await data.api(music.data,['lrc'],music);
+					}
 				}catch(err){}
 				
 				let lrc = music.lrc || '没有查询到这首歌的歌词！';
@@ -1005,31 +1008,32 @@ async function music_search(search,source,page = 1,page_size = 10){
 				return url;
 			},
 			url: null,
-			api: async (data,types) => {
+			lrc: null,
+			api: async (data,types,music_data = {}) => {
 				let hash = data.hash;
 				let album_id = data.album_id;
 				let url = `https://wwwapi.kugou.com/yy/index.php?r=play/getdata&hash=${hash}&dfid=&appid=1014&mid=1234567890&platid=4&album_id=${album_id}&_=${new Date().getTime()}`;
 				let response = await fetch(url); //调用接口获取数据
 				let res = await response.json(); //结果json字符串转对象
 				
-				let result = {};
-				
 				if(res.status != 1){
-					return result;
+					return music_data;
 				}
-				
 				data = res.data;
 				
 				if(types.indexOf('pic') > -1){
-					result.pic = data.img ? data.img : no_pic;
+					music_data.pic = data.img ? data.img : no_pic;
 				}
 				if(types.indexOf('url') > -1){
 					let key = md5(`${hash}mobileservice`,32);
-					result.url = `https://m.kugou.com/api/v1/wechat/index?cmd=101&hash=${hash}&key=${key}`;//播放直链
+					music_data.url = `https://m.kugou.com/api/v1/wechat/index?cmd=101&hash=${hash}&key=${key}`;//播放直链
 					//如果直链失效了再取消注释下面
-					//result.url = data.play_url ? data.play_url : result.url;
+					//music_data.url = data.play_url ? data.play_url : result.url;
 				}
-				return result;
+				if(types.indexOf('lrc') > -1){
+					music_data.lrc = data.lrc?.lyric || '没有查询到这首歌的歌词！';
+				}
+				return music_data;
 			}
 		}
 	};
