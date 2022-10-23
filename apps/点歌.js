@@ -827,17 +827,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 
 	let background_path = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
 	let background_url = await get_background();
-	if(background_url){
-		background_path = background_url;
-		try{
-			//let response = await fetch(background_url);
-			//let buffer = await response.buffer();
-			//if(buffer){
-			//	background_path = 'data:image/jpg;base64,' + buffer.toString('base64');
-			//}
-		}catch(err){}
-	}
-
+	if(background_url) background_path = background_url;
 	let data = {
 		plugin_path: Plugin_Path,
 		background_path: background_path,
