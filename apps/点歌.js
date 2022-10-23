@@ -6,7 +6,7 @@ import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
 import ArkMsg from '../model/ArkMsg.js'
-import lodash from 'lodash'
+import fs from 'fs'
 const no_pic = '';
 var _page_size = 20;
 
@@ -817,40 +817,32 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 
 
 
+	let background_path = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
+	let background_url = await get_background();
+	if(background_url){
+		try{
+			let response = await fetch(background_url);
+			let buffer = await response.buffer();
+			if(buffer){
+				background_path = 'data:image/jpg;base64,' + buffer.toString('base64');
+			}
+		}catch(err){}
+	}
+
 	let data = {
 		plugin_path: Plugin_Path,
-		background_path: await get_background(),
+		background_path: background_path,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
 
-	let savePath = puppeteer.dealTpl("xiaofei-plugin/music_list", {
+	return puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: 'music_list',
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
-	});
-
-    if (!savePath) return false
-
-
-	const browser = await puppeteer.browserInit();
-	const browser_page = await browser.newPage();
-	await browser_page.goto(`file://${process.cwd()}${lodash.trim(savePath, '.')}`,{
-		timeout: 6000,
-		waitUntil: ['load']
-	});
-
-	let body = await browser_page.$('body');
-	let img = await body.screenshot({
-		type: 'jpeg',
-		omitBackground: false,
-		quality: 100,
-	});
-	browser_page.close().catch((err) => logger.error(err));
-
-	return segment.image(img);
+	})
 }
 
 function get_MusicListId(e){
@@ -866,7 +858,7 @@ function get_MusicListId(e){
 }
 
 async function get_background(){
-	let background_url = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
+	let background_url = '';
 	let api = 'https://content-static.mihoyo.com/content/ysCn/getContentList?channelId=313&pageSize=1000&pageNum=1&isPreview=0';
 	try{
 		let response = await fetch(api); //调用接口获取数据
