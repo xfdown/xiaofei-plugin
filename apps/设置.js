@@ -95,7 +95,7 @@ const getStatus = function (rote, def = true) {
 	if(arr.length > 0){
 		let type = arr[0], name = arr[1];
 		let data = Config.getYaml('setting', type, def ? 'defSet' : 'config') || {};
-		if (data[name] == 'true' || data[name] == 'false'){
+		if (data[name] == true || data[name] == false){
 			_class = data[name] == false ? `${_class}  status-off` : _class;
 			value = data[name] == true ? '已开启' : '已关闭';
 		}else{
