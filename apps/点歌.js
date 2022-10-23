@@ -874,9 +874,20 @@ async function get_background(){
 	let background_url = '';
 	let api = 'https://content-static.mihoyo.com/content/ysCn/getContentList?channelId=313&pageSize=1000&pageNum=1&isPreview=0';
 	try{
-		let response = await fetch(api); //调用接口获取数据
-		let res = await response.json(); //结果json字符串转对象
+		let res;
+		
+		if(xiaofei_plugin.background_temp && (new Date().getTime() - xiaofei_plugin.background_temp.time) < 1000 * 60 * 360){
+			res = xiaofei_plugin.background_temp.data;
+		}else{
+			let response = await fetch(api); //调用接口获取数据
+			res = await response.json(); //结果json字符串转对象
+		}
+		
 		if(res.retcode == 0 && res.data?.list){
+			xiaofei_plugin.background_temp = {
+				data: res,
+				time: new Date().getTime()
+			};
 			let list = res.data.list;
 			let data = list[random(0,list.length-1)].ext[0];
 			if(data.value && data.value.length > 0){
