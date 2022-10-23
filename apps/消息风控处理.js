@@ -51,6 +51,10 @@ export class xiaofei extends plugin {
 					msgs = forwardMsg;
 					result = await old_reply(msgs,quote,data);
 				}
+				
+				if(!result || !result.message_id){
+					logger.error('风控消息处理失败，请登录手机QQ查看是否可手动解除风控！');
+				}
 			}
 			return result;
 		}
