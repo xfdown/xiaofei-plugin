@@ -509,7 +509,7 @@ async function music_message(e){
 	
 	try{
 		let arr = Object.entries(music_source);
-		let index = Object.values(music_source);
+		let index = Object.values(music_source).indexOf(source);
 		reg[3] = arr[index][0] || reg[3];
 	}catch(err){}
 
