@@ -836,13 +836,13 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 
 
 	const browser = await puppeteer.browserInit();
-	const page = await browser.newPage();
-	await page.goto(`file://${process.cwd()}${lodash.trim(savePath, '.')}`,{
+	const browser_page = await browser.newPage();
+	await browser_page.goto(`file://${process.cwd()}${lodash.trim(savePath, '.')}`,{
 		timeout: 6000,
 		waitUntil: ['load']
 	});
 
-	let body = await page.$('body');
+	let body = await browser_page.$('body');
 	let img = await body.screenshot({
 		type: 'jpeg',
 		omitBackground: false,
