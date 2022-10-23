@@ -156,7 +156,7 @@ export class xiaofei_music extends plugin {
 	}
 	
 	async music_task(){
-		let data = Bot.xiaofei_music_temp_data;
+		let data = xiaofei_plugin.music_temp_data;
 		for(let key in data){
 			if((new Date().getTime() - data[key].time) > (1000 * 60)){
 				await recallMusicMsg(key,data[key].msg_results);
@@ -287,22 +287,24 @@ export class xiaofei_music extends plugin {
 	}
 }
 
-if(Bot.xiaofei_music_guild){
-	Bot.off('guild.message',Bot.xiaofei_music_guild);
+if(!global.xiaofei_plugin){
+	global.xiaofei_plugin = {
+		music_temp_data: {}
+	};
+	//xiaofei_plugin.music_temp_data = {};
 }
 
-Bot.xiaofei_music_guild = async (e) => {//处理频道消息
+if(xiaofei_plugin.music_guild){
+	Bot.off('guild.message',xiaofei_plugin.music_guild);
+}
+
+xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
 	if(RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.test(e.msg)){
 		music_message(e);
 	}
 };
-
-Bot.on('guild.message',Bot.xiaofei_music_guild);
-
-if(!Bot.xiaofei_music_temp_data){
-	Bot.xiaofei_music_temp_data = {};
-}
+Bot.on('guild.message',xiaofei_plugin.music_guild);
 
 async function update_qqmusic_ck(){
 	try{
@@ -405,7 +407,7 @@ async function music_message(e){
 		}
 
 		let key = get_MusicListId(e);
-		let data = Bot.xiaofei_music_temp_data;
+		let data = xiaofei_plugin.music_temp_data;
 		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60)){
 			return false;
 		}
@@ -544,7 +546,7 @@ async function music_message(e){
 	
 	if(reg[4] == '下一页'){
 		let key = get_MusicListId(e);
-		let data = Bot.xiaofei_music_temp_data;
+		let data = xiaofei_plugin.music_temp_data;
 		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60) || data[key].page < 1){
 			return false;
 		}
@@ -563,7 +565,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if(result && result.data && result.data.length > 0){
 		let key = get_MusicListId(e);
-		let data = Bot.xiaofei_music_temp_data;
+		let data = xiaofei_plugin.music_temp_data;
 		if(data[key]?.msg_results && page < 2){
 			recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
 		}
@@ -719,7 +721,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				}
 			}
 		}
-		Bot.xiaofei_music_temp_data[get_MusicListId(e)] = data;
+		xiaofei_plugin.music_temp_data[get_MusicListId(e)] = data;
 	}else{
 		if(page > 1){
 			await e.reply('没有找到更多歌曲！',true);
@@ -828,7 +830,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 	
-	let img = await puppeteer.screenshot("music_list", {
+	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
