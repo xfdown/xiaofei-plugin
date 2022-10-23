@@ -509,8 +509,8 @@ async function music_message(e){
 		'网易云': 'netease',
 		'酷我': 'kuwo',
 		'酷狗': 'kugou',
-		'qq': 'qq',
-		'QQ': 'qq'
+		'QQ': 'qq',
+		'qq': 'qq'
 	};
 
 	let setting = Config.getdefSet('setting','system') || {};
