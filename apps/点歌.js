@@ -154,6 +154,13 @@ export class xiaofei_music extends plugin {
 			}
 			await update_qqmusic_ck();
 		}catch(err){}
+
+		try{
+			let files = fs.readdirSync(`${process.cwd()}/data/html/xiaofei-plugin/music_list/`);
+			files.forEach(file => {
+				fs.unlink(`${path}/${file}`,err => {});
+			});
+		}catch(err){}
 	}
 	
 	async music_task(){
@@ -845,7 +852,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
-	fs.unlink(`${process.cwd()}/data/html/xiaofei-plugin/music_list/${saveId}.html`);
+	fs.unlink(`${process.cwd()}/data/html/xiaofei-plugin/music_list/${saveId}.html`,err => {});
 	return img;
 }
 
