@@ -6,6 +6,7 @@ import {Config, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
 import ArkMsg from '../model/ArkMsg.js'
+import lodash from 'lodash'
 const no_pic = '';
 var _page_size = 20;
 
@@ -825,18 +826,30 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 
-
-	if(!puppeteer.browser){
-		await puppeteer.browserInit();
-		await sleep(1000);
-	}
-	
-	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
+	let savePath = this.dealTpl("xiaofei-plugin/music_list", {
 		saveId: 'music_list',
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
-	
+
+    if (!savePath) return false
+
+
+	const browser = await puppeteer.browserInit();
+	const page = await browser.newPage();
+	await page.goto(`file://${process.cwd()}${lodash.trim(savePath, '.')}`,{
+		timeout: 6000,
+		waitUntil: ['load']
+	});
+
+	let body = await page.$('body');
+	let img = await body.screenshot({
+		type: 'jpeg',
+		omitBackground: false,
+		quality: 100,
+	});
+	page.close().catch((err) => logger.error(err));
+
 	return img;
 }
 
