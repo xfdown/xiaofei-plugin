@@ -848,7 +848,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		omitBackground: false,
 		quality: 100,
 	});
-	page.close().catch((err) => logger.error(err));
+	browser_page.close().catch((err) => logger.error(err));
 
 	return img;
 }
