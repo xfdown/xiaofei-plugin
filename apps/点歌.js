@@ -498,28 +498,24 @@ async function music_message(e){
 	let search = reg[5];
 	let source = '';
 	if(!reg[2]) reg[2] = '';
+
+	let music_source = {
+		'网易': 'netease',
+		'网易云': 'netease',
+		'酷我': 'kuwo',
+		'酷狗': 'kugou',
+		'qq': 'qq',
+		'QQ': 'qq'
+	};
+
+	let setting = Config.getdefSet('setting','system') || {};
+	source = music_source[reg[3]] || (setting['music_source'] || 'qq');
 	
-	switch(reg[3]){
-		case '网易':
-		case '网易云':
-			source = 'netease';
-			break;
-		case '酷我':
-			source = 'kuwo';
-			break;
-		case '酷狗':
-			source = 'kugou';
-			break;
-			case '咪咕':
-			source = 'migu';
-			break;
-		case 'qq':
-		case 'QQ':
-		default:
-			reg[3] = 'QQ';
-			source = 'qq';
-			break;
-	}
+	try{
+		let arr = Object.entries(music_source);
+		let index = Object.values(music_source);
+		reg[3] = arr[index][0] || reg[3];
+	}catch(err){}
 
 	source = [source, reg[3]];
 
