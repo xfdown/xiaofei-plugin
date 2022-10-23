@@ -816,9 +816,12 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 			artist: music.artist,
 		});
 	}
+
+
+
 	let data = {
 		plugin_path: Plugin_Path,
-		background_path: `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`,
+		background_path: await get_background(),
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
@@ -843,6 +846,24 @@ function get_MusicListId(e){
 		id = `friend_${e.user_id}`;
 	}
 	return `${id}`;
+}
+
+async function get_background(){
+	let background_url = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
+	let api = 'https://content-static.mihoyo.com/content/ysCn/getContentList?channelId=313&pageSize=1000&pageNum=1&isPreview=0';
+	try{
+		let response = await fetch(api); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+		if(res.retcode == 0 && res.data?.list){
+			let list = res.data.list;
+			let data = list[random(0,list.length-1)].ext[0];
+			if(data.value && data.value.length > 0){
+				background_url = data.value[random(0,data.value.length-1)].url;
+			}
+		}
+	}catch(err){
+	}
+	return background_url;
 }
 
 async function music_search(search,source,page = 1,page_size = 10){
