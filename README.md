@@ -36,6 +36,8 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 【版本】可用命令：【#小飞版本】
 
+【设置】可用命令：【#小飞设置】
+
 #### 免责声明
 
 1.  功能仅限内部交流与小范围使用，严禁将xiaofei-Plugin用于任何商业用途或盈利。
