@@ -825,7 +825,11 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 
-	await puppeteer.browserInit();
+
+	if(!puppeteer.browser){
+		await puppeteer.browserInit();
+		await sleep(1000);
+	}
 	
 	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: 'music_list',
