@@ -153,6 +153,10 @@ export class xiaofei_music extends plugin {
 			}
 			await update_qqmusic_ck();
 		}catch(err){}
+
+		try{
+			await puppeteer.browserInit();
+		}catch(err){}
 	}
 	
 	async music_task(){
