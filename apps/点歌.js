@@ -168,8 +168,9 @@ export class xiaofei_music extends plugin {
 		let data = xiaofei_plugin.music_temp_data;
 		for(let key in data){
 			if((new Date().getTime() - data[key].time) > (1000 * 60)){
-				await recallMusicMsg(key,data[key].msg_results);
+				let temp = data[key];
 				delete data[key];
+				await recallMusicMsg(key,temp.msg_results);
 			}
 		}
 		try{
@@ -567,8 +568,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 	if(result && result.data && result.data.length > 0){
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data;
-		if(data[key]?.msg_results && page < 2){
-			await recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
+		let temp = data[key];
+		if(temp?.msg_results && page < 2){
+			delete data[key];
+			await recallMusicMsg(key,temp.msg_results);//撤回上一条多选点歌列表
 		}
 		
 		data = {};
