@@ -833,6 +833,8 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
+
+	await puppeteer.browserInit();
 	
 	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: 'music_list',
