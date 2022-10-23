@@ -90,7 +90,7 @@ function setCfg(rote, value, def = true) {
 
 const getStatus = function (rote, def = true) {
 	let _class = 'cfg-status';
-	let value = ';
+	let value = '';
 	let arr = rote?.split('.') || [];
 	if(arr.length > 0){
 		let type = arr[0], name = arr[1];
