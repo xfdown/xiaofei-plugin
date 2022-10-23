@@ -102,5 +102,6 @@ const getStatus = function (rote, def = true) {
 			value = data[name];
 		}
 	}
+	if(rote == 'system.music_source' && !value) value = 'QQ';
 	return `<div class="${_class}">${value}</div>`;
 }
