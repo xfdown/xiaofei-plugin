@@ -394,7 +394,6 @@ async function recallMusicMsg(key,msg_results){
 async function music_message(e){
 	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.exec(e.msg);
 	if(reg){
-
 		if(e.source && reg[1]?.includes('语音')){
 			let source;
 			if (e.isGroup) {
@@ -416,8 +415,8 @@ async function music_message(e){
 		}
 
 		let key = get_MusicListId(e);
-		let data = xiaofei_plugin.music_temp_data;
-		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60)){
+		let data = xiaofei_plugin.music_temp_data[key];
+		if(!data || (new Date().getTime() - data.time) > (1000 * 60)){
 			return false;
 		}
 		
@@ -427,12 +426,12 @@ async function music_message(e){
 		
 		let index = Number(reg[2]) - 1;		
 		
-		if(data[key].data.length > index && index > -1){
-			if(data[key].page < 1 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))){
+		if(data.data.length > index && index > -1){
+			if(data.page < 1 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))){
 				return false;
 			}
-			data[key].index = index;
-			let music = data[key].data[index];
+			data.index = index;
+			let music = data.data[index];
 
 			if(!reg[1]?.includes('歌词')){
 				let music_json = await CreateMusicShareJSON(music);
@@ -451,8 +450,6 @@ async function music_message(e){
 					let body = await CreateMusicShare(e,music);
 					await SendMusicShare(body);
 				}
-				//await recallMusicMsg(key,data[key].msg_results);
-				//delete data[key];
 			}else{
 				try{
 					typeof(music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
@@ -550,16 +547,16 @@ async function music_message(e){
 	
 	if(reg[4] == '下一页'){
 		let key = get_MusicListId(e);
-		let data = xiaofei_plugin.music_temp_data;
-		if(!data[key] || (new Date().getTime() - data[key].time) > (1000 * 60) || data[key].page < 1){
+		let data = xiaofei_plugin.music_temp_data[key];
+		if(!data || (new Date().getTime() - data.time) > (1000 * 60) || data.page < 1){
 			return false;
 		}
-		data[key].time = new Date().getTime();//续期，防止搜索时清除
+		data.time = new Date().getTime();//续期，防止搜索时清除
 		page_size = _page_size;
-		page = data[key].page + 1;
-		search = data[key].search;
-		source = data[key].source;
-		temp_data = data[key];//上一页的列表数据
+		page = data.page + 1;
+		search = data.search;
+		source = data.source;
+		temp_data = data;//上一页的列表数据
 	}
 	
 	return music_handle(e, search, source, page, page_size, temp_data);
@@ -571,7 +568,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data;
 		if(data[key]?.msg_results && page < 2){
-			recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
+			await recallMusicMsg(key,data[key].msg_results);//撤回上一条多选点歌列表
 		}
 		
 		data = {};
