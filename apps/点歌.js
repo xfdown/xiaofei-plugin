@@ -845,8 +845,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
-	fs.unlink(`./data/html/xiaofei-plugin/music_list/${saveId}.html`);
-	
+	fs.unlink(`${process.cwd()}/data/html/xiaofei-plugin/music_list/${saveId}.html`);
 	return img;
 }
 
