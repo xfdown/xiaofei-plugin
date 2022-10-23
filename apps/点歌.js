@@ -826,7 +826,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 
-	let savePath = this.dealTpl("xiaofei-plugin/music_list", {
+	let savePath = puppeteer.dealTpl("xiaofei-plugin/music_list", {
 		saveId: 'music_list',
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
