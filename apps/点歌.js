@@ -2,7 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import fetch from "node-fetch";
 import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import {Config, Version, Plugin_Path} from '../components/index.js'
+import {Config, Data, Version, Plugin_Path} from '../components/index.js'
 import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
 import ArkMsg from '../model/ArkMsg.js'
@@ -847,13 +847,14 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 	};
 
 	let saveId = String(new Date().getTime());
-
+	let dir = `${process.cwd()}/data/html/xiaofei-plugin/music_list`;
+	Data.createDir(dir, 'root');
 	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: saveId,
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 	});
-	fs.unlink(`${process.cwd()}/data/html/xiaofei-plugin/music_list/${saveId}.html`,err => {});
+	fs.unlink(`${dir}/${saveId}.html`,err => {});
 	return img;
 }
 
