@@ -156,7 +156,8 @@ export class xiaofei_music extends plugin {
 		}catch(err){}
 
 		try{
-			let files = fs.readdirSync(`${process.cwd()}/data/html/xiaofei-plugin/music_list/`);
+			let path = `${process.cwd()}/data/html/xiaofei-plugin/music_list`;
+			let files = fs.readdirSync(path);
 			files.forEach(file => {
 				fs.unlink(`${path}/${file}`,err => {});
 			});
