@@ -20,7 +20,7 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 #### 使用说明
 
-【点歌】可用命令：【#点歌 #多选点歌 #多选QQ点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】
+【点歌】可用命令：【#点歌 #多选点歌 #多选QQ点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌 #语音点歌 #高清语音点歌 #歌词】
 
 【天气】可用命令：【#天气】
 
@@ -31,8 +31,6 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 【通行证ck转米游社ck】用户只提交通行证ck时，插件自动生成米游社ck并完成绑定。
 
 【代发言】可用命令：【#代@xx 指令 #代203017966 指令】（仅主人可用。）
-
-【用户ck统计】可用命令：【#用户ck统计】
 
 【帮助】可用命令：【#小飞帮助】
 
