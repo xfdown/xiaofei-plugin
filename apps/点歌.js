@@ -838,11 +838,16 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 
-	return puppeteer.screenshot("xiaofei-plugin/music_list", {
-		saveId: 'music_list',
+	let saveId = String(new Date().getTime());
+
+	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
+		saveId: saveId,
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
-	})
+	});
+	fs.unlink(`./data/html/xiaofei-plugin/music_list/${saveId}.html`);
+	
+	return img;
 }
 
 function get_MusicListId(e){
