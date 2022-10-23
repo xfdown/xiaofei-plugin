@@ -153,10 +153,6 @@ export class xiaofei_music extends plugin {
 			}
 			await update_qqmusic_ck();
 		}catch(err){}
-
-		try{
-			await puppeteer.browserInit();
-		}catch(err){}
 	}
 	
 	async music_task(){
@@ -509,7 +505,7 @@ async function music_message(e){
 	};
 
 	let setting = Config.getdefSet('setting','system') || {};
-	source = music_source[reg[3]] || (setting['music_source'] || 'qq');
+	source = music_source[reg[3]] || (music_source[setting['music_source']] || 'qq');
 	
 	try{
 		let arr = Object.entries(music_source);
