@@ -102,6 +102,10 @@ const getStatus = function (rote, def = true) {
 			value = data[name];
 		}
 	}
-	if(rote == 'system.music_source' && !value) value = 'QQ';
+	if(!value){
+		value = '已关闭';
+		if(rote == 'system.music_source') value = 'QQ';
+	}
+	
 	return `<div class="${_class}">${value}</div>`;
 }
