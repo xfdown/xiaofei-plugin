@@ -850,7 +850,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 	});
 	browser_page.close().catch((err) => logger.error(err));
 
-	return img;
+	return segment.image(img);
 }
 
 function get_MusicListId(e){
