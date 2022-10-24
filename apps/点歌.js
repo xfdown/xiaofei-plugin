@@ -197,7 +197,7 @@ export class xiaofei_music extends plugin {
 		let list = [
 			{
 				name: 'QQ音乐',
-				ck: (music_cookies.qqmusic.ck && music_cookies.qqmusic.ck.get('music_key')),
+				ck: (music_cookies.qqmusic.ck && music_cookies.qqmusic.ck.get('qqmusic_key')),
 				user_info: get_qqmusic_userinfo
 			},{
 				name: '网易云音乐',
@@ -347,7 +347,7 @@ async function update_qqmusic_ck(){
 				logger.error(`【小飞插件_QQ音乐ck】刷新失败！`);
 			}
 			music_cookies.qqmusic.ck = ck_map;
-			authst = ck_map.get('music_key') || ck_map.get('qm_keyst');
+			authst = ck_map.get('qqmusic_key') || ck_map.get('qm_keyst');
 		}else if(refresh_num > 2){
 			if(!music_cookies.qqmusic.init){
 				music_cookies.qqmusic.init = true;
