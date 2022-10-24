@@ -541,6 +541,7 @@ async function music_message(e){
 		source = ['qq_radio','QQ个性电台'];
 		page = 0;
 		page_size = 5;
+		if(reg[4].includes('首')) page_size = 1;
 		e.reply('请稍候。。。',true);
 	}
 	
@@ -668,41 +669,55 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 				let MsgList = [];
 				let index = 1;
-				for(let music of result.data){
+				if(result.data.length > 1){
+					for(let music of result.data){
+						let music_json = await CreateMusicShareJSON({
+							...music,
+							app_name: 'QQ音乐个性电台'
+						});
+	
+						music = music_json.meta.music;
+						music.tag = index + '.' + music.tag;
+						
+						let json_sign = await ArkMsg.Sign(JSON.stringify(music_json));
+						if(json_sign.code == 1){
+							music_json = json_sign.data;
+						}
+						MsgList.push({
+							...user_info,
+							message: segment.json(music_json)
+						});
+						index++;
+					}
+					let forwardMsg = await Bot.makeForwardMsg(MsgList);
+					forwardMsg.data = forwardMsg.data
+					.replace('<?xml version="1.0" encoding="utf-8"?>','<?xml version="1.0" encoding="utf-8" ?>')
+					.replace(/\n/g, '')
+					.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+					.replace(/___+/, `<title color="#777777" size="26">根据QQ[${search}]的听歌口味为您推荐</title>`);
+					await e.reply(forwardMsg);
+					data = {
+						time: new Date().getTime(),
+						data: result.data,
+						page: 0,
+						msg_results: [],
+						search: search,
+						source: source,
+						index: -1
+					};
+				}else{
 					let music_json = await CreateMusicShareJSON({
 						...music,
 						app_name: 'QQ音乐个性电台'
 					});
-
 					music = music_json.meta.music;
 					music.tag = index + '.' + music.tag;
-					
-					let json_sign = await ArkMsg.Sign(JSON.stringify(music_json));
-					if(json_sign.code == 1){
-						music_json = json_sign.data;
+					let ArkSend = await ArkMsg.Share(JSON.stringify(music_json),e);
+					if(ArkSend.code != 1){
+						let body = await CreateMusicShare(e,music);
+						await SendMusicShare(body);
 					}
-					MsgList.push({
-						...user_info,
-						message: segment.json(music_json)
-					});
-					index++;
 				}
-				let forwardMsg = await Bot.makeForwardMsg(MsgList);
-				forwardMsg.data = forwardMsg.data
-				.replace('<?xml version="1.0" encoding="utf-8"?>','<?xml version="1.0" encoding="utf-8" ?>')
-				.replace(/\n/g, '')
-				.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-				.replace(/___+/, `<title color="#777777" size="26">根据QQ[${search}]的听歌口味为您推荐</title>`);
-				await e.reply(forwardMsg);
-				data = {
-					time: new Date().getTime(),
-					data: result.data,
-					page: 0,
-					msg_results: [],
-					search: search,
-					source: source,
-					index: -1
-				};
 			}else{
 				let music = result.data[0];
 				data = {
