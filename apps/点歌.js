@@ -207,7 +207,7 @@ export class xiaofei_music extends plugin {
 		];
 		for(let val of list){
 			msgs.push(`---${val.name}---`);
-			if(!val.ck){
+			if(!val.ck?.get('music_key')){
 				msgs.push(`状态：未设置ck`);
 			}else{
 				let result = await val.user_info();
