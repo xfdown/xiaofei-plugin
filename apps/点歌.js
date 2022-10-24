@@ -541,8 +541,11 @@ async function music_message(e){
 		source = ['qq_radio','QQ个性电台'];
 		page = 0;
 		page_size = 5;
-		if(reg[4].includes('首')) page_size = 1;
-		e.reply('请稍候。。。',true);
+		if(reg[4].includes('首')){
+			page_size = 1;
+		}else{
+			e.reply('请稍候。。。',true);
+		}
 	}
 	
 	if(reg[4] == '下一页'){
