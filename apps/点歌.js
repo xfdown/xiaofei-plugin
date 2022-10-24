@@ -519,7 +519,7 @@ async function music_message(e){
 
 	source = [source, reg[3]];
 
-	if(search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && !(reg[4] == '来首' || reg[4] == '放首' && search == '歌')){
+	if(search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && !((reg[4] == '来首' || reg[4] == '放首') && search == '歌')){
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help,true);
 		return true;
@@ -531,7 +531,7 @@ async function music_message(e){
 	let page = reg[2] == '多选' ? 1 : 0;
 	let page_size = reg[2] == '多选' ? _page_size : 10;
 
-	if(reg[4] == '个性电台' || (reg[4] == '来首' || reg[4] == '放首' && search == '歌')){
+	if(reg[4] == '个性电台' || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')){
 		//if(source[0] != 'qq'){
 		//	await e.reply(`暂不支持${source[1]}个性电台！`,true);
 		//	return true;
