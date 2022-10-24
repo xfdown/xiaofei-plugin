@@ -297,11 +297,8 @@ export class xiaofei_music extends plugin {
 	}
 }
 
-if(!global.xiaofei_plugin){
-	global.xiaofei_plugin = {
-		music_temp_data: {}
-	};
-	//xiaofei_plugin.music_temp_data = {};
+if(!xiaofei_plugin.music_temp_data){
+	xiaofei_plugin.music_temp_data = {};
 }
 
 if(xiaofei_plugin.music_guild){
@@ -422,7 +419,7 @@ async function music_message(e){
 		}
 		
 		if((reg[1]?.includes('语音') || reg[1]?.includes('歌词')) && !reg[2]){
-			reg[2] = String(data[key].index + 1);
+			reg[2] = String(data.index + 1);
 		}
 		
 		let index = Number(reg[2]) - 1;		

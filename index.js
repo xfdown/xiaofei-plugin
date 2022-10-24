@@ -2,6 +2,12 @@
 /**
 插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
 */
+
+const apps = {};
+global.xiaofei_plugin = {
+	apps: apps
+};
+
 import fs from 'node:fs'
 import { Version, Plugin_Path} from './components/index.js'
 
@@ -14,8 +20,6 @@ files.forEach((file) => {
 })
 
 ret = await Promise.allSettled(ret)
-
-let apps = {}
 let ver = Version.ver;
 
 logger.info(`---------^_^---------`)
