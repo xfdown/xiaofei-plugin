@@ -67,6 +67,7 @@ async function uploadRecord(record_url, seconds = 0,transcoding = true) {
 		body: buf
 	});
 	//await axios.post(url, buf, { headers });
+    
 	const fid = rsp[11].toBuffer();
 	const b = core.pb.encode({
 		1: 4,
@@ -120,7 +121,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
                 method: 'GET',//post请求 
                 headers: headers
             });
-            const buf = await response.buffer();
+            const buf = Buffer.from(await response.arrayBuffer());
             const tmpfile = path.join(TMP_DIR, (0, uuid)());
             await fs.promises.writeFile(tmpfile, buf);
             //await (0, pipeline)(readable.pipe(new DownloadTransform), fs.createWriteStream(tmpfile));
