@@ -1,10 +1,13 @@
 import fs from 'fs'
 import lodash from 'lodash'
-import cfg from '../../../lib/config/config.js'
 const Plugin_Path = `${process.cwd()}/plugins/xiaofei-plugin`;
 const README_path = `${Plugin_Path}/README.md`
 const CHANGELOG_path = `${Plugin_Path}/CHANGELOG.md`
-const yunzai_ver = `${cfg.package.version}`;
+let yunzai_ver = '';
+try{
+  let packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf8'));
+  yunzai_ver = packageJson.version;
+}catch(err){}
 
 let logs = {}
 let changelogs = []
