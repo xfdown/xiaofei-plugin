@@ -197,7 +197,7 @@ export class xiaofei_music extends plugin {
 		let list = [
 			{
 				name: 'QQ音乐',
-				ck: music_cookies.qqmusic.ck || new Map(),
+				ck: (music_cookies.qqmusic.ck && music_cookies.qqmusic.ck.get('music_key')),
 				user_info: get_qqmusic_userinfo
 			},{
 				name: '网易云音乐',
@@ -207,7 +207,7 @@ export class xiaofei_music extends plugin {
 		];
 		for(let val of list){
 			msgs.push(`---${val.name}---`);
-			if(!val.ck.get('music_key')){
+			if(!val.ck){
 				msgs.push(`状态：未设置ck`);
 			}else{
 				let result = await val.user_info();
