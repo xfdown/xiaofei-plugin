@@ -706,6 +706,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						index: -1
 					};
 				}else{
+					let music = result.data[0];
 					let music_json = await CreateMusicShareJSON({
 						...music,
 						app_name: 'QQ音乐个性电台'
