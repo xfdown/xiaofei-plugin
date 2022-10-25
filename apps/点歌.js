@@ -500,7 +500,7 @@ async function music_message(e){
 	if(!reg[2]) reg[2] = '';
 	if(!reg[3]) reg[3] = '';
 
-	if(reg[3] == '多选'){
+	if(music_source[reg[2]]){
 		let source = reg[2];
 		reg[2] = reg[3];
 		reg[3] = source;
