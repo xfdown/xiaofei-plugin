@@ -213,7 +213,7 @@ export class xiaofei_music extends plugin {
 				let result = await val.user_info();
 				if(result.code == 1){
 					let data = result.data;
-					msgs.push(`用户：${data.nickname}[${data.userid}]`);
+					msgs.push(`账号：${data.nickname}[${data.userid}]`);
 					msgs.push(`状态：ck状态正常`);
 					msgs.push(`是否VIP：${data.is_vip ? '是' : '否'}`);
 				}else{
