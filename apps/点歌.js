@@ -883,7 +883,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 		imgType: 'jpeg',
-		quality: 60
+		quality: 66
 	});
 	fs.unlink(`${process.cwd()}/${dir}/${saveId}.html`,err => {});
 	fs.unlink(background_path,err => {});
