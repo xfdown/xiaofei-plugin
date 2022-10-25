@@ -92,7 +92,7 @@ var music_cookies = {
 	}
 };
 
-const music_reg = '^#?(小飞)?(多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台)(.*)$';
+const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台)(.*)$';
 
 export class xiaofei_music extends plugin {
 	constructor () {
@@ -498,6 +498,13 @@ async function music_message(e){
 	let search = reg[5];
 	let source = '';
 	if(!reg[2]) reg[2] = '';
+	if(!reg[3]) reg[3] = '';
+
+	if(reg[3] == '多选'){
+		let source = reg[2];
+		reg[2] = reg[3];
+		reg[3] = source;
+	}
 
 	let music_source = {
 		'网易': 'netease',
