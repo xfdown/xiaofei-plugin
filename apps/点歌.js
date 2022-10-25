@@ -581,7 +581,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		let temp = data[key];
 		if(temp?.msg_results && page < 2){
 			delete data[key];
-			await recallMusicMsg(key,temp.msg_results);//撤回上一条多选点歌列表
+			recallMusicMsg(key,temp.msg_results);//撤回上一条多选点歌列表
 		}
 		
 		data = {};

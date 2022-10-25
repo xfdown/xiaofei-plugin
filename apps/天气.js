@@ -150,6 +150,9 @@ async function weather(e,search){
 			quality: 90,
 		});
 		
+		puppeteer.renderNum++;
+		puppeteer.restart();
+		
 		page.close().catch((err) => logger.error(err));
 	}catch(err){
 		logger.error(err);
