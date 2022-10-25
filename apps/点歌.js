@@ -500,12 +500,6 @@ async function music_message(e){
 	if(!reg[2]) reg[2] = '';
 	if(!reg[3]) reg[3] = '';
 
-	if(music_source[reg[2]]){
-		let source = reg[2];
-		reg[2] = reg[3];
-		reg[3] = source;
-	}
-
 	let music_source = {
 		'网易': 'netease',
 		'网易云': 'netease',
@@ -515,6 +509,13 @@ async function music_message(e){
 		'qq': 'qq'
 	};
 
+	if(music_source[reg[2]]){
+		let source = reg[2];
+		reg[2] = reg[3];
+		reg[3] = source;
+	}
+
+	
 	let setting = Config.getdefSet('setting','system') || {};
 	source = music_source[reg[3]] || (music_source[setting['music_source']] || 'qq');
 	
