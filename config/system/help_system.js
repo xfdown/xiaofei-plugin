@@ -64,10 +64,6 @@ export const helpList = [
   auth: 'master',
   list: [{
     icon: 85,
-    title: '#用户ck统计',
-    desc: '查询已绑定ck用户的ck使用状态'
-  },{
-    icon: 85,
     title: '#提交音乐ck',
     desc: '设置点歌ck'
   },{
