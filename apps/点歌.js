@@ -832,6 +832,7 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 }
 
 async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
+	let start = Date.now()
 	let new_list = [];
 	for(let i in list){
 		let music = list[i];
@@ -845,12 +846,28 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 			artist: music.artist,
 		});
 	}
-
-
+	let saveId = String(new Date().getTime());
+	let dir = `data/html/xiaofei-plugin/music_list`;
+	Data.createDir(dir, 'root');
+	
 
 	let background_path = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
 	let background_url = await get_background();
-	if(background_url) background_path = background_url;
+	
+	
+	
+	if(background_url){
+		try{
+			let response = await fetch(background_url);
+			let buffer = Buffer.from(await response.arrayBuffer());
+			if(buffer){
+				let file = `${process.cwd()}/${dir}/${saveId}.jpg`;
+				fs.writeFileSync(file, buffer);
+				background_path = file;
+			}
+		}catch(err){}
+	}
+
 	let data = {
 		plugin_path: Plugin_Path,
 		background_path: background_path,
@@ -860,18 +877,17 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		list: new_list,
 	};
 
-	let saveId = String(new Date().getTime());
-	let dir = `data/html/xiaofei-plugin/music_list`;
-	Data.createDir(dir, 'root');
+	
 	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: saveId,
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
-		pageGotoParams: {
-			waitUntil: 'networkidle0'
-		}
+		imgType: 'jpeg',
+		quality: 90
 	});
 	fs.unlink(`${process.cwd()}/${dir}/${saveId}.html`,err => {});
+	fs.unlink(background_path,err => {});
+	logger.mark(`[小飞插件_点歌列表图片生成耗时]${logger.green(`${Date.now() - start}ms`)}`);
 	return img;
 }
 
