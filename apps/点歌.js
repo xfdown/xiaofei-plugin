@@ -727,6 +727,15 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						let body = await CreateMusicShare(e,music);
 						await SendMusicShare(body);
 					}
+					data = {
+						time: new Date().getTime(),
+						data: [music],
+						page: 0,
+						msg_results: [],
+						search: search,
+						source: source,
+						index: 0
+					};
 				}
 			}else{
 				let music = result.data[0];
