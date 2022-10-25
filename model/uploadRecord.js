@@ -142,10 +142,10 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
         file = String(file).replace(/^file:\/{2}/, "");
         IS_WIN && file.startsWith("/") && (file = file.slice(1));
         const head = await read7Bytes(file);
-        let result = getAudioTime(file,ffmpeg);
+        let result = await getAudioTime(file,ffmpeg);
         if(result.code == 1) time = result.data;
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            buffer = fs.promises.readFile(file);
+            buffer = await fs.promises.readFile(file);
         } else {
             buffer = await audioTrans(file, ffmpeg);
         }
