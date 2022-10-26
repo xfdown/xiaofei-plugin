@@ -20,7 +20,7 @@ git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 #### 使用说明
 
-【点歌】可用命令：【#点歌 #多选点歌 #多选QQ点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌 #语音点歌 #高清语音点歌 #歌词】
+【点歌】可用命令：【#点歌 #多选点歌 #多选QQ点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌 #歌词 #语音 #高清语音】
 
 【天气】可用命令：【#天气】
 
