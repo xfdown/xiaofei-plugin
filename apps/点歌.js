@@ -213,7 +213,11 @@ export class xiaofei_music extends plugin {
 				let result = await val.user_info();
 				if(result.code == 1){
 					let data = result.data;
-					msgs.push(`账号：${data.nickname}[${data.userid}]`);
+					let userid = String(data.userid);
+					if(e.isGroup){
+						userid = userid.length > 5 ? `${userid.substring(0,3)}**${userid.substring(userid.length-3)}` : `${userid.substring(0,1)}**${userid.substring(userid.length-1)}`;
+					}
+					msgs.push(`账号：${data.nickname}[${userid}]`);
 					msgs.push(`状态：ck状态正常`);
 					msgs.push(`是否VIP：${data.is_vip ? '是' : '否'}`);
 				}else{
@@ -407,7 +411,14 @@ async function music_message(e){
 					if(music_json['view'] == 'music'){
 						let music = music_json.meta.music;
 						await e.reply('开始上传['+music.title + '-' + music.desc+']。。。');
-						await e.reply(await uploadRecord(music.musicUrl,0,!reg[1].includes('高清')));
+						let result = await e.reply(await uploadRecord(music.musicUrl,0,!reg[1].includes('高清')));
+						if(reg[1].includes('高清') && result){
+							try{
+								let message = await Bot.getMsg(result.message_id);
+								if(Array.isArray(message.message)) message.message.push({type: 'text', text: '[语音]'});
+								(e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！',message);
+							}catch(err){}
+						}
 					}
 				}catch(err){}
 				return true;
@@ -441,7 +452,14 @@ async function music_message(e){
 					if(!result){
 						result = '上传['+music.name + '-' + music.artist+']失败！\n'+music_json.meta.music.musicUrl;
 					}
-					await e.reply(result);
+					result = await e.reply(result);
+					if(reg[1].includes('高清') && result){
+						try{
+							let message = await Bot.getMsg(result.message_id);
+								if(Array.isArray(message.message)) message.message.push({type: 'text', text: '[语音]'});
+								(e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！',message);
+						}catch(err){}
+					}
 					return true;
 				}
 
