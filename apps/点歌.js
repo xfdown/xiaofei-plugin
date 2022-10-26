@@ -100,7 +100,7 @@ export class xiaofei_music extends plugin {
 			/** 功能名称 */
 			name: '小飞插件_点歌',
 			/** 功能描述 */
-			dsc: '使用互联分享接口发送音乐，目前支持以下命令：【#点歌 #多选点歌 #QQ点歌 #网易点歌 #酷我点歌 #酷狗点歌】',
+			dsc: '',
 			/** https://oicqjs.github.io/oicq/#events */
 			event: 'message',
 			/** 优先级，数字越小等级越高 */
