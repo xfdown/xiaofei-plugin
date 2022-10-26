@@ -860,10 +860,9 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 	Data.createDir(dir, 'root');
 	
 
-	let background_path = `${Plugin_Path}/resources/html/music_list/bg/bg${String(random(1,13))}.jpg`;
+	let _background_path = `${Plugin_Path}/resources/html/music_list/bg/default.jpg`;
+	let background_path = '';
 	let background_url = await get_background();
-	
-	
 	
 	if(background_url){
 		try{
@@ -879,7 +878,7 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 
 	let data = {
 		plugin_path: Plugin_Path,
-		background_path: background_path,
+		background_path: background_path || _background_path,
 		title: `${source.split('').join(' ')} 点 歌 列 表`,
 		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
@@ -892,10 +891,14 @@ async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自�
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,
 		imgType: 'jpeg',
-		quality: 75
+		quality: 80
 	});
-	fs.unlink(`${process.cwd()}/${dir}/${saveId}.html`,err => {});
-	fs.unlink(background_path,err => {});
+	
+	setTimeout(() => {
+		fs.unlink(`${process.cwd()}/${dir}/${saveId}.html`,err => {});
+		if(background_path) fs.unlink(background_path,err => {});
+	},100);
+	
 	logger.mark(`[小飞插件_点歌列表图片生成耗时]${logger.green(`${Date.now() - start}ms`)}`);
 	return img;
 }
