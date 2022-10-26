@@ -59,6 +59,6 @@ Q群：938326742
 3.  提交代码
 4.  新建 Pull Request
 
-####赞助支持
+#### 赞助支持
 
 [爱发电-xiaofei-plugin](https://afdian.net/a/xiaofei-plugin)
