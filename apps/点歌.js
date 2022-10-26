@@ -372,7 +372,9 @@ async function recallMusicMsg(key,msg_results){
 			let type = arr[0];
 			for(let val of msg_result){
 				try{
-					let message_id = (await val)?.message_id;
+					val = await val;
+					let message_id = (await val?.message)?.message_id || val?.message_id
+					console.log(val,message_id)
 					switch(type){
 						case 'group':
 							await Bot.pickGroup(arr[1]).recallMsg(message_id);
@@ -587,57 +589,20 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		data = {};
 		
 		if(page > 0){
-			let message = [`---${source[1]}点歌列表---`];
-			for(let i in result.data){
-				let music = result.data[i];
-				let index = Number(i) + 1;
-				if(page > 1){
-					index = ((page - 1) * 10) + index;
-				}
-				message.push(index + '.' + music.name + '-' + music.artist);
-			}
-			message.push('----------------');
-			message.push('提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！');
 			let msg_result = [];
-
+			
 			let setting = Config.getdefSet('setting','system') || {};
 			if(setting['is_cardlist'] == true){
-				let json_result = await ShareMusic_JSONList(e,result.data, page, page_size, source[1]);
-				json_result = await ArkMsg.Share(JSON.stringify(json_result.data),e,null,null,true);
-				msg_result.push(json_result.message);
+				let json_result = ShareMusic_JSONList(e,result.data, page, page_size, source[1]);
+				msg_result.push(ArkMsg.Share(JSON.stringify(json_result.data),e,null,null,true));
 			}
 
 			if(e.guild_id){//频道的话发文字，图片不显示。。。
-				msg_result.push(e.reply(message.join("\r\n")));
+				msg_result.push(e.reply(ShareMusic_TextList(e, result.data, page, page_size, source[1])));
 			}else{
 				msg_result.push(new Promise(async (resolve, reject) => {
-					resolve(await e.reply(await ShareMusic_HtmlList(result.data, page, page_size, source[1])));//生成图片列表
+					resolve(await e.reply(await ShareMusic_HtmlList(e, result.data, page, page_size, source[1])));//生成图片列表
 				}));
-			}
-
-			if(msg_result.length < 1){//消息发送失败，使用转发消息发送
-				let nickname = Bot.nickname;
-				if (e.isGroup) {
-					let info = await Bot.getGroupMemberInfo(e.group_id, Bot.uin)
-					nickname = info.card || info.nickname;
-					if(e.at && !e.atBot){
-						return false;
-					}
-				}
-				
-				let MsgList = [];
-				let user_info = {
-					nickname: nickname,
-					user_id: Bot.uin
-				};
-				
-				MsgList.push({
-					...user_info,
-					message: message.join("\r\n"),
-				});
-				let forwardMsg = await Bot.makeForwardMsg(MsgList);
-				
-				msg_result.push(await e.reply(forwardMsg));
 			}
 			
 			if(page > 1){
@@ -769,8 +734,22 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 	
 }
 
+function ShareMusic_TextList(e, list, page, page_size, source = ''){
+	let message = [`---${source}点歌列表---`];
+	for(let i in list){
+		let music = list[i];
+		let index = Number(i) + 1;
+		if(page > 1){
+			index = ((page - 1) * 10) + index;
+		}
+		message.push(index + '.' + music.name + '-' + music.artist);
+	}
+	message.push('----------------');
+	message.push('提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！');
+	return message.join('\n');
+}
 
-async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
+function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 	let json = {
 		"app": "com.tencent.bot.task.deblock",
 		"config": {
@@ -793,12 +772,12 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 					"cmd": " #下一页",
 					"cmdTitle": "发送"
 				  },{
-					"cmdDesc": "播放语音",
-					"cmd": " #(高清)语音+序号",
-					"cmdTitle": "发送"
-				  },{
 					"cmdDesc": "查看歌词",
 					"cmd": " #歌词+序号",
+					"cmdTitle": "发送"
+				  },{
+					"cmdDesc": "播放语音",
+					"cmd": " #(高清)语音+序号",
 					"cmdTitle": "发送"
 				  }],
 				"cmdTitle": "可在一分钟内发送以下指令:",
@@ -833,14 +812,9 @@ async function ShareMusic_JSONList(e, list, page, page_size, source = ''){
 	json.meta.detail.content = music_list.join("\n");
 
 	return {data: json};
-	let json_sign = await ArkMsg.Sign(JSON.stringify(json));
-	if(json_sign.code == 1){
-		return segment.json(json_sign.data);
-	}
-	return false;
 }
 
-async function ShareMusic_HtmlList(list, page, page_size, source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
+async function ShareMusic_HtmlList(e, list, page, page_size, source = ''){//来自土块插件（earth-k-plugin）的列表样式（已修改）
 	let start = Date.now()
 	let new_list = [];
 	for(let i in list){
