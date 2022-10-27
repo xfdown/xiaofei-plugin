@@ -412,6 +412,11 @@ async function music_message(e){
 						let music = music_json.meta.music;
 						await e.reply('开始上传['+music.title + '-' + music.desc+']。。。');
 						let result = await e.reply(await uploadRecord(music.musicUrl,0,!reg[1].includes('高清')));
+						if(!result){
+							result = '上传['+music.name + '-' + music.artist+']失败！\n'+music.musicUrl;
+							await e.reply(result);
+							return true;
+						}
 						if(reg[1].includes('高清') && result){
 							try{
 								let message = await Bot.getMsg(result.message_id);
@@ -451,6 +456,8 @@ async function music_message(e){
 					let result = await uploadRecord(music_json.meta.music.musicUrl,0,!reg[1].includes('高清'));
 					if(!result){
 						result = '上传['+music.name + '-' + music.artist+']失败！\n'+music_json.meta.music.musicUrl;
+						await e.reply(result);
+						return true;
 					}
 					result = await e.reply(result);
 					if(reg[1].includes('高清') && result){
