@@ -1035,8 +1035,8 @@ async function music_search(search,source,page = 1,page_size = 10){
 				return url;
 			},
 			url: async (data) => {
-				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url3&br=320kmp3`;
-				let response = await fetch(url); //调用接口获取数据
+				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url&`;
+				let response = await fetch(url.replace('convert_url','convert_url3')); //调用接口获取数据
 				let res = await response.json(); //结果json字符串转对象
 				if(res && res.url){
 					url = res.url;
