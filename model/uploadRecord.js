@@ -157,7 +157,7 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
         let cmd = `${ffmpeg} -i "${file}"`;
         let is_aac = false;
         if(file_info['size'] >= 10485760){
-            cmd = `${ffmpeg} -i "${file}" -ab 96k "${file}.aac"`;
+            cmd = `${ffmpeg} -i "${file}" -fs 10485600 -ab 128k "${file}.mp3"`;
             is_aac = true;
         }
         (0, child_process.exec)(cmd, async (error, stdout, stderr) => {
@@ -165,7 +165,7 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
                 let buffer = null;
                 if(is_aac){
                     fs.unlinkSync(file);
-                    buffer = fs.readFileSync(`${file}.aac`);
+                    buffer = fs.readFileSync(`${file}.mp3`);
                 }
 				let time = stderr.split('Duration:')[1]?.split(',')[0].trim();
                 let arr = time?.split(':');
