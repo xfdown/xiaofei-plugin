@@ -100,7 +100,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             if(result.code == 1) time = result.data;
             buf = await fs.promises.readFile(tmpfile);
             fs.unlink(tmpfile,NOOP);
-            buffer = buf;
+            buffer = result.buffer || buf;
         }else {
             const tmpfile = TMP_DIR + '/' + (0, uuid)();
             let result = await getAudioTime(tmpfile,ffmpeg);
@@ -128,9 +128,8 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             let result = await getAudioTime(tmpfile,ffmpeg);
             if(result.code == 1) time = result.data;
             if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-                buf = await fs.promises.readFile(tmpfile);
                 fs.unlink(tmpfile,NOOP);
-                buffer = buf;
+                buffer = result.buffer || buf;
             } else {
                 buffer = await audioTrans(tmpfile, ffmpeg);
             }
@@ -163,9 +162,10 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
         }
         (0, child_process.exec)(cmd, async (error, stdout, stderr) => {
             try {
+                let buffer = null;
                 if(is_aac){
                     fs.unlinkSync(file);
-                    fs.renameSync(file+'.aac', file);
+                    buffer = fs.readFileSync();
                 }
 				let time = stderr.split('Duration:')[1]?.split(',')[0].trim();
                 let arr = time?.split(':');
@@ -176,10 +176,11 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
                     if(parseInt(val) > 0) s += parseInt(val) * n;
                     n *= 60;
                 }
-                resolve({code: 1,data: {
+                resolve({code: 1,buffer: buffer,data: {
                     time: time,
                     seconds: s,
-					exec_text: stderr
+					exec_text: stderr,
+                    
                 }});
             }
             catch {
