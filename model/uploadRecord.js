@@ -98,6 +98,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             await fs.promises.writeFile(tmpfile, buf);
             let result = await getAudioTime(tmpfile,ffmpeg);
             if(result.code == 1) time = result.data;
+            buf = await fs.promises.readFile(tmpfile);
             fs.unlink(tmpfile,NOOP);
             buffer = buf;
         }else {
@@ -127,7 +128,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             let result = await getAudioTime(tmpfile,ffmpeg);
             if(result.code == 1) time = result.data;
             if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-                //const buf = await fs.promises.readFile(tmpfile);
+                buf = await fs.promises.readFile(tmpfile);
                 fs.unlink(tmpfile,NOOP);
                 buffer = buf;
             } else {
@@ -153,8 +154,19 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
 
 async function getAudioTime(file, ffmpeg = "ffmpeg") {
     return new Promise((resolve, reject) => {
-        (0, child_process.exec)(`${ffmpeg} -i "${file}"`, async (error, stdout, stderr) => {
+        let file_info = fs.statSync(file);
+        let cmd = `${ffmpeg} -i "${file}"`;
+        let is_aac = false;
+        if(file_info['size'] >= 10485760){
+            cmd = `${ffmpeg} -i "${file}" -acodec libfdk_aac -profile:a aac_he_v2 -vbr 3 "${file}.aac"`;
+            is_aac = true;
+        }
+        (0, child_process.exec)(cmd, async (error, stdout, stderr) => {
             try {
+                if(is_aac){
+                    fs.unlinkSync(file);
+                    fs.rename(file+'.aac', file);
+                }
 				let time = stderr.split('Duration:')[1]?.split(',')[0].trim();
                 let arr = time?.split(':');
                 arr.reverse();
