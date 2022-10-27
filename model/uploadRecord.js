@@ -158,7 +158,7 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
         let cmd = `${ffmpeg} -i "${file}"`;
         let is_aac = false;
         if(file_info['size'] >= 10485760){
-            cmd = `${ffmpeg} -i "${file}" -acodec libfdk_aac -profile:a aac_he_v2 -vbr 3 "${file}.aac"`;
+            cmd = `${ffmpeg} -i "${file}" -ab 96k "${file}.aac"`;
             is_aac = true;
         }
         (0, child_process.exec)(cmd, async (error, stdout, stderr) => {
