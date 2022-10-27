@@ -165,7 +165,7 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
             try {
                 if(is_aac){
                     fs.unlinkSync(file);
-                    fs.rename(file+'.aac', file);
+                    fs.renameSync(file+'.aac', file);
                 }
 				let time = stderr.split('Duration:')[1]?.split(',')[0].trim();
                 let arr = time?.split(':');
