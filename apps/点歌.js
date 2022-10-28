@@ -215,7 +215,7 @@ export class xiaofei_music extends plugin {
 					let data = result.data;
 					let userid = String(data.userid);
 					if(e.isGroup){
-						userid = userid.length > 5 ? `${userid.substring(0,3)}**${userid.substring(userid.length-3)}` : `${userid.substring(0,1)}**${userid.substring(userid.length-1)}`;
+						userid = userid.length > 5 ? `${userid.substring(0,3)}***${userid.substring(userid.length-3)}` : `${userid.substring(0,1)}**${userid.substring(userid.length-1)}`;
 					}
 					msgs.push(`账号：${data.nickname}[${userid}]`);
 					msgs.push(`状态：ck状态正常`);
