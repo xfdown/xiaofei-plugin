@@ -282,7 +282,7 @@ export class xiaofei_music extends plugin {
 			user_id: Bot.uin
 		};
 
-		let msgs = [];
+		let msgs = ['格式：#提交音乐ck+音乐ck'];
 		msgs.push(`---QQ音乐ck说明---`);
 		msgs.push(`请前往：http://y.qq.com/ 获取以下ck：`);
 		msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;`);
@@ -293,7 +293,7 @@ export class xiaofei_music extends plugin {
 		msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取，pc端请使用浏览器的开发人员工具获取。`);
 		MsgList.push({
 			...user_info,
-			message: `---提交音乐ck---\n${msgs.join('\n')}`
+			message: `---提交音乐ck说明---\n${msgs.join('\n')}`
 		});
 		let forwardMsg = await Bot.makeForwardMsg(MsgList);
 		await e.reply(forwardMsg);
