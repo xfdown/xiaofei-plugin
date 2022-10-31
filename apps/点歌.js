@@ -1112,7 +1112,7 @@ async function music_search(search,source,page = 1,page_size = 10){
 						body: JSON.stringify(json_body)
 					};
 					
-					let url = `http://u6.y.qq.com/cgi-bin/musicu.fcg`;
+					let url = `https://u6.y.qq.com/cgi-bin/musicu.fcg`;
 					try{
 						let response = await fetch(url,options); //调用接口获取数据
 						let res = await response.json();
@@ -1502,7 +1502,7 @@ async function is_qqmusic_vip(uin,cookies = null){
 		body: JSON.stringify(json)
 	};
 	
-	let url = `http://u6.y.qq.com/cgi-bin/musicu.fcg`;
+	let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
 	try{
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json();
@@ -1577,7 +1577,7 @@ async function qqmusic_refresh_token(cookies,type){
 		body: JSON.stringify(json_body)
 	};
 	
-	let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+	let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
 	try{
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json(); //结果json字符串转对象
@@ -1640,7 +1640,7 @@ async function qqmusic_radio(uin,page_size){
 			body: JSON.stringify(json_body)
 		};
 		
-		let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
 		let response = await fetch(url,options); //调用接口获取数据
 		let res = await response.json(); //结果json字符串转对象
 		
@@ -1671,7 +1671,7 @@ async function qqmusic_search(search,page = 1,page_size = 10){
 			body: JSON.stringify(qq_search_json)
 		};
 		
-		let url = `http://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
 	
 		let response = await fetch(url,options); //调用接口获取数据
 		
