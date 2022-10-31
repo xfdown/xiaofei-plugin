@@ -752,7 +752,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		if(page > 1){
 			await e.reply('没有找到更多歌曲！',true);
 		}else{
-			await e.reply('没有找到该歌曲！',true);
+			await e.reply((source[0].includes('radio') ? '获取推荐歌曲失败，请重试！' : '没有找到该歌曲！'),true);
 		}
 	}
 	return true;
