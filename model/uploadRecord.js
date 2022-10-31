@@ -143,7 +143,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
         let result = await getAudioTime(file,ffmpeg);
         if(result.code == 1) time = result.data;
         if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-            buffer = await fs.promises.readFile(file);
+            buffer = result.buffer || await fs.promises.readFile(file);
         } else {
             buffer = await audioTrans(file, ffmpeg);
         }
@@ -164,7 +164,6 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
             try {
                 let buffer = null;
                 if(is_aac){
-                    fs.unlinkSync(file);
                     buffer = fs.readFileSync(`${file}.mp3`);
                     fs.unlinkSync(`${file}.mp3`);
                 }
