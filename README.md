@@ -16,6 +16,9 @@
 // 使用gitee
 git clone https://gitee.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
+// 使用github
+git clone https://github.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
+
 ```
 
 #### 使用说明
