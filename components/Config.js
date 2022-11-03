@@ -55,7 +55,7 @@ class Config {
         fs.readFileSync(file, 'utf8')
       )
     } catch (error) {
-      logger.error(`[${app}][${name}] 格式错误 ${error}`)
+      logger.error(`[小飞插件][${app}][${name}] 格式错误 ${error}`)
       return false
     }
 
@@ -93,7 +93,7 @@ class Config {
     const watcher = chokidar.watch(file)
     watcher.on('change', path => {
       delete this.config[type][key]
-      logger.mark(`[修改配置文件][${type}][${app}][${name}]`)
+      logger.mark(`[小飞插件][修改配置文件][${type}][${app}][${name}]`)
       this.getYaml(app, name, type)//重新读取文件
       if (this[`change_${app}${name}`]) {
         this[`change_${app}${name}`]()
