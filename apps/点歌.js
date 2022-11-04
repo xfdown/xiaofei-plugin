@@ -487,19 +487,7 @@ async function music_message(e) {
 				} catch (err) { }
 
 				let lrcs = music.lrc || '没有查询到这首歌的歌词！';
-				let lrc = lrcs;
 				if (!Array.isArray(lrcs)) lrcs = [lrcs];
-				let lrc_text = [];
-				let lrc_reg = /\[.*\](.*)?/gm;
-
-				let exec;
-				for (let lrc of lrcs) {
-					while (exec = lrc_reg.exec(lrc)) {
-						if (exec[1]) {
-							lrc_text.push(exec[1]);
-						}
-					}
-				}
 
 				let user_info = {
 					nickname: Bot.nickname,
@@ -507,18 +495,27 @@ async function music_message(e) {
 				};
 				let MsgList = [];
 
-				if (lrc_text.length > 0) {
+				for (let lrc of lrcs) {
+					let lrc_text = [];
+					let lrc_reg = /\[.*\](.*)?/gm;
+					let exec;
+					while (exec = lrc_reg.exec(lrc)) {
+						if (exec[1]) {
+							lrc_text.push(exec[1]);
+						}
+					}
+					if (lrc_text.length > 0) {
+						MsgList.push({
+							...user_info,
+							message: `---${music.name}-${music.artist}---\n${lrc_text.join('\n')}`
+						});
+					}
+
 					MsgList.push({
 						...user_info,
-						message: `---${music.name}-${music.artist}---\n${lrc_text.join('\n')}`
+						message: `---${music.name}-${music.artist}---\n${lrc}`
 					});
 				}
-
-				MsgList.push({
-					...user_info,
-					message: `---${music.name}-${music.artist}---\n${lrc}`
-				});
-
 				let forwardMsg = await Bot.makeForwardMsg(MsgList);
 				await e.reply(forwardMsg);
 			}
