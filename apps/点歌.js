@@ -486,14 +486,17 @@ async function music_message(e) {
 					}
 				} catch (err) { }
 
-				let lrc = music.lrc || '没有查询到这首歌的歌词！';
+				let lrcs = music.lrc || '没有查询到这首歌的歌词！';
+				if (!Array.isArray(lrcs)) lrcs = [lrcs];
 				let lrc_text = [];
 				let lrc_reg = /\[.*\](.*)?/gm;
 
 				let exec;
-				while (exec = lrc_reg.exec(lrc)) {
-					if (exec[1]) {
-						lrc_text.push(exec[1]);
+				for (let lrc of lrcs) {
+					while (exec = lrc_reg.exec(lrc)) {
+						if (exec[1]) {
+							lrc_text.push(exec[1]);
+						}
 					}
 				}
 
@@ -1147,7 +1150,9 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					let response = await fetch(url, options); //调用接口获取数据
 					let res = await response.json();
 					if (res.lyric) {
-						return Buffer.from(res.lyric, 'base64').toString();
+						let lrc = Buffer.from(res.lyric, 'base64').toString();
+						if (res.trans) lrc = [lrc, Buffer.from(res.trans, 'base64').toString()];
+						return lrc;
 					}
 				} catch (err) { }
 				return '没有查询到这首歌的歌词！';
