@@ -451,7 +451,7 @@ async function music_message(e) {
 			if (!reg[1]?.includes('歌词')) {
 				let music_json = await CreateMusicShareJSON(music);
 				if (reg[1] && reg[1].includes('语音')) {
-					if (!music_json.meta.music || music_json.meta.music?.musicUrl) {
+					if (!music_json.meta.music || !music_json.meta.music?.musicUrl) {
 						await e.reply('[' + music.name + '-' + music.artist + ']获取播放地址失败！');
 						return true;
 					}
