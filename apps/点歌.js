@@ -1014,7 +1014,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					let res = await response.json();
 					if (res.code == 200 && res.lrc?.lyric) {
 						let lrc = res.lrc.lyric;
-						if(res.tlyric.lyric) lrc = [lrc, res.lrc.tlyric];
+						if(res.tlyric.lyric) lrc = [lrc, res.tlyric.lyric];
 						return lrc;
 					}
 				} catch (err) { }
