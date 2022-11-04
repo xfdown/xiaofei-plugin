@@ -377,8 +377,7 @@ async function recallMusicMsg(key, msg_results) {
 			for (let val of msg_result) {
 				try {
 					val = await val;
-					let message_id = (await val?.message)?.message_id || val?.message_id
-					console.log(val, message_id)
+					let message_id = (await val?.message)?.message_id || val?.message_id;
 					switch (type) {
 						case 'group':
 							await Bot.pickGroup(arr[1]).recallMsg(message_id);
@@ -452,7 +451,7 @@ async function music_message(e) {
 			if (!reg[1]?.includes('歌词')) {
 				let music_json = await CreateMusicShareJSON(music);
 				if (reg[1] && reg[1].includes('语音')) {
-					if(!music_json.meta.music || music_json.meta.music?.musicUrl){
+					if (!music_json.meta.music || music_json.meta.music?.musicUrl) {
 						await e.reply('[' + music.name + '-' + music.artist + ']获取播放地址失败！');
 						return true;
 					}
