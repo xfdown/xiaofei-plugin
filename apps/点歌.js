@@ -662,8 +662,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			if (source[0] == 'qq_radio') {
 				let nickname = e.sender.nickname;
 				if (e.isGroup) {
-					let info = await Bot.getGroupMemberInfo(e.group_id, e.user_id)
-					nickname = info.card || info.nickname;
+					try {
+						let info = await Bot.getGroupMemberInfo(e.group_id, e.user_id)
+						nickname = info.card || info.nickname;
+					} catch (err) { }
 				}
 
 				let user_info = {
