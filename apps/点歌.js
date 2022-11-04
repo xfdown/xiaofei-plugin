@@ -253,7 +253,7 @@ export class xiaofei_music extends plugin {
 					}
 					music_cookies.netease.ck = netease_cookies;
 					let data = result.data;
-					await e.reply(`网易云音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
+					await e.reply(`网易云音乐ck提交成功！\n账号：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
 					return true;
 				} else if (cookies.get('wxunionid') || cookies.get('psrf_qqunionid')) {
 					let result = await get_qqmusic_userinfo(cookies);
@@ -268,7 +268,7 @@ export class xiaofei_music extends plugin {
 						update_qqmusic_ck();
 					} catch (err) { }
 					let data = result.data;
-					await e.reply(`QQ音乐ck提交成功！\n用户：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
+					await e.reply(`QQ音乐ck提交成功！\n账号：${data.nickname}[${data.userid}]\n是否VIP：${data.is_vip ? '是' : '否'}`);
 					return true;
 				}
 			} catch (err) {
