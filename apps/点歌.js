@@ -487,7 +487,7 @@ async function music_message(e) {
 				} catch (err) { }
 
 				let lrcs = music.lrc || '没有查询到这首歌的歌词！';
-				let lrc = '';
+				let lrc = lrcs;
 				if (!Array.isArray(lrcs)) lrcs = [lrcs];
 				let lrc_text = [];
 				let lrc_reg = /\[.*\](.*)?/gm;
