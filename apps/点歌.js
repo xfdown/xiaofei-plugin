@@ -1013,7 +1013,9 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					let response = await fetch(url, options); //调用接口获取数据
 					let res = await response.json();
 					if (res.code == 200 && res.lrc?.lyric) {
-						return res.lrc.lyric;
+						let lrc = res.lrc.lyric;
+						if(res.tlyric.lyric) lrc = [lrc, res.lrc.tlyric];
+						return lrc;
 					}
 				} catch (err) { }
 				return '没有查询到这首歌的歌词！';
