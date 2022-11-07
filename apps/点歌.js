@@ -1243,9 +1243,9 @@ async function music_search(search, source, page = 1, page_size = 10) {
 	}
 	if (result && result.data && result.data.length > 0) {
 		page = result.page;
-		result = result.data;
-		for (let i in result) {
-			let data = result[i];
+		let result_data = result.data;
+		for (let i in result_data) {
+			let data = result_data[i];
 			let name = value[source].name; name = typeof (name) == 'function' ? await name(data) : data[name];
 			let id = data[value[source].id]; if (source == 'kuwo') { id = id.substring(6); }
 			let artist = value[source].artist; artist = typeof (artist) == 'function' ? await artist(data) : data[artist];
