@@ -92,7 +92,7 @@ var music_cookies = {
 	}
 };
 
-const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台)(.*)$';
+const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首)(.*)$';
 
 export class xiaofei_music extends plugin {
 	constructor() {
@@ -558,7 +558,7 @@ async function music_message(e) {
 
 	source = [source, reg[3]];
 
-	if (search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && !((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+	if (search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && reg[4] != '每日推荐' && reg[4] != '每日30首' && !((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help, true);
 		return true;
@@ -587,6 +587,13 @@ async function music_message(e) {
 		}
 	}
 
+	if (reg[4] == '每日推荐' || reg[4] == '每日30首') {
+		search = e.user_id;
+		source = ['qq_recommend', '每日推荐'];
+		page = 1;
+		page_size = 30;
+	}
+
 	if (reg[4] == '下一页') {
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data[key];
@@ -607,6 +614,7 @@ async function music_message(e) {
 async function music_handle(e, search, source, page = 0, page_size = 10, temp_data = {}) {
 	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if (result && result.data && result.data.length > 0) {
+		page = result.page;
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data;
 		let temp = data[key];
@@ -614,23 +622,24 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			delete data[key];
 			recallMusicMsg(key, temp.msg_results);//撤回上一条多选点歌列表
 		}
-
 		data = {};
 
 		if (page > 0) {
+			let title = source[1] + '点歌列表';
+			if (result.title) title = result.title;
 			let msg_result = [];
 
 			let setting = Config.getdefSet('setting', 'system') || {};
 			if (setting['is_cardlist'] == true) {
-				let json_result = ShareMusic_JSONList(e, result.data, page, page_size, source[1]);
+				let json_result = ShareMusic_JSONList(e, result.data, page, page_size, title);
 				msg_result.push(ArkMsg.Share(JSON.stringify(json_result.data), e, null, null, true));
 			}
 
 			if (e.guild_id) {//频道的话发文字，图片不显示。。。
-				msg_result.push(e.reply(ShareMusic_TextList(e, result.data, page, page_size, source[1])));
+				msg_result.push(e.reply(ShareMusic_TextList(e, result.data, page, page_size, title)));
 			} else {
 				msg_result.push(new Promise(async (resolve, reject) => {
-					resolve(await e.reply(await ShareMusic_HtmlList(e, result.data, page, page_size, source[1])));//生成图片列表
+					resolve(await e.reply(await ShareMusic_HtmlList(e, result.data, page, page_size, title)));//生成图片列表
 				}));
 			}
 
@@ -758,29 +767,31 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		if (page > 1) {
 			await e.reply('没有找到更多歌曲！', true);
 		} else {
-			await e.reply((source[0].includes('radio') ? '获取推荐歌曲失败，请重试！' : '没有找到该歌曲！'), true);
+			await e.reply(((source[0].includes('radio') || source[0].includes('recommend')) ? '获取推荐歌曲失败，请重试！' : '没有找到该歌曲！'), true);
 		}
 	}
 	return true;
 
 }
 
-function ShareMusic_TextList(e, list, page, page_size, source = '') {
-	let message = [`---${source}点歌列表---`];
+function ShareMusic_TextList(e, list, page, page_size, title = '') {
+	let next_page = (page > 0 && list.length >= page_size) ? true : false;
+	let message = [`---${title}---`];
 	for (let i in list) {
 		let music = list[i];
 		let index = Number(i) + 1;
 		if (page > 1) {
-			index = ((page - 1) * 10) + index;
+			index = ((page - 1) * page_size) + index;
 		}
 		message.push(index + '.' + music.name + '-' + music.artist);
 	}
 	message.push('----------------');
-	message.push('提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！');
+	message.push('提示：请在一分钟内发送序号进行点歌' + (next_page ? '，发送【#下一页】查看更多' : '') + '！');
 	return message.join('\n');
 }
 
-function ShareMusic_JSONList(e, list, page, page_size, source = '') {
+function ShareMusic_JSONList(e, list, page, page_size, title = '') {
+	let next_page = (page > 0 && list.length >= page_size) ? true : false;
 	let json = {
 		"app": "com.tencent.bot.task.deblock",
 		"config": {
@@ -793,24 +804,7 @@ function ShareMusic_JSONList(e, list, page, page_size, source = '') {
 				"appID": "",
 				"battleDesc": "",
 				"botName": "Yunzai-Bot",
-				"cmdList": [{
-					"cmdDesc": "进行点歌",
-					"cmd": " 歌曲序号",
-					"cmdTitle": "发送"
-				},
-				{
-					"cmdDesc": "查看更多",
-					"cmd": " #下一页",
-					"cmdTitle": "发送"
-				}, {
-					"cmdDesc": "查看歌词",
-					"cmd": " #歌词+序号",
-					"cmdTitle": "发送"
-				}, {
-					"cmdDesc": "播放语音",
-					"cmd": " #(高清)语音+序号",
-					"cmdTitle": "发送"
-				}],
+				"cmdList": [],
 				"cmdTitle": "可在一分钟内发送以下指令:",
 				"content": "",
 				"guildID": "",
@@ -826,9 +820,9 @@ function ShareMusic_JSONList(e, list, page, page_size, source = '') {
 		"ver": "2.0.4.0",
 		"view": "index"
 	};
-	json.prompt = `${source}点歌列表`;
+	json.prompt = `${title}`;
 	json.meta.detail.receiverName = `@${e.nickname}`;
-	json.meta.detail.title = `---${source}点歌列表---`;
+	json.meta.detail.title = `---${title}---`;
 	let music_list = [];
 
 	for (let i in list) {
@@ -842,10 +836,37 @@ function ShareMusic_JSONList(e, list, page, page_size, source = '') {
 
 	json.meta.detail.content = music_list.join("\n");
 
+	let cmdList = json.meta.detail.cmdList;
+	cmdList.push({
+		"cmdDesc": "进行点歌",
+		"cmd": " 歌曲序号",
+		"cmdTitle": "发送"
+	});
+
+	if (next_page) {
+		cmdList.push({
+			"cmdDesc": "查看更多",
+			"cmd": " #下一页",
+			"cmdTitle": "发送"
+		});
+	}
+
+	cmdList.push({
+		"cmdDesc": "查看歌词",
+		"cmd": " #歌词+序号",
+		"cmdTitle": "发送"
+	});
+
+	cmdList.push({
+		"cmdDesc": "播放语音",
+		"cmd": " #(高清)语音+序号",
+		"cmdTitle": "发送"
+	});
 	return { data: json };
 }
 
-async function ShareMusic_HtmlList(e, list, page, page_size, source = '') {//来自土块插件（earth-k-plugin）的列表样式（已修改）
+async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//来自土块插件（earth-k-plugin）的列表样式（已修改）
+	let next_page = (page > 0 && list.length >= page_size) ? true : false;
 	let start = Date.now()
 	let new_list = [];
 	for (let i in list) {
@@ -884,8 +905,8 @@ async function ShareMusic_HtmlList(e, list, page, page_size, source = '') {//来
 	let data = {
 		plugin_path: Plugin_Path,
 		background_path: background_path || _background_path,
-		title: `${source.split('').join(' ')} 点 歌 列 表`,
-		tips: '提示：请在一分钟内发送序号进行点歌，发送【#下一页】查看更多！',
+		title: `${title.split('').join(' ')}`,
+		tips: '提示：请在一分钟内发送序号进行点歌' + (next_page ? '，发送【#下一页】查看更多' : '') + '！',
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
@@ -1014,7 +1035,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					let res = await response.json();
 					if (res.code == 200 && res.lrc?.lyric) {
 						let lrc = res.lrc.lyric;
-						if(res.tlyric.lyric) lrc = [lrc, res.tlyric.lyric];
+						if (res.tlyric.lyric) lrc = [lrc, res.tlyric.lyric];
 						return lrc;
 					}
 				} catch (err) { }
@@ -1210,6 +1231,9 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			source = 'qq';
 			result = await qqmusic_radio(search, page_size);
 			break;
+		case 'qq_recommend':
+			source = 'qq';
+			result = await qqmusic_recommend(search, page_size);
 		case 'qq':
 		default:
 			source = 'qq';
@@ -1671,11 +1695,49 @@ async function qqmusic_radio(uin, page_size) {
 
 		let data = res.req_0?.data?.tracks;
 		data = data ? data : [];
-		return { page: 1, data: data };
+		return { page: 0, data: data };
 	} catch (err) { }
 
 	return null;
 }
+
+async function qqmusic_recommend(uin, page_size) {
+	try {
+		let json_body = {
+			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
+			"req_0": { "module": "srf_diss_info.DissInfoServer", "method": "CgiGetDiss", "param": { "disstid": 0, "dirid": 202, "onlysonglist": 0, "song_begin": 0, "song_num": 500, "userinfo": 1, "pic_dpi": 800, "orderlist": 1 } }
+		};
+		json_body.comm.guid = md5(String(new Date().getTime()), 32);
+		json_body.comm.uin = uin;
+		json_body.comm.tmeLoginType = 2;
+		json_body.comm.psrf_qqunionid = '';
+		json_body.comm.authst = '';
+		json_body.req_0.param.song_num = page_size;
+
+		let options = {
+			method: 'POST',//post请求 
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: JSON.stringify(json_body)
+		};
+
+		let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let response = await fetch(url, options); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+
+		if (res.code != '0' && res.req_0.code != '0') {
+			return null;
+		}
+
+		let dirinfo = res.req_0?.data?.dirinfo;
+		let data = dirinfo?.songlist;
+		data = data ? data : [];
+		return { title: dirinfo.title, desc: dirinfo.desc, page: 0, data: data };
+	} catch (err) { }
+
+	return null;
+}
+
+
 
 async function qqmusic_search(search, page = 1, page_size = 10) {
 	try {
