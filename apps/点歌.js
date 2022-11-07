@@ -614,7 +614,6 @@ async function music_message(e) {
 async function music_handle(e, search, source, page = 0, page_size = 10, temp_data = {}) {
 	let result = await music_search(search, source[0], page == 0 ? 1 : page, page_size);
 	if (result && result.data && result.data.length > 0) {
-		page = result.page;
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data;
 		let temp = data[key];
@@ -625,6 +624,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		data = {};
 
 		if (page > 0) {
+			page = result.page;
 			let title = source[1] + '点歌列表';
 			if (result.title) title = result.title;
 			let msg_result = [];
