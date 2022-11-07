@@ -442,7 +442,7 @@ async function music_message(e) {
 		let index = Number(reg[2]) - 1;
 
 		if (data.data.length > index && index > -1) {
-			if (data.page < 1 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))) {
+			if (data.data.length < 2 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))) {
 				return false;
 			}
 			data.index = index;
