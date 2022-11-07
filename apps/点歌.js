@@ -1728,8 +1728,8 @@ async function qqmusic_recommend(uin, page_size) {
 			return null;
 		}
 
-		let dirinfo = res.req_0?.data?.dirinfo;
-		let data = dirinfo?.songlist;
+		let dirinfo = res.req_0?.data?.dirinfo || {};
+		let data = res.req_0?.data?.songlist;
 		data = data ? data : [];
 		return { title: dirinfo.title, desc: dirinfo.desc, page: 0, data: data };
 	} catch (err) { }
