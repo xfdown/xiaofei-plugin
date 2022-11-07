@@ -1234,6 +1234,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 		case 'qq_recommend':
 			source = 'qq';
 			result = await qqmusic_recommend(search, page_size);
+			break;
 		case 'qq':
 		default:
 			source = 'qq';
