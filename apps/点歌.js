@@ -1267,7 +1267,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			});
 		}
 	}
-	return { page: page, data: list };
+	return { title: result.title, page: page, data: list };
 }
 
 async function CreateMusicShareJSON(data) {
