@@ -571,11 +571,7 @@ async function music_message(e) {
 	let page_size = reg[2] == '多选' ? _page_size : 10;
 
 	if (reg[4] == '个性电台' || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
-		//if(source[0] != 'qq'){
-		//	await e.reply(`暂不支持${source[1]}个性电台！`,true);
-		//	return true;
-		//}
-
+		if (search != '') return true;
 		search = e.user_id;
 		source = ['qq_radio', 'QQ个性电台'];
 		page = 0;
@@ -588,6 +584,7 @@ async function music_message(e) {
 	}
 
 	if (reg[4] == '每日推荐' || reg[4] == '每日30首' || reg[4] == '日推') {
+		if (search != '') return true;
 		search = e.user_id;
 		source = ['qq_recommend', '每日推荐'];
 		page = 1;
