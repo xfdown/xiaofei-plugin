@@ -92,7 +92,7 @@ var music_cookies = {
 	}
 };
 
-const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首)(.*)$';
+const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推)(.*)$';
 
 export class xiaofei_music extends plugin {
 	constructor() {
@@ -587,7 +587,7 @@ async function music_message(e) {
 		}
 	}
 
-	if (reg[4] == '每日推荐' || reg[4] == '每日30首') {
+	if (reg[4] == '每日推荐' || reg[4] == '每日30首' || reg[4] == '日推') {
 		search = e.user_id;
 		source = ['qq_recommend', '每日推荐'];
 		page = 1;

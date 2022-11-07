@@ -41,7 +41,7 @@ export const helpList = [
     desc: '查询当前点播音乐的歌词，请先点播音乐再使用该功能'
   },{
     icon: 33,
-    title: '#来首歌 #QQ个性电台',
+    title: '#来首歌 #每日推荐 #QQ个性电台',
     desc: '根据你当前QQ的听歌口味推荐歌曲'
   },{
     icon: 71,
