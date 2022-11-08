@@ -570,7 +570,8 @@ async function music_message(e) {
 	let page = reg[2] == '多选' ? 1 : 0;
 	let page_size = reg[2] == '多选' ? _page_size : 10;
 
-	if ((reg[4] == '个性电台' && search == '') || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+	if (reg[4] == '个性电台' || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+		if (reg[4] == '个性电台' && search != '') return true;
 		search = e.user_id;
 		source = ['qq_radio', 'QQ个性电台'];
 		page = 0;
