@@ -692,12 +692,13 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 						music = music_json.meta.music;
 						music.tag = index + '.' + music.tag;
-						json_list.push(ArkMsg.Sign(JSON.stringify(music_json)));
+						json_list.push([music_json, ArkMsg.Sign(JSON.stringify(music_json))]);
 						index++;
 					}
 
 					for (let val of json_list) {
-						let json_sign = await val;
+						let music_json = val[0];
+						let json_sign = await val[1];
 						if (json_sign.code == 1) {
 							music_json = json_sign.data;
 						}
