@@ -74,7 +74,7 @@ async function Sign(json, client_info = null) {
 				} catch (err) { }
 
 				if (extra && extra.msg_seq == msg_seq) {
-					Bot.off('message.private', json_handle);
+					//Bot.off('message.private', json_handle);
 					clearTimeout(timer);
 					clearTimeout(timer1);
 					delete json['extra'];
@@ -101,7 +101,7 @@ async function Sign(json, client_info = null) {
 
 		let timer = setTimeout(async function () {
 			if (await get_json()) return;
-			Bot.off('message.private', json_handle);
+			//Bot.off('message.private', json_handle);
 			result.code = -1;
 			result.msg = '签名失败，请稍后再试！';
 			resolve(result);
@@ -114,7 +114,7 @@ async function Sign(json, client_info = null) {
 					let data = await result.result;
 					data = core.pb.decode(data);
 					if (data[3] != 0) {
-						Bot.off('message.private', json_handle);
+						//Bot.off('message.private', json_handle);
 						result.code = -1;
 						result.msg = '签名失败，请稍后再试！';
 						clearTimeout(timer);
@@ -130,7 +130,7 @@ async function Sign(json, client_info = null) {
 		};
 		let timer1 = setTimeout(timer1_fun, 100);
 
-		Bot.on('message.private', json_handle);
+		//Bot.on('message.private', json_handle);
 		result.result = Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 	});
 }
