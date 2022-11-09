@@ -587,8 +587,9 @@ async function music_message(e) {
 		if (search != '') return true;
 		search = e.user_id;
 		source = ['qq_recommend', '每日推荐'];
-		page = 1;
+		page = 0;
 		page_size = 30;
+		e.reply('请稍候。。。', true);
 	}
 
 	if (reg[4] == '下一页') {
@@ -666,7 +667,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 			}
 		} else {
-			if (source[0] == 'qq_radio') {
+			if (source[0] == 'qq_radio' || source[0] == 'qq_recommend') {
+				let title = source[0] == 'qq_radio' ? `根据QQ[${search}]的听歌口味为您推荐` : result.title;
 				let nickname = e.sender.nickname;
 				if (e.isGroup) {
 					try {
@@ -693,6 +695,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music = music_json.meta.music;
 						music.tag = index + '.' + music.tag;
 						json_list.push([music_json, ArkMsg.Sign(JSON.stringify(music_json))]);
+						if (index % 5 == 0 && index != result.data.length) await sleep(1000);
 						index++;
 					}
 
@@ -713,7 +716,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')
 						.replace(/\n/g, '')
 						.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-						.replace(/___+/, `<title color="#777777" size="26">根据QQ[${search}]的听歌口味为您推荐</title>`);
+						.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
 					await e.reply(forwardMsg);
 					data = {
 						time: new Date().getTime(),
