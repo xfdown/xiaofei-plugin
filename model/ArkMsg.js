@@ -126,7 +126,7 @@ async function Sign(json, client_info = null) {
 			if (await get_json()) return;
 			if (num > 6) return;
 			num++;
-			timer1 = setTimeout(timer1_fun, 200);
+			timer1 = setTimeout(timer1_fun, 100);
 		};
 		let timer1 = setTimeout(timer1_fun, 100);
 
