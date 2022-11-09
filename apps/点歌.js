@@ -683,16 +683,21 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				let MsgList = [];
 				let index = 1;
 				if (result.data.length > 1) {
+					let json_list = [];
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
-							app_name: 'QQ音乐个性电台'
+							app_name: 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '')
 						});
 
 						music = music_json.meta.music;
 						music.tag = index + '.' + music.tag;
+						json_list.push(ArkMsg.Sign(JSON.stringify(music_json)));
+						index++;
+					}
 
-						let json_sign = await ArkMsg.Sign(JSON.stringify(music_json));
+					for (let val of json_list) {
+						let json_sign = await val;
 						if (json_sign.code == 1) {
 							music_json = json_sign.data;
 						}
@@ -700,8 +705,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 							...user_info,
 							message: segment.json(music_json)
 						});
-						index++;
 					}
+
 					let forwardMsg = await Bot.makeForwardMsg(MsgList);
 					forwardMsg.data = forwardMsg.data
 						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')

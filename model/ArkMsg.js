@@ -109,11 +109,24 @@ async function Sign(json, client_info = null) {
 
 		let num = 0;
 		let timer1_fun = async function () {
-			if (num == 0) await result.result;
+			if (num == 0) {
+				try {
+					let data = await result.result;
+					data = core.pb.decode(data);
+					if (data[3] != 0) {
+						Bot.off('message.private', json_handle);
+						result.code = -1;
+						result.msg = '签名失败，请稍后再试！';
+						clearTimeout(timer);
+						resolve(result);
+						return true;
+					}
+				} catch (err) { }
+			}
 			if (await get_json()) return;
-			if(num > 6) return;
+			if (num > 6) return;
 			num++;
-			timer1 = setTimeout(timer1_fun, 100);
+			timer1 = setTimeout(timer1_fun, 200);
 		};
 		let timer1 = setTimeout(timer1_fun, 100);
 
