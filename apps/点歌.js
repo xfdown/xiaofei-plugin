@@ -688,12 +688,11 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
-							app_name: 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '')
 						});
 						music_json.app = 'com.tencent.qzone.structmsg';
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
-						music.tag = index + '.' + music.tag.replace('小飞插件', '');
+						music.tag = index + '.' + 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '每日推荐');
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
