@@ -699,11 +699,14 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						index++;
 					}
 
+					let is_sign = true;
 					for (let val of json_list) {
 						let music_json = val[0];
 						let json_sign = await val[1];
 						if (json_sign.code == 1) {
 							music_json = json_sign.data;
+						} else {
+							is_sign = false;
 						}
 						MsgList.push({
 							...user_info,
@@ -717,6 +720,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						.replace(/\n/g, '')
 						.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
 						.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
+					if (!is_sign) {
+						forwardMsg.data = forwardMsg.data
+							.replace('转发的', '不可转发的');
+					}
 					await e.reply(forwardMsg);
 					data = {
 						time: new Date().getTime(),
