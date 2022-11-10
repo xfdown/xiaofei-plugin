@@ -685,35 +685,23 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				let MsgList = [];
 				let index = 1;
 				if (result.data.length > 1) {
-					let json_list = [];
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
 							app_name: 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '')
 						});
-
+						music_json.app = 'com.tencent.qzone.structmsg';
+						music_json.config.autosize = true;
 						music = music_json.meta.music;
-						music.tag = index + '.' + music.tag;
-						json_list.push([music_json, ArkMsg.Sign(JSON.stringify(music_json))]);
-						if (index % 5 == 0 && index != result.data.length) await sleep(1000);
-						index++;
-					}
-
-					let is_sign = true;
-					for (let val of json_list) {
-						let music_json = val[0];
-						let json_sign = await val[1];
-						if (json_sign.code == 1) {
-							music_json = json_sign.data;
-						} else {
-							is_sign = false;
-						}
+						music.tag = index + '.' + music.tag.replace('小飞插件', '');
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
 						});
+						index++;
 					}
 
+					let is_sign = true;
 					let forwardMsg = await Bot.makeForwardMsg(MsgList);
 					forwardMsg.data = forwardMsg.data
 						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')
