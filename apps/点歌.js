@@ -108,12 +108,6 @@ export class xiaofei_music extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: music_reg,
-					/** 执行方法 */
-					fnc: 'music'
-				},
-				{
-					/** 命令正则匹配 */
 					reg: '^#?(点歌|音乐)(ck|cookie)(检查|状态)$',
 					/** 执行方法 */
 					fnc: 'music_ck_check',
@@ -125,6 +119,12 @@ export class xiaofei_music extends plugin {
 					/** 执行方法 */
 					fnc: 'submit_music_ck',
 					permission: 'master'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: music_reg,
+					/** 执行方法 */
+					fnc: 'music'
 				}
 			]
 		});
