@@ -693,6 +693,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
 						music.tag = index + '.' + 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '每日推荐');
+						music.preview = music.source_icon;
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
@@ -727,8 +728,6 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						...music,
 						app_name: 'QQ音乐个性电台'
 					});
-					let meta = music_json.meta;
-					meta.music.preview = meta.music.source_icon;
 					let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
 					if (ArkSend.code != 1) {
 						let body = await CreateMusicShare(e, music);
