@@ -727,6 +727,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						...music,
 						app_name: 'QQ音乐个性电台'
 					});
+					let meta = music_json.meta;
+					meta.music.preview = meta.music.source_icon;
 					let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
 					if (ArkSend.code != 1) {
 						let body = await CreateMusicShare(e, music);
