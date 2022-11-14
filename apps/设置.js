@@ -1,20 +1,20 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import lodash from 'lodash'
-import {Config, Common} from '../components/index.js'
+import { Config, Common } from '../components/index.js'
 
 
 const cfgMap = {
-  '点歌': 'system.music',
-  '多选点歌': 'system.is_list',
-  '天气': 'system.weather',
-  '卡片多选点歌': 'system.is_cardlist',
-  '默认音乐源': 'system.music_source',
+	'点歌': 'system.music',
+	'多选点歌': 'system.is_list',
+	'天气': 'system.weather',
+	'卡片多选点歌': 'system.is_cardlist',
+	'默认音乐源': 'system.music_source',
 };
 
 const CfgReg = `^#?小飞(插件)?设置\\s*(${lodash.keys(cfgMap).join('|')})?\\s*(.*)$`;
 
 export class xiaofei_setting extends plugin {
-	constructor () {
+	constructor() {
 		super({
 			/** 功能名称 */
 			name: '小飞插件_设置',
@@ -35,52 +35,54 @@ export class xiaofei_setting extends plugin {
 			]
 		});
 	}
-	
-	async message(){
+
+	async message() {
 		return await setting(this.e);
 	}
 }
 
 
 async function setting(e) {
-  let reg = new RegExp(CfgReg).exec(e.msg);
+	let reg = new RegExp(CfgReg).exec(e.msg);
 
-  if (reg && reg[2]) {
-    let val = reg[3] || '';
-    let cfgKey = cfgMap[reg[2]];
+	if (reg && reg[2]) {
+		let val = reg[3] || '';
+		let cfgKey = cfgMap[reg[2]];
 
-	if(val.includes('开启') || val.includes('关闭')) val = !/关闭/.test(val);
+		if (cfgKey == 'system.music_source') {
+			let music_source = ['QQ', '网易', '酷我', '酷狗'];
+			if (!music_source.includes(val)) {
+				e.reply('不支持的音乐源！', true);
+				return true;
+			}
+		} else if (val.includes('开启') || val.includes('关闭')) {
+			val = !/关闭/.test(val);
+		} else {
+			cfgKey = '';
+		}
 
-	if(cfgKey == 'system.music_source'){
-		let music_source = ['QQ','网易','酷我','酷狗'];
-		if(!music_source.includes(val)){
-			e.reply('不支持的音乐源！',true);
-			return true;
+		if (cfgKey) {
+			setCfg(cfgKey, val);
 		}
 	}
 
-    if (cfgKey) {
-		setCfg(cfgKey, val);
-    }
-  }
 
-  
-  let cfg = {};
-  for(let name in cfgMap){
-	let key = cfgMap[name].split('.')[1];
-	cfg[key] = getStatus(cfgMap[name]);
-  }
+	let cfg = {};
+	for (let name in cfgMap) {
+		let key = cfgMap[name].split('.')[1];
+		cfg[key] = getStatus(cfgMap[name]);
+	}
 
-  // 渲染图像
-  return await Common.render('admin/index', {
-    ...cfg
-  }, { e, scale: 1});
+	// 渲染图像
+	return await Common.render('admin/index', {
+		...cfg
+	}, { e, scale: 1 });
 
 }
 
 function setCfg(rote, value, def = true) {
 	let arr = rote?.split('.') || [];
-	if(arr.length > 0){
+	if (arr.length > 0) {
 		let type = arr[0], name = arr[1];
 		let data = Config.getYaml('setting', type, def ? 'defSet' : 'config') || {};
 		data[name] = value;
@@ -92,24 +94,24 @@ const getStatus = function (rote, def = true) {
 	let _class = 'cfg-status';
 	let value = '';
 	let arr = rote?.split('.') || [];
-	if(arr.length > 0){
+	if (arr.length > 0) {
 		let type = arr[0], name = arr[1];
 		let data = Config.getYaml('setting', type, def ? 'defSet' : 'config') || {};
-		if (data[name] == true || data[name] == false){
+		if (data[name] == true || data[name] == false) {
 			_class = data[name] == false ? `${_class}  status-off` : _class;
 			value = data[name] == true ? '已开启' : '已关闭';
-		}else{
+		} else {
 			value = data[name];
 		}
 	}
-	if(!value){
-		if(rote == 'system.music_source'){
+	if (!value) {
+		if (rote == 'system.music_source') {
 			value = 'QQ';
-		}else{
+		} else {
 			_class = `${_class}  status-off`;
 			value = '已关闭';
 		}
 	}
-	
+
 	return `<div class="${_class}">${value}</div>`;
 }
