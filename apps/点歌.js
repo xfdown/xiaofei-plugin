@@ -664,7 +664,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					search: search,
 					source: source,
 					index: -1,
-					start_index: !temp_data.data ? (page * page_size) - page_size : 0
+					start_index: !temp_data.data ? (page * page_size) - page_size : temp_data.start_index
 				};
 			} else {
 				data = {
