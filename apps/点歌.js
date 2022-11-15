@@ -92,7 +92,7 @@ var music_cookies = {
 	}
 };
 
-const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推)(.*)$';
+const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推|我的收藏|我喜欢的歌)(.*)$';
 
 export class xiaofei_music extends plugin {
 	constructor() {
@@ -558,7 +558,7 @@ async function music_message(e) {
 
 	source = [source, reg[3]];
 
-	if (search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && reg[4] != '每日推荐' && reg[4] != '每日30首' && reg[4] != '日推' && !((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+	if (search == '' && reg[4] != '下一页' && reg[4] != '个性电台' && reg[4] != '每日推荐' && reg[4] != '每日30首' && reg[4] != '日推' && !((reg[4] == '来首' || reg[4] == '放首') && search == '歌') && reg[4] != '我的收藏' && reg[4] != '我喜欢的歌') {
 		let help = "------点歌说明------\r\n格式：#点歌 #多选点歌\r\n支持：QQ、网易、酷我、酷狗\r\n例如：#QQ点歌 #多选QQ点歌"
 		await e.reply(help, true);
 		return true;
@@ -589,6 +589,15 @@ async function music_message(e) {
 		source = ['qq_recommend', '每日推荐'];
 		page = 0;
 		page_size = 30;
+		e.reply('请稍候。。。', true);
+	}
+
+	if (reg[4] == '我的收藏' || reg[4] == '我喜欢的歌') {
+		if (search != '') return true;
+		search = e.user_id;
+		source = ['qq_like', '我的收藏'];
+		page = 1;
+		page_size = 9999;
 		e.reply('请稍候。。。', true);
 	}
 
@@ -1234,7 +1243,11 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			break;
 		case 'qq_recommend':
 			source = 'qq';
-			result = await qqmusic_recommend(search, page_size);
+			result = await qqmusic_getdiss(search, 0, 202, page, page_size);
+			break;
+		case 'qq_like':
+			source = 'qq';
+			result = await qqmusic_getdiss(search, 0, 201, page, page_size);
 			break;
 		case 'qq':
 		default:
@@ -1703,7 +1716,7 @@ async function qqmusic_radio(uin, page_size) {
 	return null;
 }
 
-async function qqmusic_recommend(uin, page_size) {
+async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page_size = 30) {
 	try {
 		let json_body = {
 			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
@@ -1715,6 +1728,9 @@ async function qqmusic_recommend(uin, page_size) {
 		json_body.comm.psrf_qqunionid = '';
 		json_body.comm.authst = '';
 		json_body.req_0.param.song_num = page_size;
+		json_body.req_0.param.song_begin = ((page < 1 ? 1 : page) * page_size) - 30;
+		json_body.req_0.param.disstid = disstid;
+		json_body.req_0.param.dirid = dirid;
 
 		let options = {
 			method: 'POST',//post请求 
@@ -1733,7 +1749,7 @@ async function qqmusic_recommend(uin, page_size) {
 		let dirinfo = res.req_0?.data?.dirinfo || {};
 		let data = res.req_0?.data?.songlist;
 		data = data ? data : [];
-		return { title: dirinfo.title, desc: dirinfo.desc, page: 0, data: data };
+		return { title: dirinfo.title, desc: dirinfo.desc, page: page, data: data };
 	} catch (err) { }
 
 	return null;
