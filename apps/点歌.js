@@ -635,6 +635,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			page = result.page;
 			let title = source[1] + '点歌列表';
 			if (result.title) title = result.title;
+			title += `[第${page}页]`;
 			let msg_result = [];
 
 			let setting = Config.getdefSet('setting', 'system') || {};
@@ -922,7 +923,7 @@ async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//来�
 		plugin_path: Plugin_Path,
 		background_path: background_path || _background_path,
 		title: `${title.split('').join(' ')}`,
-		tips: '提示：请在一分钟内发送序号进行点歌' + (next_page ? '，发送【#下一页】查看更多' : '') + '！',
+		tips: '请在一分钟内发送序号进行点歌' + (next_page ? '，发送【#下一页】查看更多' : '') + '！',
 		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
