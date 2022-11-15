@@ -679,7 +679,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 			}
 		} else {
-			if (source[0] == 'qq_radio' || source[0] == 'qq_recommend') {
+			if (source[0] == 'qq_radio' || source[0] == 'qq_recommend' || source[0] == 'qq_like') {
 				let title = source[0] == 'qq_radio' ? `根据QQ[${search}]的听歌口味为您推荐` : result.title;
 				let nickname = e.sender.nickname;
 				if (e.isGroup) {
