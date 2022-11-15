@@ -439,7 +439,7 @@ async function music_message(e) {
 			reg[2] = String(data.index + 1);
 		}
 
-		let index = Number(reg[2]) - 1;
+		let index = (Number(reg[2]) - 1) - data.start_index;
 
 		if (data.data.length > index && index > -1) {
 			if (data.data.length < 2 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))) {
@@ -663,7 +663,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					msg_results: msg_results,
 					search: search,
 					source: source,
-					index: -1
+					index: -1,
+					start_index: !temp_data.data ? (page * page_size) - page_size : 0
 				};
 			} else {
 				data = {
@@ -673,7 +674,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					msg_results: [msg_result],
 					search: search,
 					source: source,
-					index: -1
+					index: -1,
+					start_index: 0
 				};
 			}
 		} else {
