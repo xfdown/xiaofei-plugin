@@ -436,7 +436,7 @@ async function music_message(e) {
 		}
 
 		if ((reg[1]?.includes('语音') || reg[1]?.includes('歌词')) && !reg[2]) {
-			reg[2] = String(data.index + 1) + data.start_index;
+			reg[2] = String((data.index + 1) + data.start_index);
 		}
 
 		let index = (Number(reg[2]) - 1) - data.start_index;
