@@ -597,7 +597,7 @@ async function music_message(e) {
 		search = e.user_id;
 		source = ['qq_like', '我的收藏'];
 		page = 1;
-		page_size = 9999;
+		page_size = 20;
 		e.reply('请稍候。。。', true);
 	}
 
