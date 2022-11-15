@@ -1728,7 +1728,7 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 		json_body.comm.psrf_qqunionid = '';
 		json_body.comm.authst = '';
 		json_body.req_0.param.song_num = page_size;
-		json_body.req_0.param.song_begin = ((page < 1 ? 1 : page) * page_size) - 30;
+		json_body.req_0.param.song_begin = ((page < 1 ? 1 : page) * page_size) - page_size;
 		json_body.req_0.param.disstid = disstid;
 		json_body.req_0.param.dirid = dirid;
 
