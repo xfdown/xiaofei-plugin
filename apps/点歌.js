@@ -593,10 +593,11 @@ async function music_message(e) {
 	}
 
 	if (reg[4] == '我的收藏' || reg[4] == '我喜欢的歌') {
-		if (search != '') return true;
+		let page_reg = /^\d+$/.exec(search);
+		if (search != '' && !page_reg) return true;
 		search = e.user_id;
 		source = ['qq_like', '我的收藏'];
-		page = 1;
+		page = (!page_reg ? 1 : parseInt(page_reg[0]));
 		page_size = 20;
 		e.reply('请稍候。。。', true);
 	}
@@ -777,7 +778,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		if (page > 1) {
 			await e.reply('没有找到更多歌曲！', true);
 		} else {
-			await e.reply(((source[0].includes('radio') || source[0].includes('recommend')) ? '获取推荐歌曲失败，请重试！' : '没有找到该歌曲！'), true);
+			await e.reply(((source[0].includes('radio') || source[0].includes('recommend')) ? '获取推荐歌曲失败，请重试！' : '没有找到歌曲！'), true);
 		}
 	}
 	return true;

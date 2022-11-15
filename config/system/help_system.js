@@ -44,6 +44,10 @@ export const helpList = [
     title: '#来首歌 #每日推荐 #个性电台',
     desc: '根据你当前QQ的听歌口味推荐歌曲'
   },{
+    icon: 33,
+    title: '#我的收藏 #我喜欢的歌',
+    desc: '获取你当前QQ的收藏歌曲'
+  },{
     icon: 71,
     title: '#天气 #小飞天气',
     desc: '例如：#北京天气 #小飞北京天气'
