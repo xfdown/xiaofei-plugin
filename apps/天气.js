@@ -138,6 +138,7 @@ async function weather(e,search){
 		await page.goto('https://tianqi.qq.com/');//请求天气页面
 		
 		await page.evaluate(() => {
+			$('a').remove();
 			$('#ct-footer').remove();//删除底部导航栏
 		});
 
