@@ -1146,7 +1146,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 				if (data.sa == 0 || data.pay?.pay_play == 1) {//需要付费
 					let json_body = {
 						...music_cookies.qqmusic.body,
-						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime()), 32), "songmid": [], "songtype": [0], "uin": "0" } }
+						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime()), 32), "songmid": [], "songtype": [0], "uin": "0", "platform": "20" } }
 					};
 					json_body.req_0.param.songmid = [data.mid];
 					let options = {
