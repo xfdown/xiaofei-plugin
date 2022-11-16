@@ -150,11 +150,11 @@ async function weather(e,search){
 			omitBackground: false,
 			quality: 90,
 		});
-		
+
+		page.close().catch((err) => logger.error(err));
+
 		puppeteer.renderNum++;
 		puppeteer.restart();
-		
-		page.close().catch((err) => logger.error(err));
 	}catch(err){
 		logger.error(err);
 	}
