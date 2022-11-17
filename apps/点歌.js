@@ -186,7 +186,7 @@ export class xiaofei_music extends plugin {
 
 	/** 接受到消息都会先执行一次 */
 	accept() {
-		if (/^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.test(this.e.msg)) {
+		if (/^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|播放地址)?(\d+)?$/.test(this.e.msg)) {
 			music_message(this.e);
 		}
 		return;
@@ -311,7 +311,7 @@ if (xiaofei_plugin.music_guild) {
 
 xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if (RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.test(e.msg)) {
+	if (RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|播放地址)?(\d+)?$/.test(e.msg)) {
 		music_message(e);
 	}
 };
