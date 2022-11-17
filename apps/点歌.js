@@ -751,7 +751,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					}
 					await e.reply(forwardMsg);
 					data = {
-						time: new Date().getTime(),
+						time: new Date().getTime() + (1000 * 60 * 29),
 						data: result.data,
 						page: 0,
 						msg_results: [],
