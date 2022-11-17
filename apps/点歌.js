@@ -1047,11 +1047,11 @@ async function music_search(search, source, page = 1, page_size = 10) {
 							headers: {
 								'Content-Type': 'application/x-www-form-urlencoded',
 								'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 12; MI Build/SKQ1.211230.001)',
-								'Cookie': cookie
+								'Cookie': 'versioncode=8008070; os=android; channel=xiaomi; ;appver=8.8.70; ' + cookie
 							},
 							body: `ids=${JSON.stringify([data.id])}&level=standard&encodeType=mp3`
 						};
-						let response = await fetch('https://music.163.com/api/song/enhance/player/url/v1', options); //调用接口获取数据
+						let response = await fetch('https://interface3.music.163.com/api/song/enhance/player/url/v1', options); //调用接口获取数据
 						let res = await response.json(); //结果json字符串转对象
 						if (res.code == 200) {
 							url = res.data[0]?.url;
