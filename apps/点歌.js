@@ -397,7 +397,7 @@ async function recallMusicMsg(key, msg_results) {
 async function music_message(e) {
 	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|播放地址)?(\d+)?$/.exec(e.msg);
 	if (reg) {
-		if (e.source && reg[1]?.includes('语音') || reg[1]?.includes('播放地址')) {
+		if (e.source && (reg[1]?.includes('语音') || reg[1]?.includes('播放地址'))) {
 			let source;
 			if (e.isGroup) {
 				source = (await e.group.getChatHistory(e.source.seq, 1)).pop();
