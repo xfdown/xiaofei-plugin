@@ -625,7 +625,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data;
 		let temp = data[key];
-		if (temp?.msg_results && page < 2) {
+		if (temp?.msg_results && (temp?.search != search || temp?.source[0] != source[0])) {
 			delete data[key];
 			recallMusicMsg(key, temp.msg_results);//撤回上一条多选点歌列表
 		}
