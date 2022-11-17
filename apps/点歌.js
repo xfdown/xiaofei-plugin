@@ -290,7 +290,10 @@ export class xiaofei_music extends plugin {
 		msgs.push(`---网易云音乐ck说明---`);
 		msgs.push(`请前往：http://music.163.com/ 获取以下ck：`);
 		msgs.push(`必须参数：MUSIC_U=;`);
-		msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取，pc端请使用浏览器的开发人员工具获取。`);
+		msgs.push(`因网易云音乐ck使用了HttpOnly，手机端需使用抓包工具获取（或使用Via浏览器的"查看Cookies"功能获取），pc端请使用浏览器的开发人员工具获取。`);
+		msgs.push(`--------------------`);
+		msgs.push(`Via浏览器下载：https://www.viayoo.com/`);
+		
 		MsgList.push({
 			...user_info,
 			message: `---提交音乐ck说明---\n${msgs.join('\n')}`
