@@ -395,9 +395,9 @@ async function recallMusicMsg(key, msg_results) {
 }
 
 async function music_message(e) {
-	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词)?(\d+)?$/.exec(e.msg);
+	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|播放地址)?(\d+)?$/.exec(e.msg);
 	if (reg) {
-		if (e.source && reg[1]?.includes('语音')) {
+		if (e.source && reg[1]?.includes('语音') || reg[1]?.includes('播放地址')) {
 			let source;
 			if (e.isGroup) {
 				source = (await e.group.getChatHistory(e.source.seq, 1)).pop();
@@ -409,6 +409,12 @@ async function music_message(e) {
 					let music_json = JSON.parse(source['message'][0]['data']);
 					if (music_json['view'] == 'music') {
 						let music = music_json.meta.music;
+
+						if (reg[1]?.includes('播放地址')) {
+							await e.reply('[' + music.title + '-' + music.desc + ']\n播放地址：' + music.musicUrl);
+							return true;
+						}
+
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
 						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清')));
 						if (!result) {
@@ -435,14 +441,14 @@ async function music_message(e) {
 			return false;
 		}
 
-		if ((reg[1]?.includes('语音') || reg[1]?.includes('歌词')) && !reg[2]) {
+		if ((reg[1]?.includes('语音') || reg[1]?.includes('歌词') || reg[1]?.includes('播放地址')) && !reg[2]) {
 			reg[2] = String((data.index + 1) + data.start_index);
 		}
 
 		let index = (Number(reg[2]) - 1) - data.start_index;
 
 		if (data.data.length > index && index > -1) {
-			if (data.data.length < 2 && (!reg[1]?.includes('语音') && !reg[1]?.includes('歌词'))) {
+			if (data.data.length < 2 && !reg[1]?.includes('语音') && !reg[1]?.includes('歌词') && !reg[1]?.includes('播放地址')) {
 				return false;
 			}
 			data.index = index;
@@ -450,11 +456,17 @@ async function music_message(e) {
 
 			if (!reg[1]?.includes('歌词')) {
 				let music_json = await CreateMusicShareJSON(music);
-				if (reg[1] && reg[1].includes('语音')) {
+				if (reg[1] && (reg[1].includes('语音') || reg[1]?.includes('播放地址'))) {
 					if (!music_json.meta.music || !music_json.meta.music?.musicUrl) {
 						await e.reply('[' + music.name + '-' + music.artist + ']获取播放地址失败！');
 						return true;
 					}
+
+					if (reg[1]?.includes('播放地址')) {
+						await e.reply('[' + music.name + '-' + music.artist + ']\n播放地址：' + music_json.meta.music.musicUrl);
+						return true;
+					}
+
 					await e.reply('开始上传[' + music.name + '-' + music.artist + ']。。。');
 					let result = await uploadRecord(music_json.meta.music.musicUrl, 0, !reg[1].includes('高清'));
 					if (!result) {
