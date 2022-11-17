@@ -186,7 +186,7 @@ export class xiaofei_music extends plugin {
 
 	/** 接受到消息都会先执行一次 */
 	accept() {
-		if (/^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载地址)?(\d+)?$/.test(this.e.msg)) {
+		if (/^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载音乐)?(\d+)?$/.test(this.e.msg)) {
 			music_message(this.e);
 		}
 		return;
@@ -311,7 +311,7 @@ if (xiaofei_plugin.music_guild) {
 
 xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
-	if (RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载地址)?(\d+)?$/.test(e.msg)) {
+	if (RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载音乐)?(\d+)?$/.test(e.msg)) {
 		music_message(e);
 	}
 };
@@ -395,9 +395,9 @@ async function recallMusicMsg(key, msg_results) {
 }
 
 async function music_message(e) {
-	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载地址)?(\d+)?$/.exec(e.msg);
+	let reg = /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载音乐)?(\d+)?$/.exec(e.msg);
 	if (reg) {
-		if (e.source && (reg[1]?.includes('语音') || reg[1]?.includes('下载地址'))) {
+		if (e.source && (reg[1]?.includes('语音') || reg[1]?.includes('下载音乐'))) {
 			let source;
 			if (e.isGroup) {
 				source = (await e.group.getChatHistory(e.source.seq, 1)).pop();
@@ -410,8 +410,14 @@ async function music_message(e) {
 					if (music_json['view'] == 'music') {
 						let music = music_json.meta.music;
 
-						if (reg[1]?.includes('下载地址')) {
-							await e.reply('[' + music.title + '-' + music.desc + ']\n下载地址：' + music.musicUrl);
+						if (reg[1]?.includes('下载音乐')) {
+							music.title = music.title + '-' + music.desc;
+							music.desc = '请点击下载';
+							music.jumpUrl = music.musicUrl;
+							music_json.view = 'news';
+							music_json.meta.news = music;
+							delete music_json.meta.music;
+							await ArkMsg.Share(JSON.stringify(music_json), e);
 							return true;
 						}
 
@@ -441,14 +447,14 @@ async function music_message(e) {
 			return false;
 		}
 
-		if ((reg[1]?.includes('语音') || reg[1]?.includes('歌词') || reg[1]?.includes('下载地址')) && !reg[2]) {
+		if ((reg[1]?.includes('语音') || reg[1]?.includes('歌词') || reg[1]?.includes('下载音乐')) && !reg[2]) {
 			reg[2] = String((data.index + 1) + data.start_index);
 		}
 
 		let index = (Number(reg[2]) - 1) - data.start_index;
 
 		if (data.data.length > index && index > -1) {
-			if (data.data.length < 2 && !reg[1]?.includes('语音') && !reg[1]?.includes('歌词') && !reg[1]?.includes('下载地址')) {
+			if (data.data.length < 2 && !reg[1]?.includes('语音') && !reg[1]?.includes('歌词') && !reg[1]?.includes('下载音乐')) {
 				return false;
 			}
 			data.index = index;
@@ -456,14 +462,20 @@ async function music_message(e) {
 
 			if (!reg[1]?.includes('歌词')) {
 				let music_json = await CreateMusicShareJSON(music);
-				if (reg[1] && (reg[1].includes('语音') || reg[1]?.includes('下载地址'))) {
+				if (reg[1] && (reg[1].includes('语音') || reg[1]?.includes('下载音乐'))) {
 					if (!music_json.meta.music || !music_json.meta.music?.musicUrl) {
 						await e.reply('[' + music.name + '-' + music.artist + ']获取下载地址失败！');
 						return true;
 					}
 
-					if (reg[1]?.includes('下载地址')) {
-						await e.reply('[' + music.name + '-' + music.artist + ']\n下载地址：' + music_json.meta.music.musicUrl);
+					if (reg[1]?.includes('下载音乐')) {
+						music_json.meta.music.title = music.name + '-' + music.artist;
+						music_json.meta.music.desc = '请点击下载';
+						music_json.meta.music.jumpUrl = music_json.meta.music.musicUrl;
+						music_json.view = 'news';
+						music_json.meta.news = music_json.meta.music;
+						delete music_json.meta.music;
+						await ArkMsg.Share(JSON.stringify(music_json), e);
 						return true;
 					}
 
