@@ -601,7 +601,7 @@ async function music_message(e) {
 	if (reg[4] == '个性电台' || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
 		if (reg[4] == '个性电台' && search != '') return true;
 		search = e.user_id;
-		source = ['qq_radio', 'QQ个性电台'];
+		source = ['qq_radio', '个性电台'];
 		page = 0;
 		page_size = 5;
 		if (reg[4].includes('首')) {
@@ -624,7 +624,7 @@ async function music_message(e) {
 		let page_reg = /^\d+$/.exec(search);
 		if (search != '' && !page_reg) return true;
 		search = e.user_id;
-		source = ['qq_like', '我的收藏'];
+		source = ['qq_like', '我喜欢'];
 		page = (!page_reg ? 1 : parseInt(page_reg[0]));
 		page_size = page == 0 ? 50 : 20;
 		e.reply('请稍候。。。', true);
@@ -733,7 +733,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music_json.app = 'com.tencent.qzone.structmsg';
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
-						music.tag = index + '.' + 'QQ音乐' + (source[0] == 'qq_radio' ? '个性电台' : '每日推荐');
+						music.tag = index + '.' + 'QQ音乐' + (source[1]);
 						music.preview = music.source_icon;
 						MsgList.push({
 							...user_info,
