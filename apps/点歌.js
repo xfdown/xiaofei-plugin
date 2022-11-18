@@ -662,7 +662,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			page = result.page;
 			let title = source[1] + '点歌列表';
 			if (result.title) title = result.title;
-			if (result.data.length >= page_size) title += `[第${page}页]`;
+			if (result.data.length >= page_size || page > 1) title += `[第${page}页]`;
 			let msg_result = [];
 
 			let setting = Config.getdefSet('setting', 'system') || {};
