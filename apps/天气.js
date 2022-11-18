@@ -32,6 +32,7 @@ export class xiaofei_weather extends plugin {
 	}
 
 	async query_weather() {
+		if (/^#?小飞设置.*$/.test(this.e.msg)) return false;
 		let msg = this.e.msg
 			.replace('#', '')
 			.replace('小飞', '')
