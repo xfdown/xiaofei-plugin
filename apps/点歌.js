@@ -7,6 +7,7 @@ import uploadRecord from '../model/uploadRecord.js'
 import { segment } from "oicq";
 import ArkMsg from '../model/ArkMsg.js'
 import fs from 'fs'
+import md5 from 'md5'
 const no_pic = '';
 var _page_size = 20;
 
@@ -52,7 +53,7 @@ var music_cookies = {
 				"authst": "",
 				"ct": "19",
 				"cv": "1891",
-				"guid": md5(String(new Date().getTime()), 32),
+				"guid": md5(String(new Date().getTime())),
 				"patch": "118",
 				"psrf_access_token_expiresAt": 0,
 				"psrf_qqaccess_token": "",
@@ -366,7 +367,7 @@ async function update_qqmusic_ck() {
 		if (type == 1) comm.wid = ck_map.get('wxuin') || '', comm.psrf_qqunionid = ck_map.get('wxunionid') || '';
 		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
 		comm.authst = authst || '';
-		comm.guid = md5(String(comm.authst + comm.uin + comm.wid), 32);
+		comm.guid = md5(String(comm.authst + comm.uin + comm.wid));
 	} catch (err) {
 		logger.error(err);
 	}
@@ -1168,12 +1169,12 @@ async function music_search(search, source, page = 1, page_size = 10) {
 				return url;
 			},
 			url: async (data) => {
-				let code = md5(`${data.mid}q;z(&l~sdf2!nK`, 32).substring(0, 5).toLocaleUpperCase();
+				let code = md5(`${data.mid}q;z(&l~sdf2!nK`).substring(0, 5).toLocaleUpperCase();
 				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
 				if (data.sa == 0 || data.pay?.pay_play == 1) {//需要付费
 					let json_body = {
 						...music_cookies.qqmusic.body,
-						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime()), 32), "songmid": [], "songtype": [0], "uin": "0", "ctx": 1 } }
+						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime())), "songmid": [], "songtype": [0], "uin": "0", "ctx": 1 } }
 					};
 					json_body.req_0.param.songmid = [data.mid];
 					let options = {
@@ -1248,7 +1249,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					music_data.pic = data.img ? data.img : no_pic;
 				}
 				if (types.indexOf('url') > -1) {
-					let key = md5(`${hash}mobileservice`, 32);
+					let key = md5(`${hash}mobileservice`);
 					music_data.url = `https://m.kugou.com/api/v1/wechat/index?cmd=101&hash=${hash}&key=${key}`;//播放直链
 					//如果直链失效了再取消注释下面
 					//music_data.url = data.play_url ? data.play_url : result.url;
@@ -1721,7 +1722,7 @@ async function qqmusic_radio(uin, page_size) {
 			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
 			"req_0": { "method": "get_radio_track", "module": "pc_track_radio_svr", "param": { "id": 99, "num": 1 } }
 		};
-		json_body.comm.guid = md5(String(new Date().getTime()), 32);
+		json_body.comm.guid = md5(String(new Date().getTime()));
 		json_body.comm.uin = uin;
 		json_body.comm.tmeLoginType = 2;
 		json_body.comm.psrf_qqunionid = '';
@@ -1756,7 +1757,7 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
 			"req_0": { "module": "srf_diss_info.DissInfoServer", "method": "CgiGetDiss", "param": { "disstid": 0, "dirid": 202, "onlysonglist": 0, "song_begin": 0, "song_num": 500, "userinfo": 1, "pic_dpi": 800, "orderlist": 1 } }
 		};
-		json_body.comm.guid = md5(String(new Date().getTime()), 32);
+		json_body.comm.guid = md5(String(new Date().getTime()));
 		json_body.comm.uin = uin;
 		json_body.comm.tmeLoginType = 2;
 		json_body.comm.psrf_qqunionid = '';
@@ -1890,13 +1891,4 @@ function random(min, max) {
  */
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function md5(string, bit) {
-	try{
-		const MD5 = require("md5");
-		let result = MD5(string);
-		if(bit == 16)return result.substring(8,24);
-		return result;
-	}catch(err){}
 }
