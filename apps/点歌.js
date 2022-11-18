@@ -624,7 +624,7 @@ async function music_message(e) {
 		let page_reg = /^\d+$/.exec(search);
 		if (search != '' && !page_reg) return true;
 		search = e.user_id;
-		source = ['qq_like', '我喜欢'];
+		source = ['qq_like', '收藏'];
 		page = (!page_reg ? 1 : parseInt(page_reg[0]));
 		page_size = page == 0 ? 50 : 20;
 		e.reply('请稍候。。。', true);
