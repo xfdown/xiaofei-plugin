@@ -40,7 +40,7 @@ export class xiaofei_replace extends plugin {
 				reg = /^#?代(\d+)(.*)$/.exec(e.msg);
 				if (reg) {
 					at = reg[1];
-					msg = reg[2];
+					msg = reg[2]?.trim();
 				} else {
 					return;
 				}
@@ -58,6 +58,7 @@ export class xiaofei_replace extends plugin {
 			e.sender.nickname = nickname;
 			e.sender.user_id = at;
 
+			msg = msg?.trim();
 			e.msg = msg;
 			e.raw_message = msg;
 			e.original_msg = msg;
