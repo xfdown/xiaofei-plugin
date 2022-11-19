@@ -725,7 +725,16 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 
 				let MsgList = [];
 				let index = 1;
+				let tag = 'QQ音乐' + source[1];
 				if (result.data.length > 1) {
+
+					if (result.desc) {
+						MsgList.push({
+							...user_info,
+							message: result.desc
+						});
+					}
+
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
@@ -733,7 +742,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music_json.app = 'com.tencent.qzone.structmsg';
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
-						music.tag = index + '.' + 'QQ音乐' + (source[1]);
+						music.tag = index + '.' + tag[1];
 						music.preview = music.source_icon;
 						MsgList.push({
 							...user_info,
@@ -768,7 +777,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					let music = result.data[0];
 					let music_json = await CreateMusicShareJSON({
 						...music,
-						app_name: 'QQ音乐个性电台'
+						app_name: tag
 					});
 					let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
 					if (ArkSend.code != 1) {
@@ -1316,7 +1325,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			});
 		}
 	}
-	return { title: result?.title, page: page, data: list };
+	return { title: result?.title, desc: result?.desc, page: page, data: list };
 }
 
 async function CreateMusicShareJSON(data) {
