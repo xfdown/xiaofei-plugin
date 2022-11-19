@@ -742,7 +742,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music_json.app = 'com.tencent.qzone.structmsg';
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
-						music.tag = index + '.' + tag[1];
+						music.tag = index + '.' + tag;
 						music.preview = music.source_icon;
 						MsgList.push({
 							...user_info,
