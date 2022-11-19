@@ -1,7 +1,7 @@
 import plugin from '../../../lib/plugins/plugin.js'
 
 export class xiaofei_replace extends plugin {
-	constructor () {
+	constructor() {
 		super({
 			/** 功能名称 */
 			name: '小飞插件_代发言',
@@ -13,35 +13,35 @@ export class xiaofei_replace extends plugin {
 			priority: 10
 		});
 	}
-	
+
 	/** 接受到消息都会执行一次 */
-	async accept () {
-		if (!this.e.msg || !this.e.isMaster){
+	async accept() {
+		if (!this.e.msg || !this.e.isMaster) {
 			return;
 		}
-		
+
 		let e = this.e;
 		let message = [];
-		
+
 		if (e.message) {
 			for (let val of e.message) {
-				if(val.type == 'at'){
+				if (val.type == 'at') {
 					continue;
 				}
 				message.push(val);
 			}
 		}
-		
+
 		let reg = /^#?代(.*)$/.exec(e.msg);
-		if(reg){
+		if (reg) {
 			let msg = reg[1];
 			let at = e.at;
-			if(!at){
+			if (!at) {
 				reg = /^#?代(\d+)(.*)$/.exec(e.msg);
-				if(reg){
+				if (reg) {
 					at = reg[1];
 					msg = reg[2];
-				}else{
+				} else {
 					return;
 				}
 			}
@@ -51,6 +51,11 @@ export class xiaofei_replace extends plugin {
 			e.message = message;
 			e.user_id = at;
 			e.from_id = at;
+
+			let nickname = e.group?.pickMember(at)?.nickname || Bot.pickFriend(at).nickname;
+			nickname = nickname || at;
+			e.sender.card = nickname;
+			e.sender.nickname = nickname;
 			e.sender.user_id = at;
 
 			e.msg = msg;
@@ -59,6 +64,6 @@ export class xiaofei_replace extends plugin {
 			return;
 		}
 	}
-	
+
 }
 
