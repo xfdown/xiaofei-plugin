@@ -1,5 +1,5 @@
 export class xiaofei extends plugin {
-	constructor () {
+	constructor() {
 		super({
 			/** 功能名称 */
 			name: '小飞插件_消息风控处理',
@@ -11,48 +11,48 @@ export class xiaofei extends plugin {
 			priority: 2,
 		});
 	}
-	
+
 	/** 接受到消息都会先执行一次 */
-	async accept () {
-		
+	async accept() {
+
 		let old_reply = this.e.reply;
-		
-		this.e.reply = async function(msgs, quote, data){
-			if(!msgs) return false;
-			if(!Array.isArray(msgs)) msgs = [msgs];
-			let result = await old_reply(msgs,quote,data);
-			
-			if(!result || !result.message_id){
+
+		this.e.reply = async function (msgs, quote, data) {
+			if (!msgs) return false;
+			if (!Array.isArray(msgs)) msgs = [msgs];
+			let result = await old_reply(msgs, quote, data);
+
+			if (!result || !result.message_id) {
 				let isxml = false;
-				
-				for(let msg of msgs){
-					if(msg && msg?.type == 'xml' && msg?.data){
-						msg.data = msg.data.replace(/^<\?xml.*version=.*?>/g,'<?xml version="1.0" encoding="utf-8" ?>');
+
+				for (let msg of msgs) {
+					if (msg && msg?.type == 'xml' && msg?.data) {
+						msg.data = msg.data.replace(/^<\?xml.*version=.*?>/g, '<?xml version="1.0" encoding="utf-8" ?>');
 						isxml = true;
 					}
 				}
 
-				if(isxml){
-					result = await old_reply(msgs,quote,data);
-				}else{
+				if (isxml) {
+					result = await old_reply(msgs, quote, data);
+				} else {
 					let MsgList = [{
 						message: msgs,
 						nickname: Bot.nickname,
 						user_id: Bot.uin
 					}];
-						
+
 					let forwardMsg = await Bot.makeForwardMsg(MsgList);
-					
+
 					forwardMsg.data = forwardMsg.data
-					.replace('<?xml version="1.0" encoding="utf-8"?>','<?xml version="1.0" encoding="utf-8" ?>')
-					.replace(/\n/g, '')
-					.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-					.replace(/___+/, '<title color="#777777" size="26">请点击查看内容</title>');
+						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')
+						.replace(/\n/g, '')
+						.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+						.replace(/___+/, '<title color="#777777" size="26">请点击查看内容</title>');
 					msgs = forwardMsg;
-					result = await old_reply(msgs,quote,data);
+					result = await old_reply(msgs, quote, data);
 				}
-				
-				if(!result || !result.message_id){
+
+				if (!result || !result.message_id) {
 					logger.error('风控消息处理失败，请登录手机QQ查看是否可手动解除风控！');
 				}
 			}
