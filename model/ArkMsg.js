@@ -29,8 +29,8 @@ async function Sign(json, client_info = null) {
 		let recv_guild_id = 0;
 		let style = 10;
 
-		let time = new Date().getTime();
-		let msg_seq = parseInt(`${time}${random(100, 999)}`);
+		let send_time = new Date().getTime();
+		let msg_seq = parseInt(`${send_time}${random(100, 999)}`);
 
 		result.msg_seq = msg_seq;
 
@@ -89,12 +89,17 @@ async function Sign(json, client_info = null) {
 		}
 
 		let get_json = async function () {
-			let ChatHistory = await Bot.pickFriend(Bot.uin).getChatHistory(0, 20);
-			ChatHistory.reverse();
-			for (let msg of ChatHistory) {
-				if (json_handle(msg)) {
-					return true;
+			let time = 0;
+			for (let i = 0; i < 10; i++) {
+				let ChatHistory = await Bot.pickFriend(Bot.uin).getChatHistory(0, 20);
+				time = ChatHistory[0]?.time;
+				ChatHistory.reverse();
+				for (let msg of ChatHistory) {
+					if (json_handle(msg)) {
+						return true;
+					}
 				}
+				if (parseInt(('' + send_time).substring(0, 10)) - time > 3) break;
 			}
 			return false;
 		}
@@ -180,8 +185,8 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 
 	let style = 10;
 
-	let time = new Date().getTime();
-	let msg_seq = parseInt(`${time}${random(100, 999)}`);
+	let send_time = new Date().getTime();
+	let msg_seq = parseInt(`${send_time}${random(100, 999)}`);
 
 	result.msg_seq = msg_seq;
 
@@ -246,8 +251,9 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 				}
 				let get_message = async function (status = false) {
 					let seq = 0;
-					for (let i = 0; i < 3; i++) {
+					for (let i = 0; i < 10; i++) {
 						let ChatHistory = send_type == 1 ? await Bot.pickGroup(recv_uin).getChatHistory(seq, 20) : await Bot.pickFriend(recv_uin).getChatHistory(seq, 20);
+						let time = ChatHistory[0]?.time;
 						if (send_type == 1) {
 							seq = ChatHistory[0]?.seq;
 						} else {
@@ -259,6 +265,7 @@ async function Share(json, e, to_uin = null, client_info = null, get_message = f
 								return;
 							}
 						}
+						if (parseInt(('' + send_time).substring(0, 10)) - time > 3) break;
 					}
 					if (!status) {
 						timer = setTimeout(function () {
