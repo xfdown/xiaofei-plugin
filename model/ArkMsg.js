@@ -91,7 +91,7 @@ async function Sign(json, client_info = null) {
 		let get_json = async function () {
 			let time = 0;
 			for (let i = 0; i < 10; i++) {
-				let ChatHistory = await Bot.pickFriend(Bot.uin).getChatHistory(0, 20);
+				let ChatHistory = await Bot.pickFriend(Bot.uin).getChatHistory(time, 20);
 				time = ChatHistory[0]?.time;
 				ChatHistory.reverse();
 				for (let msg of ChatHistory) {
@@ -133,7 +133,7 @@ async function Sign(json, client_info = null) {
 			num++;
 			timer1 = setTimeout(timer1_fun, 100);
 		};
-		let timer1 = setTimeout(timer1_fun, 10);
+		let timer1 = setTimeout(timer1_fun, 50);
 
 		//Bot.on('message.private', json_handle);
 		result.result = Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
