@@ -323,7 +323,8 @@ xiaofei_plugin.music_notice = async (e) => {//处理通知
 	let setting = Config.getdefSet('setting', 'system') || {};
 	if (setting['poke'] != true) return;
 	e.msg = '#小飞来首歌';
-	if (await music_message(e)) return 'return';
+	e.user_id = e.operator_id;
+	if (await music_message(e)) return;
 }
 Bot.on('notice', xiaofei_plugin.music_notice);
 
