@@ -94,7 +94,6 @@ var music_cookies = {
 };
 
 const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推|我的收藏|我喜欢的歌)(.*)$';
-
 export class xiaofei_music extends plugin {
 	constructor() {
 		super({
@@ -309,10 +308,7 @@ if (!xiaofei_plugin.music_temp_data) {
 	xiaofei_plugin.music_temp_data = {};
 }
 
-if (xiaofei_plugin.music_guild) {
-	Bot.off('guild.message', xiaofei_plugin.music_guild);
-}
-
+if (xiaofei_plugin.music_guild) Bot.off('guild.message', xiaofei_plugin.music_guild);
 xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
 	if (RegExp(music_reg).test(e.msg) || /^#?(小飞语音|小飞高清语音|小飞歌词|语音|高清语音|歌词|下载音乐)?(\d+)?$/.test(e.msg)) {
@@ -320,6 +316,16 @@ xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	}
 };
 Bot.on('guild.message', xiaofei_plugin.music_guild);
+
+if (xiaofei_plugin.music_notice) Bot.off('notice', xiaofei_plugin.music_notice);
+xiaofei_plugin.music_notice = async (e) => {//处理通知
+	if (e?.sub_type != 'poke') return;
+	let setting = Config.getdefSet('setting', 'system') || {};
+	if (setting['poke'] != true) return;
+	e.msg = '#小飞来首歌';
+	if (await music_message(e)) return 'return';
+}
+Bot.on('notice', xiaofei_plugin.music_notice);
 
 async function update_qqmusic_ck() {
 	try {
