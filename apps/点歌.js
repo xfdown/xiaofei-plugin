@@ -1200,7 +1200,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			url: async (data) => {
 				let code = md5(`${data.mid}q;z(&l~sdf2!nK`).substring(0, 5).toLocaleUpperCase();
 				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
-				if ((data.sa == 0 && data.pay?.price_track != 200) || data.pay?.pay_play == 1) {//需要付费
+				if ((data.sa == 0 && data.pay?.price_track == 0) || data.pay?.pay_play == 1) {//需要付费
 					let json_body = {
 						...music_cookies.qqmusic.body,
 						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime())), "songmid": [], "songtype": [0], "uin": "0", "ctx": 1 } }
