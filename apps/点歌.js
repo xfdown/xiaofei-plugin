@@ -794,6 +794,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						start_index: 0
 					};
 				} else {
+					if (source[0] == 'qq_radio') tag = `${nickname}的个性电台`;
 					let music = result.data[0];
 					let music_json = await CreateMusicShareJSON({
 						...music,
