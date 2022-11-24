@@ -319,7 +319,7 @@ Bot.on('guild.message', xiaofei_plugin.music_guild);
 
 if (xiaofei_plugin.music_notice) Bot.off('notice', xiaofei_plugin.music_notice);
 xiaofei_plugin.music_notice = async (e) => {//处理通知
-	if (e?.sub_type != 'poke' || e.user_id != Bot.uin) return;
+	if (e?.sub_type != 'poke' || e.self_id != Bot.uin) return;
 	let setting = Config.getdefSet('setting', 'system') || {};
 	if (setting['poke'] != true) return;
 	e.msg = '#小飞来首歌';
