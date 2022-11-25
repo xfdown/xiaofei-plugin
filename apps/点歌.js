@@ -1833,7 +1833,10 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 
 		let options = {
 			method: 'POST',//post请求 
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Cookie': Bot.cookies['y.qq.com']
+			},
 			body: JSON.stringify(qq_search_json)
 		};
 
