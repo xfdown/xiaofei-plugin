@@ -243,7 +243,7 @@ export class xiaofei_music extends plugin {
 		if (reg) {
 			let cookies;
 			try {
-				cookies = getCookieMap(reg[2]);
+				cookies = getCookieMap(reg[2].replace(/'/g, '').replace(/"/g, ''));
 				if (cookies.get('MUSIC_U')) {
 					let netease_cookies = `MUSIC_U=${cookies.get('MUSIC_U')};`;
 					let result = await get_netease_userinfo(netease_cookies);

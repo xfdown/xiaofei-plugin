@@ -99,7 +99,7 @@ export class xiaofei_mysck extends plugin {
 				this.e.msg = '';
 				return true;
 			}
-			let ck_map = getCookieMap(this.e.msg);
+			let ck_map = getCookieMap(this.e.msg.replace(/'/g, '').replace(/"/g, ''));
 
 			let param = {
 				login_ticket: ck_map?.get('login_ticket'),
