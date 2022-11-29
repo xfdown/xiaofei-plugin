@@ -308,6 +308,10 @@ if (!xiaofei_plugin.music_temp_data) {
 	xiaofei_plugin.music_temp_data = {};
 }
 
+if (!xiaofei_plugin.music_poke_cd) {
+	xiaofei_plugin.music_poke_cd = {};
+}
+
 if (xiaofei_plugin.music_guild) Bot.off('guild.message', xiaofei_plugin.music_guild);
 xiaofei_plugin.music_guild = async (e) => {//处理频道消息
 	e.msg = e.raw_message;
@@ -320,6 +324,10 @@ Bot.on('guild.message', xiaofei_plugin.music_guild);
 if (xiaofei_plugin.music_notice) Bot.off('notice', xiaofei_plugin.music_notice);
 xiaofei_plugin.music_notice = async (e) => {//处理通知
 	if (e?.sub_type != 'poke' || e.target_id != Bot.uin) return;
+	let key = get_MusicListId(e);
+	let time = xiaofei_plugin.music_poke_cd[key] || 0;
+	if ((new Date().getTime() - time) < 8000) return;
+	xiaofei_plugin.music_poke_cd[key] = new Date().getTime();
 	let setting = Config.getdefSet('setting', 'system') || {};
 	if (setting['poke'] != true) return;
 	e.msg = '#小飞来首歌';
