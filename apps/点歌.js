@@ -1881,7 +1881,7 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 		if (res.code != '0') {
 			return null;
 		}
-		return { page: page, data: res.search.data.body.item_song };
+		return { page: page, data: res.search.data.body.song.list };
 	} catch (err) { }
 
 	return null;
