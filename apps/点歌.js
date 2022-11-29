@@ -1824,9 +1824,40 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 
 async function qqmusic_search(search, page = 1, page_size = 10) {
 	try {
-		let qq_search_json = { "search": { "module": "music.search.SearchBrokerCgiServer", "method": "DoSearchForQQMusicMobile", "param": { "query": "", "highlight": 1, "searchid": "123456789", "sub_searchid": 0, "search_type": 0, "nqc_flag": 0, "sin": 0, "ein": 30, "page_num": 1, "num_per_page": 10, "cat": 2, "grp": 1, "remoteplace": "search.android.defaultword", "multi_zhida": 1, "sem": 0 } } };
+		let qq_search_json = {
+			"comm": {
+				"_channelid": "19",
+				"_os_version": "6.2.9200-2",
+				"authst": "",
+				"ct": "19",
+				"cv": "1891",
+				"guid": md5(String(new Date().getTime()) + random(100000, 999999)),
+				"patch": "118",
+				"psrf_access_token_expiresAt": 0,
+				"psrf_qqaccess_token": "",
+				"psrf_qqopenid": "",
+				"psrf_qqunionid": "",
+				"tmeAppID": "qqmusic",
+				"tmeLoginType": 2,
+				"uin": "0",
+				"wid": "0"
+			},
+			"search": {
+				"method": "DoSearchForQQMusicDesktop",
+				"module": "music.search.SearchCgiService",
+				"param": {
+					"grp": 1,
+					"num_per_page": 40,
+					"page_num": 1,
+					"query": "",
+					"remoteplace": "sizer.newclient.song",
+					"search_type": 0,
+					"searchid": ""
+				}
+			}
+		};
 
-		qq_search_json['search']['param']['searchid'] = new Date().getTime();
+		qq_search_json['search']['param']['searchid'] = md5(String(new Date().getTime()) + random(100000, 999999));
 		qq_search_json['search']['param']['query'] = search;
 		qq_search_json['search']['param']['page_num'] = page;
 		qq_search_json['search']['param']['num_per_page'] = page_size;
@@ -1834,6 +1865,7 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 		let options = {
 			method: 'POST',//post请求 
 			headers: {
+				'User-Agent': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)',
 				'Content-Type': 'application/x-www-form-urlencoded',
 				'Cookie': Bot.cookies['y.qq.com']
 			},
