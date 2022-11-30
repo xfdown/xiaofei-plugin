@@ -674,7 +674,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 		}
 		data = {};
 
-		if (page > 0) {
+		if (page > 0 && result.data.length > 1) {
 			page = result.page;
 			let title = source[1] + '点歌列表';
 			if (result.title) title = result.title;
