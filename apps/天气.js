@@ -135,7 +135,19 @@ async function weather(e, search) {
 		await page.goto('https://tianqi.qq.com/favicon.ico');
 		await page.evaluate(`localStorage.setItem('attentionCity', '${attentionCity}')`);//设置默认地区信息
 
+		await page.setRequestInterception(true);
+		page.on('request', req => {
+			let urls = [
+				'trace.qq.com',
+			];
 
+			let url = req.url();
+			if (urls.find(val => {return url.includes(val)})) {
+				req.abort();
+			}else{
+				req.continue();
+			}
+		});
 		await page.goto('https://tianqi.qq.com/');//请求天气页面
 
 		await page.evaluate(() => {
