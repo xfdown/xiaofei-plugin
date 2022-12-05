@@ -1900,7 +1900,10 @@ async function netease_search(search, page = 1, page_size = 10) {
 		let url = 'http://music.163.com/api/cloudsearch/pc';
 		let options = {
 			method: 'POST',//post请求 
-			headers: { 'Content-Type': ' application/x-www-form-urlencoded' },
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Cookie': music_cookies.netease.ck
+			},
 			body: `offset=${page - 1}&limit=${page_size}&type=1&s=${encodeURI(search)}`
 		};
 
