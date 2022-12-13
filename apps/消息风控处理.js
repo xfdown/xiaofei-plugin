@@ -14,6 +14,11 @@ export class xiaofei extends plugin {
 
 	/** 接受到消息都会先执行一次 */
 	async accept() {
+		if (this.e.isGroup) {
+			let group = this.e.group;
+			if (!group.is_owner && (group.is_admin && group.mute_left > 0)) return;
+			if (group.all_muted || group.mute_left > 0) return;
+		}
 
 		let old_reply = this.e.reply;
 
