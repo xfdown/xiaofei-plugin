@@ -1900,6 +1900,8 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 
 async function netease_search(search, page = 1, page_size = 10) {
 	try {
+		let offset = page < 1 ? 0 : page;
+		offset = (page_size * page) - page_size;
 		let url = 'http://music.163.com/api/cloudsearch/pc';
 		let options = {
 			method: 'POST',//post请求 
@@ -1907,7 +1909,7 @@ async function netease_search(search, page = 1, page_size = 10) {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				'Cookie': music_cookies.netease.ck
 			},
-			body: `offset=${page - 1}&limit=${page_size}&type=1&s=${encodeURI(search)}`
+			body: `offset=${offset}&limit=${page_size}&type=1&s=${encodeURI(search)}`
 		};
 
 		let response = await fetch(url, options); //调用接口获取数据
