@@ -443,7 +443,7 @@ async function music_message(e) {
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
 						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清')));
 						if (!result) {
-							result = '上传[' + music.name + '-' + music.artist + ']失败！\n' + music.musicUrl;
+							result = '上传[' + music.title + '-' + music.desc + ']失败！\n' + music.musicUrl;
 							await e.reply(result);
 							return true;
 						}
