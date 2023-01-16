@@ -65,7 +65,7 @@ async function setting(e) {
 			setCfg(cfgKey, val);
 		}
 		if (cfgKey == 'system.music') {
-			let tmp = await import(`../apps/点歌.js?${moment().format('x')}`)
+			let tmp = await import(`./点歌.js?${moment().format('x')}`)
 
 			lodash.forEach(tmp, (p) => {
 				/* eslint-disable new-cap */
