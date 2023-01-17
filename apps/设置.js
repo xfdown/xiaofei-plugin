@@ -1,8 +1,8 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import lodash from 'lodash'
 import { Config, Common } from '../components/index.js'
-
-
+import loader from '../../../lib/plugins/loader.js'
+import moment from 'moment'
 const cfgMap = {
 	'点歌': 'system.music',
 	'多选点歌': 'system.is_list',
@@ -49,7 +49,6 @@ async function setting(e) {
 	if (reg && reg[2]) {
 		let val = reg[3] || '';
 		let cfgKey = cfgMap[reg[2]];
-
 		if (cfgKey == 'system.music_source') {
 			let music_source = ['QQ', '网易', '酷我', '酷狗'];
 			if (!music_source.includes(val)) {
@@ -64,6 +63,21 @@ async function setting(e) {
 
 		if (cfgKey) {
 			setCfg(cfgKey, val);
+		}
+		if (cfgKey == 'system.music') {
+			let tmp = await import(`./点歌.js?${moment().format('x')}`)
+
+			lodash.forEach(tmp, (p) => {
+				/* eslint-disable new-cap */
+				let plugin = new p()
+				for (let i in loader.priority) {
+					if (loader.priority[i].key == 'xiaofei-plugin' && loader.priority[i].name == '小飞插件_点歌') {
+						loader.priority[i].class = p
+						loader.priority[i].priority = plugin.priority
+					}
+				}
+			})
+			loader.priority = lodash.orderBy(loader.priority, ['priority'], ['asc'])
 		}
 	}
 
