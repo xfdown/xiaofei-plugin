@@ -1086,7 +1086,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			url: async (data) => {
 				let url = 'http://music.163.com/song/media/outer/url?id=' + data.id;
 
-				if (data.privilege && data.privilege.fee != 8 && music_high_quality) {
+				if (data.privilege && data.privilege.fee != 8 || music_high_quality) {
 					try {
 						let cookie = music_cookies.netease?.ck;
 						cookie = cookie ? cookie : '';
