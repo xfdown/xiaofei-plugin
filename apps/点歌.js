@@ -1231,7 +1231,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 						];
 						let filename = [];
 						let songtype = [];
-						for (val of quality) {
+						for (let val of quality) {
 							songmid.push(mid);
 							songtype.push(0);
 							filename.push(`${val[0]}${media_mid}.${val[1]}`);
@@ -1258,7 +1258,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 							let midurlinfo = res.req_0.data.midurlinfo;
 							let purl = '';
 							if (midurlinfo && midurlinfo.length > 0) {
-								for (val of midurlinfo) {
+								for (let val of midurlinfo) {
 									purl = val.purl;
 									if (purl) {
 										play_url = 'http://ws.stream.qqmusic.qq.com/' + purl;
