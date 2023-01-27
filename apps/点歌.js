@@ -1062,6 +1062,8 @@ async function get_background() {
 async function music_search(search, source, page = 1, page_size = 10) {
 	let list = [];
 	let result = [];
+	let setting = Config.getdefSet('setting', 'system') || {};
+	let music_high_quality = setting['music_high_quality'];
 
 	let value = {
 		netease: {
@@ -1083,7 +1085,8 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			},
 			url: async (data) => {
 				let url = 'http://music.163.com/song/media/outer/url?id=' + data.id;
-				if (data.privilege && data.privilege.fee != 8) {
+
+				if (data.privilege && data.privilege.fee != 8 && music_high_quality) {
 					try {
 						let cookie = music_cookies.netease?.ck;
 						cookie = cookie ? cookie : '';
@@ -1094,13 +1097,12 @@ async function music_search(search, source, page = 1, page_size = 10) {
 								'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 12; MI Build/SKQ1.211230.001)',
 								'Cookie': 'versioncode=8008070; os=android; channel=xiaomi; ;appver=8.8.70; ' + cookie
 							},
-							body: `ids=${JSON.stringify([data.id])}&level=standard&encodeType=mp3`
+							body: `ids=${JSON.stringify([data.id])}&level=${music_high_quality ? 'exhigh' : 'standard'}&encodeType=mp3`
 						};
 						let response = await fetch('https://interface3.music.163.com/api/song/enhance/player/url/v1', options); //调用接口获取数据
 						let res = await response.json(); //结果json字符串转对象
 						if (res.code == 200) {
-							url = res.data[0]?.url;
-							url = url ? url : '';
+							url = res.data[0]?.url || url;
 						}
 					} catch (err) { }
 				}
@@ -1150,7 +1152,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 				return url;
 			},
 			url: async (data) => {
-				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url&`;
+				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url&br=${music_high_quality ? '320kmp3' : '128kmp3'}`;
 				let response = await fetch(url.replace('convert_url', 'convert_url3')); //调用接口获取数据
 				let res = await response.json(); //结果json字符串转对象
 				if (res && res.url) {
@@ -1212,12 +1214,33 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			url: async (data) => {
 				let code = md5(`${data.mid}q;z(&l~sdf2!nK`).substring(0, 5).toLocaleUpperCase();
 				let play_url = `http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=${data.mid}&songtype=1&fromtag=50&uin=${Bot.uin}&code=${code}`;
-				if ((data.sa == 0 && data.pay?.price_track == 0) || data.pay?.pay_play == 1) {//需要付费
+				if ((data.sa == 0 && data.pay?.price_track == 0) || data.pay?.pay_play == 1 || music_high_quality) {//需要付费
 					let json_body = {
 						...music_cookies.qqmusic.body,
 						"req_0": { "module": "vkey.GetVkeyServer", "method": "CgiGetVkey", "param": { "guid": md5(String(new Date().getTime())), "songmid": [], "songtype": [0], "uin": "0", "ctx": 1 } }
 					};
-					json_body.req_0.param.songmid = [data.mid];
+					let mid = data.mid;
+					let media_mid = data.file?.media_mid;
+					let songmid = [mid];
+					if (music_high_quality) {
+						let quality = [
+							['M800', 'mp3'],
+							['O600', 'ogg'],
+							['M500', 'mp3'],
+							['C400', 'm4a']
+						];
+						let filename = [];
+						let songtype = [];
+						for (val of quality) {
+							songmid.push(mid);
+							songtype.push(0);
+							filename.push(`${val[0]}${media_mid}.${val[1]}`);
+						}
+						json_body.req_0.param.filename = filename;
+						json_body.req_0.param.songtype = songtype;
+					}
+					json_body.req_0.param.songmid = songmid;
+
 					let options = {
 						method: 'POST',//post请求 
 						headers: {
@@ -1235,8 +1258,13 @@ async function music_search(search, source, page = 1, page_size = 10) {
 							let midurlinfo = res.req_0.data.midurlinfo;
 							let purl = '';
 							if (midurlinfo && midurlinfo.length > 0) {
-								purl = midurlinfo[0].purl;
-								if (purl) play_url = 'http://ws.stream.qqmusic.qq.com/' + purl;
+								for (val of midurlinfo) {
+									purl = val.purl;
+									if (purl) {
+										play_url = 'http://ws.stream.qqmusic.qq.com/' + purl;
+										break;
+									}
+								}
 							}
 						}
 					} catch (err) { }
