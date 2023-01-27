@@ -1229,6 +1229,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 							['M500', 'mp3'],
 							['C400', 'm4a']
 						];
+						songmid = [];
 						let filename = [];
 						let songtype = [];
 						for (let val of quality) {
