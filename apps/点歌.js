@@ -1224,18 +1224,19 @@ async function music_search(search, source, page = 1, page_size = 10) {
 					let songmid = [mid];
 					if (music_high_quality) {
 						let quality = [
-							['M800', 'mp3'],
-							['O600', 'ogg'],
-							['M500', 'mp3'],
-							['C400', 'm4a']
+							['size_320mp3', 'M800', 'mp3'],
+							['size_192ogg', 'O600', 'ogg'],
+							['size_128mp3', 'M500', 'mp3'],
+							['size_96aac', 'C400', 'm4a']
 						];
 						songmid = [];
 						let filename = [];
 						let songtype = [];
 						for (let val of quality) {
+							if (data.file[val[0]] < 1) continue;
 							songmid.push(mid);
 							songtype.push(0);
-							filename.push(`${val[0]}${media_mid}.${val[1]}`);
+							filename.push(`${val[1]}${media_mid}.${val[2]}`);
 						}
 						json_body.req_0.param.filename = filename;
 						json_body.req_0.param.songtype = songtype;
