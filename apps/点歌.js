@@ -1,13 +1,12 @@
-import plugin from '../../../lib/plugins/plugin.js'
+import plugin from '../../../lib/plugins/plugin.js';
 import fetch from "node-fetch";
 import { core } from "oicq";
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import { Config, Data, Version, Plugin_Path } from '../components/index.js'
-import uploadRecord from '../model/uploadRecord.js'
-import { segment } from "oicq";
-import ArkMsg from '../model/ArkMsg.js'
-import fs from 'fs'
-import md5 from 'md5'
+import puppeteer from '../../../lib/puppeteer/puppeteer.js';
+import { Config, Data, Version, Plugin_Path } from '../components/index.js';
+import uploadRecord from '../model/uploadRecord.js';
+import { segment } from 'oicq';
+import fs from 'fs';
+import md5 from 'md5';
 const no_pic = '';
 var _page_size = 20;
 
@@ -429,16 +428,15 @@ async function music_message(e) {
 					if (music_json['view'] == 'music') {
 						let music = music_json.meta.music;
 
-						if (reg[1]?.includes('下载音乐')) {
-							music.title = music.title + '-' + music.desc;
-							music.desc = '请点击下载';
-							music.jumpUrl = music.musicUrl;
-							music_json.view = 'news';
-							music_json.meta.news = music;
-							delete music_json.meta.music;
-							await ArkMsg.Share(JSON.stringify(music_json), e);
-							return true;
-						}
+						//if (reg[1]?.includes('下载音乐')) {
+						//	music.title = music.title + '-' + music.desc;
+						//	music.desc = '请点击下载';
+						//	music.jumpUrl = music.musicUrl;
+						//	music_json.view = 'news';
+						//	music_json.meta.news = music;
+						//	delete music_json.meta.music;
+						//	return true;
+						//}
 
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
 						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清')));
@@ -487,16 +485,15 @@ async function music_message(e) {
 						return true;
 					}
 
-					if (reg[1]?.includes('下载音乐')) {
-						music_json.meta.music.title = music.name + '-' + music.artist;
-						music_json.meta.music.desc = '请点击下载';
-						music_json.meta.music.jumpUrl = music_json.meta.music.musicUrl;
-						music_json.view = 'news';
-						music_json.meta.news = music_json.meta.music;
-						delete music_json.meta.music;
-						await ArkMsg.Share(JSON.stringify(music_json), e);
-						return true;
-					}
+					//if (reg[1]?.includes('下载音乐')) {
+					//	music_json.meta.music.title = music.name + '-' + music.artist;
+					//	music_json.meta.music.desc = '请点击下载';
+					//	music_json.meta.music.jumpUrl = music_json.meta.music.musicUrl;
+					//	music_json.view = 'news';
+					//	music_json.meta.news = music_json.meta.music;
+					//	delete music_json.meta.music;
+					//	return true;
+					//}
 
 					await e.reply('开始上传[' + music.name + '-' + music.artist + ']。。。');
 					let result = await uploadRecord(music_json.meta.music.musicUrl, 0, !reg[1].includes('高清'));
@@ -515,12 +512,8 @@ async function music_message(e) {
 					}
 					return true;
 				}
-
-				let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
-				if (ArkSend.code != 1) {
-					let body = await CreateMusicShare(e, music);
-					await SendMusicShare(body);
-				}
+				let body = await CreateMusicShare(e, music);
+				await SendMusicShare(body);
 			} else {
 				try {
 					typeof (music.lrc) == 'function' ? music.lrc = await music.lrc(music.data) : music.lrc = music.lrc;
@@ -681,12 +674,6 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			if (result.data.length >= page_size || page > 1) title += `[第${page}页]`;
 			let msg_result = [];
 
-			let setting = Config.getdefSet('setting', 'system') || {};
-			if (setting['is_cardlist'] == true) {
-				let json_result = ShareMusic_JSONList(e, result.data, page, page_size, title);
-				msg_result.push(ArkMsg.Share(JSON.stringify(json_result.data), e, null, null, true));
-			}
-
 			if (e.guild_id) {//频道的话发文字，图片不显示。。。
 				msg_result.push(e.reply(ShareMusic_TextList(e, result.data, page, page_size, title)));
 			} else {
@@ -811,11 +798,14 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						...music,
 						app_name: tag
 					});
-					let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
-					if (ArkSend.code != 1) {
-						let body = await CreateMusicShare(e, music);
-						await SendMusicShare(body);
-					}
+					music_json.app = 'com.tencent.qzone.structmsg';
+					music_json.config.autosize = true;
+					music = music_json.meta.music;
+					music.tag = tag;
+					music.preview = music.source_icon;
+					await e.reply(segment.json(music_json));
+					//let body = await CreateMusicShare(e, music);
+					//await SendMusicShare(body);
 					data = {
 						time: new Date().getTime(),
 						data: [music],
@@ -839,13 +829,8 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					index: 0,
 					start_index: 0
 				};
-
-				let music_json = await CreateMusicShareJSON(music);
-				let ArkSend = await ArkMsg.Share(JSON.stringify(music_json), e);
-				if (ArkSend.code != 1) {
-					let body = await CreateMusicShare(e, music);
-					await SendMusicShare(body);
-				}
+				let body = await CreateMusicShare(e, music);
+				await SendMusicShare(body);
 			}
 		}
 		xiaofei_plugin.music_temp_data[get_MusicListId(e)] = data;

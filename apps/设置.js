@@ -7,7 +7,6 @@ const cfgMap = {
 	'点歌': 'system.music',
 	'多选点歌': 'system.is_list',
 	'天气': 'system.weather',
-	'卡片多选点歌': 'system.is_cardlist',
 	'默认音乐源': 'system.music_source',
 	'戳一戳': 'system.poke',
 	'高品质点歌': 'system.music_high_quality'
