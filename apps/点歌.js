@@ -808,7 +808,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					//await SendMusicShare(body);
 					data = {
 						time: new Date().getTime(),
-						data: [music],
+						data: [result.data[0]],
 						page: 0,
 						msg_results: [],
 						search: search,
