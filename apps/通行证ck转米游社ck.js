@@ -140,7 +140,14 @@ export class xiaofei_mysck extends plugin {
 				let game_biz = param.api_index == 0 ? 'hk4e_cn' : 'hk4e_global';
 				let url = `${param.api}/auth/api/getCookieAccountInfoBySToken?game_biz=${game_biz}`;
 				url += `&stoken=${map.get("stoken")}&uid=${map.get("stuid")}`;
-				let response = await fetch(url);
+				let options = {
+					method: param.api_index == 0 ? 'GET' : 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: JSON.stringify({ game_biz: game_biz, stoken: map.get("stoken"), uid: map.get("stuid") })
+				};
+				let response = await fetch(url, param.api_index == 0 ? {} : options);
 				let res = await response.json()
 
 				if (res?.retcode == 0 && res?.data) {
