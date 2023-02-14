@@ -1283,10 +1283,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 		kugou: {
 			name: 'songname', id: 'hash', artist: 'singername',
 			pic: null,
-			link: (data) => {
-				let url = `http://www.kugou.com/song/#hash=${data.hash}&album_id=${data.album_id}`;
-				return url;
-			},
+			link: null,
 			url: null,
 			lrc: null,
 			api: async (data, types, music_data = {}) => {
@@ -1312,6 +1309,9 @@ async function music_search(search, source, page = 1, page_size = 10) {
 				}
 				if (types.indexOf('lrc') > -1) {
 					music_data.lrc = data.lyrics || '没有查询到这首歌的歌词！';
+				}
+				if (types.indexOf('link') > -1) {
+					music_data.link = `https://www.kugou.com/song/#${data.encode_album_audio_id}`;
 				}
 				return music_data;
 			}
