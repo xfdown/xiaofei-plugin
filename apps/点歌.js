@@ -9,6 +9,7 @@ import fs from 'fs';
 import md5 from 'md5';
 const no_pic = '';
 var _page_size = 20;
+var _music_timeout = 1000 * 60 * 3;
 
 var music_cookies = {
 	qqmusic: {
@@ -166,7 +167,7 @@ export class xiaofei_music extends plugin {
 	async music_task() {
 		let data = xiaofei_plugin.music_temp_data;
 		for (let key in data) {
-			if ((new Date().getTime() - data[key].time) > (1000 * 60)) {
+			if ((new Date().getTime() - data[key].time) > _music_timeout) {
 				let temp = data[key];
 				delete data[key];
 				await recallMusicMsg(key, temp.msg_results);
@@ -460,7 +461,7 @@ async function music_message(e) {
 
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data[key];
-		if (!data || (new Date().getTime() - data.time) > (1000 * 60)) {
+		if (!data || (new Date().getTime() - data.time) > _music_timeout) {
 			return false;
 		}
 
@@ -641,7 +642,7 @@ async function music_message(e) {
 	if (reg[4] == '下一页') {
 		let key = get_MusicListId(e);
 		let data = xiaofei_plugin.music_temp_data[key];
-		if (!data || (new Date().getTime() - data.time) > (1000 * 60) || data.page < 1) {
+		if (!data || (new Date().getTime() - data.time) > _music_timeout || data.page < 1) {
 			return false;
 		}
 		data.time = new Date().getTime();//续期，防止搜索时清除
@@ -779,7 +780,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					}
 					await e.reply(forwardMsg);
 					data = {
-						time: new Date().getTime() + (1000 * 60 * 29),
+						time: new Date().getTime() + (1000 * 60 * 27),
 						data: result.data,
 						page: 0,
 						msg_results: [],
