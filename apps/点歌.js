@@ -440,7 +440,7 @@ async function music_message(e) {
 						//}
 
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
-						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清')));
+						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清'), music.title + '-' + music.desc));
 						if (!result) {
 							result = '上传[' + music.title + '-' + music.desc + ']失败！\n' + music.musicUrl;
 							await e.reply(result);
@@ -497,7 +497,7 @@ async function music_message(e) {
 					//}
 
 					await e.reply('开始上传[' + music.name + '-' + music.artist + ']。。。');
-					let result = await uploadRecord(music_json.meta.music.musicUrl, 0, !reg[1].includes('高清'));
+					let result = await uploadRecord(music_json.meta.music.musicUrl, 0, !reg[1].includes('高清'), music.name + '-' + music.artist);
 					if (!result) {
 						result = '上传[' + music.name + '-' + music.artist + ']失败！\n' + music_json.meta.music.musicUrl;
 						await e.reply(result);
