@@ -223,7 +223,7 @@ async function pcm_silk(file) {
     let silk = false;
     const tmpfile = TMP_DIR + '/' + (0, uuid)() + '.silk';
     try {
-        await child_process.execSync(`silk_v3_encoder "${file}" "${tmpfile}" -tencent`);//-rate
+        await child_process.execSync(`silk_v3_encoder "${file}" "${tmpfile}" -tencent -rate 100000`);
         silk = await fs.promises.readFile(tmpfile);
     }
     catch {
