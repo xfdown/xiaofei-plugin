@@ -65,12 +65,26 @@ thead th{
 tr td:first-child{
 	background-color: rgb(0 0 0 / 10%);
 	color: white;
-	text-align: center
+	text-align: center;
+	min-width: 10px;
 }
 tr td:nth-child(2){
 	background-color: rgb(0 0 0 / 20%);
 	color: white;
-	width: 460px
+	max-width: 460px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 20em;
+}
+tr td:nth-child(3){
+	background-color: rgb(0 0 0 / 30%);
+	color: white;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 20em;
 }
 tr td:nth-child(3){
 	background-color: rgb(0 0 0 / 30%);
