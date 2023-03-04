@@ -8,7 +8,7 @@
 body {
   width: 100%;
   height: 130%;
-  background-size: 100%;
+  background-size: 101%;
 }
 .bt{
 	font-family: "jty";
@@ -104,6 +104,7 @@ tbody tr:nth-child(2n-1){
 }
 .jw{
 	font-family: "jty";
+	padding-top: 20px;
 	text-align: center;
 	font-size: 25px;
 	color: #fff;
