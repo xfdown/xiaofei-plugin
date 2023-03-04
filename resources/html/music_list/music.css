@@ -66,11 +66,11 @@ tr td:first-child{
 	background-color: rgb(0 0 0 / 10%);
 	color: white;
 	text-align: center;
-	min-width: 10px;
 }
 tr td:nth-child(2){
 	background-color: rgb(0 0 0 / 20%);
 	color: white;
+	min-width: 460px;
 	max-width: 460px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -80,6 +80,7 @@ tr td:nth-child(2){
 tr td:nth-child(3){
 	background-color: rgb(0 0 0 / 30%);
 	color: white;
+	min-width: 120px;
 	max-width: 120px;
 	overflow: hidden;
 	text-overflow: ellipsis;
