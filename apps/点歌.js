@@ -1139,10 +1139,15 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			},
 			url: async (data) => {
 				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url&br=${music_high_quality ? '320kmp3' : '128kmp3'}`;
-				let response = await fetch(url.replace('convert_url', 'convert_url3')); //调用接口获取数据
-				let res = await response.json(); //结果json字符串转对象
-				if (res && res.url) {
-					url = res.url;
+				for (let i = 10; i > 0; i--) {
+					try {
+						let response = await fetch(url.replace('convert_url', 'convert_url3')); //调用接口获取数据
+						let res = await response.json(); //结果json字符串转对象
+						if (res && res.url && !res.url.includes("/588957081.mp3")) {
+							return res.url;
+						}
+					} catch (err) {
+					}
 				}
 				return url;
 			},
