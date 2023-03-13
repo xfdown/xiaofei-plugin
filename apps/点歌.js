@@ -7,6 +7,8 @@ import uploadRecord from '../model/uploadRecord.js';
 import { segment } from 'oicq';
 import fs from 'fs';
 import md5 from 'md5';
+import crypto from 'crypto';
+
 const no_pic = '';
 var _page_size = 20;
 var _music_timeout = 1000 * 60 * 3;
@@ -1140,12 +1142,14 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			url: async (data) => {
 				let url = `http://antiserver.kuwo.cn/anti.s?useless=/resource/&format=mp3&rid=${data.MUSICRID}&response=res&type=convert_url&br=128kmp3`;
 				try {
-					let response = await fetch(`https://www.kuwo.cn/api/v1/www/music/playUrl?mid=${data.MUSICRID}&type=convert_url&httpsStatus=1&reqId=${crypto.randomUUID()}`); //调用接口获取数据
+
+					let response = await fetch(`https://www.kuwo.cn/api/v1/www/music/playUrl?mid=${data.MUSICRID.substring(6)}&type=convert_url&httpsStatus=1&reqId=${crypto.randomUUID()}`); //调用接口获取数据
 					let res = await response.json(); //结果json字符串转对象
 					if (res.data && res.data?.url) {
 						return res.data.url;
 					}
 				} catch (err) {
+					console.log(err)
 				}
 				return url;
 			},
