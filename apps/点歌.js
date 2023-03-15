@@ -762,6 +762,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
 						music.preview = music.source_icon;
+						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/,'$1ptlogin2.qq.com@');
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
@@ -806,6 +807,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					music = music_json.meta.music;
 					music.tag = tag;
 					music.preview = music.source_icon;
+					music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/,'$1ptlogin2.qq.com@');
 					await e.reply(segment.json(music_json));
 					//let body = await CreateMusicShare(e, music);
 					//await SendMusicShare(body);
