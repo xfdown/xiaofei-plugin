@@ -1967,8 +1967,6 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 
 async function bilibili_search(search, page = 1, page_size = 10) {
 	try {
-		let offset = page < 1 ? 0 : page;
-		offset = (page_size * page) - page_size;
 		let url = `https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&_extra=&context=&page=${page}&page_size=${page_size}&from_source=&from_spmid=333.337&platform=pc&highlight=1&single_column=0&keyword=${encodeURI(search)}&qv_id=CAwC63KwwHyP6q4IJlnV2afQ6clyM87r&ad_resource=5654&source_tag=3&gaia_vtoken=&category_id=&search_type=video&dynamic_offset=0&wts=1678977993`;
 		let options = {
 			method: 'GET',//post请求 
