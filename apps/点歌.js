@@ -12,6 +12,16 @@ import crypto from 'crypto';
 const no_pic = '';
 var _page_size = 20;
 var _music_timeout = 1000 * 60 * 3;
+const music_source = {
+	'哔哩哔哩': 'bilibili',
+	'哔哩': 'bilibili',
+	'网易云': 'netease',
+	'网易': 'netease',
+	'酷我': 'kuwo',
+	'酷狗': 'kugou',
+	'QQ': 'qq',
+	'qq': 'qq'
+};
 
 var music_cookies = {
 	qqmusic: {
@@ -95,7 +105,7 @@ var music_cookies = {
 	}
 };
 
-const music_reg = '^#?(小飞)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(qq|QQ|腾讯|网易云?|酷我|酷狗|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推|我的收藏|我喜欢的歌)(.*)$';
+const music_reg = '^#?(小飞)?(' + Object.keys(music_source).join('|') + '|多选)?(' + Object.keys(music_source).join('|') + '|多选)?(点播音乐|点播|点歌|播放|放一?首|来一?首|下一页|个性电台|每日推荐|每日30首|日推|我的收藏|我喜欢的歌)(.*)$';
 export class xiaofei_music extends plugin {
 	constructor() {
 		super({
@@ -570,14 +580,6 @@ async function music_message(e) {
 	if (!reg[2]) reg[2] = '';
 	if (!reg[3]) reg[3] = '';
 
-	let music_source = {
-		'网易': 'netease',
-		'网易云': 'netease',
-		'酷我': 'kuwo',
-		'酷狗': 'kugou',
-		'QQ': 'qq',
-		'qq': 'qq'
-	};
 
 	if (music_source[reg[2]]) {
 		let source = reg[2];
@@ -762,7 +764,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
 						music.preview = music.source_icon;
-						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/,'$1ptlogin2.qq.com@');
+						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
@@ -807,7 +809,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					music = music_json.meta.music;
 					music.tag = tag;
 					music.preview = music.source_icon;
-					music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/,'$1ptlogin2.qq.com@');
+					music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
 					await e.reply(segment.json(music_json));
 					//let body = await CreateMusicShare(e, music);
 					//await SendMusicShare(body);
@@ -1338,10 +1340,100 @@ async function music_search(search, source, page = 1, page_size = 10) {
 				}
 				return music_data;
 			}
+		},
+		bilibili: {
+			name: (data) => {
+				let title = data.title.replace(/\<.*?\>/g, '');
+				return title;
+			},
+			id: 'bvid',
+			artist: (data) => {
+				let author = data.author.replace(/\<.*?\>/g, '');
+				return author;
+			},
+			pic: (data) => {
+				let url = data.pic || '';
+				if (url.indexOf('http') != 0) url = 'http:' + url;
+				return url;
+			},
+			link: (data) => {
+				let url = `https://www.bilibili.com/video/${data.bvid}`;
+				return url;
+			},
+			url: null,
+			lrc: null,
+			api: async (data, types, music_data = {}) => {
+				let url = `https://api.bilibili.com/x/web-interface/view?bvid=${data.bvid}`;
+				let response = await fetch(url);
+				let res = await response.json();
+				let info = res.data;
+				if (types.indexOf('url') > -1) {
+					//let buvid3 = '86C4617D-B351-47D5-B0A2-8EDAA0E7FC3B167645infoc';
+					//let session = md5((buvid3 || Math.floor(1e5 * Math.random()).toString(16)) + Date.now());
+					//let url = `https://api.bilibili.com/x/player/playurl?avid=${info.aid}&bvid=${info.bvid}&cid=${info.cid}&qn=0&fnver=0&fnval=16&fourk=1&session=${session}`;
+					let url = `https://api.bilibili.com/x/tv/playurl`;
+					let time = parseInt(new Date().getTime() / 1000);
+					let params = {
+						access_key: '',
+						appkey: '1d8b6e7d45233436',
+						//aid: info.aid,
+						build: 7210300,
+						buvid: 'XU973E09237CC101E74F6E24CCF3DE3300D0B',
+						c_locale: 'zh_CN',
+						channel: 'xiaomi',
+						cid: info.cid,
+						disable_rcmd: 0,
+						fnval: 16,//130
+						fnver: 0,
+						fourk: 1,
+						is_dolby: 0,
+						is_h265: 0,
+						is_proj: 1,
+						live_extra: '',
+						mobi_app: 'android',
+						mobile_access_key: '',
+						object_id: info.aid,
+						platform: 'android',
+						playurl_type: 1,
+						protocol: 1,
+						qn: 64,
+						s_locale: 'zh_CN',
+						statistics: '%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%227.21.0%22%2C%22abtest%22%3A%22%22%7D',
+						sys_ver: 31,
+						ts: time,
+						video_type: 0
+					};
+					let param = [];
+					for (let key of Object.keys(params).sort()) {
+						param.push(`${key}=${params[key]}`);
+					}
+					param = param.join("&");
+					let sign = md5(`${param}560c52ccd288fed045859ed18bffd973`);
+					param += `&sign=${sign}`;
+					let response = await fetch(`${url}?${param}`);
+					let res = await response.json();
+					console.log(res);
+					if (res.data?.dash?.audio && res.data?.dash?.audio.length > 0) {
+						let audios = res.data?.dash?.audio;
+						audios = audios.sort((a, b) => {
+							return a.id - b.id;
+						});
+						let play_url = audios[audios.length - 1].base_url;
+						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+(:\d+)?/, 'https://upos-sz-mirrorhw.bilivideo.com');
+					} else if (res.data?.durl && res.data?.durl.length > 0) {
+						let play_url = res.data?.durl[0].url;
+						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+(:\d+)?/, 'https://upos-sz-mirrorhw.bilivideo.com');
+					}
+				}
+				return music_data;
+			}
 		}
 	};
 
 	switch (source) {
+		case 'bilibili':
+			result = await bilibili_search(search, page, page_size);
+			break;
 		case 'netease':
 			result = await netease_search(search, page, page_size);
 			break;
@@ -1481,6 +1573,9 @@ async function CreateMusicShareJSON(data) {
 async function CreateMusicShare(e, data, to_uin = null) {
 	let appid, appname, appsign, style = 4;
 	switch (data.source) {
+		case 'bilibili':
+			appid = 100951776, appname = 'tv.danmaku.bili', appsign = '7194d531cbe7960a22007b9f6bdaa38b';
+			break;
 		case 'netease':
 			appid = 100495085, appname = "com.netease.cloudmusic", appsign = "da6b069da1e2982db3e386233f68d76d";
 			break;
@@ -1583,7 +1678,7 @@ async function SendMusicShare(body) {
 	let payload = await Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 
 	let result = core.pb.decode(payload);
-
+	console.log('share:' + result.toString());
 	if (result[3] != 0) {
 		e.reply('歌曲分享失败：' + result[3], true);
 	}
@@ -1870,6 +1965,31 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 }
 
 
+async function bilibili_search(search, page = 1, page_size = 10) {
+	try {
+		let offset = page < 1 ? 0 : page;
+		offset = (page_size * page) - page_size;
+		let url = `https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&_extra=&context=&page=${page}&page_size=${page_size}&from_source=&from_spmid=333.337&platform=pc&highlight=1&single_column=0&keyword=${encodeURI(search)}&qv_id=CAwC63KwwHyP6q4IJlnV2afQ6clyM87r&ad_resource=5654&source_tag=3&gaia_vtoken=&category_id=&search_type=video&dynamic_offset=0&wts=1678977993`;
+		let options = {
+			method: 'GET',//post请求 
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Referer': 'https://search.bilibili.com/',
+				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41',
+				'Cookie': 'buvid3=A40E384B-1E77-B3F8-0FA6-8177143B71DB09209infoc'
+			}
+		};
+		let response = await fetch(url, options); //调用接口获取数据
+		let res = await response.json(); //结果json字符串转对象
+
+		if (!res.data?.result || res.data?.result.length < 1) {
+			return null;
+		}
+		return { page: page, data: res.data?.result };
+	} catch (err) { }
+
+	return null;
+}
 
 async function qqmusic_search(search, page = 1, page_size = 10) {
 	try {
