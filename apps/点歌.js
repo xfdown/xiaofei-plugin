@@ -1,10 +1,7 @@
 import plugin from '../../../lib/plugins/plugin.js';
 import fetch from "node-fetch";
-import { core } from "oicq";
 import puppeteer from '../../../lib/puppeteer/puppeteer.js';
 import { Config, Data, Version, Plugin_Path } from '../components/index.js';
-import uploadRecord from '../model/uploadRecord.js';
-import { segment } from 'oicq';
 import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
