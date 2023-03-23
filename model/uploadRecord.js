@@ -1,5 +1,3 @@
-import { core } from "oicq"
-import Contactable from "oicq"
 import querystring from "querystring"
 import fetch from "node-fetch"
 import fs from "fs"
@@ -9,7 +7,6 @@ import stream from "stream"
 import crypto from "crypto"
 import child_process from "child_process"
 var errors = {};
-
 
 async function uploadRecord(record_url, seconds = 0, transcoding = true, brief = '') {
     const result = await getPttBuffer(record_url, Bot.config.ffmpeg_path, transcoding);
@@ -24,7 +21,7 @@ async function uploadRecord(record_url, seconds = 0, transcoding = true, brief =
         1: 3,
         2: 3,
         5: {
-            1: Contactable.target,
+            1: Bot.uin,
             2: Bot.uin,
             3: 0,
             4: hash,

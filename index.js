@@ -5,22 +5,33 @@
 
 const apps = {};
 global.xiaofei_plugin = {
-	apps: apps
+  apps: apps
 };
 
-import fs from 'node:fs'
-import { Version, Plugin_Path} from './components/index.js'
-
-if (!global.segment) {
-  global.segment = (await import("oicq")).segment
-}
+let is_icqq = false;
+let is_oicq = false;
 
 try {
-  global.uploadRecord = (await import("./model/uploadRecord.js")).default
-  global.core = (await import("oicq")).core
+  let icqq = await import("icqq");
+  if (icqq) is_icqq = true;
 } catch (err) {
-  global.uploadRecord = segment.record
+  try {
+    let oicq = await import("oicq");
+    if (oicq) is_oicq = true;
+  } catch (err) { }
 }
+
+if (is_icqq || is_oicq) {
+  if (!global.core) global.core = (await import(is_icqq ? 'icqq' : 'oicq')).core;
+  if (!global.segment) global.segment = (await import(is_icqq ? 'icqq' : 'oicq')).segment;
+  global.uploadRecord = (await import("./model/uploadRecord.js")).default;
+}else{
+  global.uploadRecord = segment.record;
+}
+
+import fs from 'node:fs'
+import { Version, Plugin_Path } from './components/index.js'
+
 
 const files = fs.readdirSync(`${Plugin_Path}/apps`).filter(file => file.endsWith('.js'))
 
@@ -36,9 +47,9 @@ let ver = Version.ver;
 logger.info(`---------^_^---------`)
 logger.info(`小飞插件${ver}：初始化~`)
 
-if(Version.yunzai[0] != '3'){
+if (Version.yunzai[0] != '3') {
   logger.error(`小飞插件${ver}：初始化失败，本插件仅支持Yunzai-Bot v3！`)
-}else{
+} else {
   for (let i in files) {
     let name = files[i].replace('.js', '')
     if (ret[i].status != 'fulfilled') {
