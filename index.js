@@ -11,6 +11,17 @@ global.xiaofei_plugin = {
 import fs from 'node:fs'
 import { Version, Plugin_Path} from './components/index.js'
 
+if (!global.segment) {
+  global.segment = (await import("oicq")).segment
+}
+
+try {
+  global.uploadRecord = (await import("./model/uploadRecord.js")).default
+  global.core = (await import("oicq")).core
+} catch (err) {
+  global.uploadRecord = segment.record
+}
+
 const files = fs.readdirSync(`${Plugin_Path}/apps`).filter(file => file.endsWith('.js'))
 
 let ret = []
