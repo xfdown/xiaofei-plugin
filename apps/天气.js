@@ -16,7 +16,7 @@ export class xiaofei_weather extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#?(小飞)?(.*)天气(.*)?$',
+					reg: '^#?(小飞)?(.*)天气$',
 					/** 执行方法 */
 					fnc: 'query_weather'
 				}
@@ -32,6 +32,7 @@ export class xiaofei_weather extends plugin {
 
 	async query_weather() {
 		if (/^#?小飞设置.*$/.test(this.e.msg)) return false;
+
 		let msg = this.e.msg
 			.replace('#', '')
 			.replace('小飞', '')
