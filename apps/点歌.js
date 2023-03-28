@@ -5,6 +5,7 @@ import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
+import { Console } from 'console';
 
 const no_pic = '';
 var _page_size = 20;
@@ -438,16 +439,6 @@ async function music_message(e) {
 					if (music_json['view'] == 'music') {
 						let music = music_json.meta.music;
 
-						//if (reg[1]?.includes('下载音乐')) {
-						//	music.title = music.title + '-' + music.desc;
-						//	music.desc = '请点击下载';
-						//	music.jumpUrl = music.musicUrl;
-						//	music_json.view = 'news';
-						//	music_json.meta.news = music;
-						//	delete music_json.meta.music;
-						//	return true;
-						//}
-
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
 						let result = await e.reply(await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清'), music.title + '-' + music.desc));
 						if (!result) {
@@ -494,16 +485,6 @@ async function music_message(e) {
 						await e.reply('[' + music.name + '-' + music.artist + ']获取下载地址失败！');
 						return true;
 					}
-
-					//if (reg[1]?.includes('下载音乐')) {
-					//	music_json.meta.music.title = music.name + '-' + music.artist;
-					//	music_json.meta.music.desc = '请点击下载';
-					//	music_json.meta.music.jumpUrl = music_json.meta.music.musicUrl;
-					//	music_json.view = 'news';
-					//	music_json.meta.news = music_json.meta.music;
-					//	delete music_json.meta.music;
-					//	return true;
-					//}
 
 					await e.reply('开始上传[' + music.name + '-' + music.artist + ']。。。');
 					let result = await uploadRecord(music_json.meta.music.musicUrl, 0, !reg[1].includes('高清'), music.name + '-' + music.artist);
@@ -752,6 +733,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						});
 					}
 
+					let json_list = [];
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
@@ -760,7 +742,24 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music_json.config.autosize = true;
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
-						music.preview = music.source_icon;
+						json_list.push(music_json);
+						index++;
+					}
+
+					let images = (await Bot.pickFriend(Bot.uin)._preprocess(json_list.map(music_json => {
+						return segment.image(music_json.meta.music.preview);
+					}))).imgs;
+
+					index = 0;
+					for (let music_json of json_list) {
+						let music = music_json.meta.music;
+						let image = images[index];
+						if (image.md5) {
+							let md5 = (image.md5.toString('hex')).toUpperCase();
+							music.preview = 'https://c2cpicdw.qpic.cn/gchatpic_new/0/0-0-' + md5 + '/0';
+						} else {
+							music.preview = music.source_icon;
+						}
 						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
 						MsgList.push({
 							...user_info,
@@ -805,11 +804,16 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					music_json.config.autosize = true;
 					music = music_json.meta.music;
 					music.tag = tag;
-					music.preview = music.source_icon;
+					let image = await upload_image(music.preview);
+					if (image.md5) {
+						let md5 = (image.md5.toString('hex')).toUpperCase();
+						music.preview = 'https://c2cpicdw.qpic.cn/gchatpic_new/0/0-0-' + md5 + '/0';
+					} else {
+						music.preview = music.source_icon;
+					}
 					music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
 					await e.reply(segment.json(music_json));
-					//let body = await CreateMusicShare(e, music);
-					//await SendMusicShare(body);
+
 					data = {
 						time: new Date().getTime(),
 						data: [result.data[0]],
@@ -2125,4 +2129,8 @@ function random(min, max) {
  */
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function upload_image(file) {
+	return (await Bot.pickFriend(Bot.uin)._preprocess(segment.image(file))).imgs[0];
 }
