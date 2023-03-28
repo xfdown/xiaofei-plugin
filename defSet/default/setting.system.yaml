@@ -4,3 +4,4 @@ weather: false
 music_source: QQ
 poke: false
 music_high_quality: false
+card_weather: false

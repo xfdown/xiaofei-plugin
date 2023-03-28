@@ -9,7 +9,8 @@ const cfgMap = {
 	'天气': 'system.weather',
 	'默认音乐源': 'system.music_source',
 	'戳一戳': 'system.poke',
-	'高品质点歌': 'system.music_high_quality'
+	'高品质点歌': 'system.music_high_quality',
+	'卡片天气': 'system.card_weather',
 };
 
 const CfgReg = `^#?小飞(插件)?设置\\s*(${lodash.keys(cfgMap).join('|')})?\\s*(.*)$`;
