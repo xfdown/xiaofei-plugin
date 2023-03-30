@@ -145,31 +145,32 @@ async function weather(e, search) {
 			try {
 				res = await response.json();
 			} catch (err) { }
-			if (res == null || !res.weather || !res.weather?.adcode) {
-				return { code: -1, msg: '没有查询到该地区的天气！' };
-			}
-			let adcode = res.weather.adcode;
-			let weather = res.weather;
+			if (!(res == null || !res.weather || !res.weather?.adcode)) {
+				let adcode = res.weather.adcode;
+				let weather = res.weather;
 
+				options.body = JSON.stringify({
+					adcode: adcode,
+				});
 
-			options.body = JSON.stringify({
-				adcode: adcode,
-			});
-			url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
-			response = await fetch(url, options);
-			res = null;
-			try {
-				res = await response.json();
-			} catch (err) { }
-			if (res == null || res.code != 0 || !res.data) {
-				return { code: -1, msg: '没有查询到该地区的天气！' };
+				url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
+				response = await fetch(url, options);
+				res = null;
+
+				try {
+					res = await response.json();
+				} catch (err) { }
+				if (res == null || res.code != 0 || !res.data) {
+					return { code: -1, msg: '没有查询到该地区的天气！' };
+				}
+
+				let data = {
+					weather: weather,
+					share_json: res.data
+				}
+				e.reply({ type: 'json', data: data.share_json });
 			}
 
-			let data = {
-				weather: weather,
-				share_json: res.data
-			}
-			e.reply({ type: 'json', data: data.share_json });
 		} catch (err) {
 			logger.error(err);
 			if (e.msg.includes('#')) await e.reply('[小飞插件]卡片天气发送失败！');
