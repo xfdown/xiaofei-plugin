@@ -5,7 +5,7 @@ import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
-import { Console } from 'console';
+import ArkMsg from '../model/ArkMsg.js';
 
 const no_pic = '';
 var _page_size = 20;
@@ -800,20 +800,9 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						...music,
 						app_name: tag
 					});
-					music_json.app = 'com.tencent.qzone.structmsg';
-					music_json.config.autosize = true;
 					music = music_json.meta.music;
 					music.tag = tag;
-					let image = await upload_image(music.preview);
-					if (image.md5) {
-						let md5 = (image.md5.toString('hex')).toUpperCase();
-						music.preview = 'https://c2cpicdw.qpic.cn/gchatpic_new/0/0-0-' + md5 + '/0';
-					} else {
-						music.preview = music.source_icon;
-					}
-					music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
-					await e.reply(segment.json(music_json));
-
+					await ArkMsg.Share(JSON.stringify(music_json), e);
 					data = {
 						time: new Date().getTime(),
 						data: [result.data[0]],
@@ -1560,7 +1549,7 @@ async function CreateMusicShareJSON(data) {
 	music.preview = preview;
 	music.title = title;
 	music.appid = appid;
-	music.tag = `小飞插件[${app_name}]`;
+	music.tag = `${app_name}`;
 	music.source_icon = app_icon;
 	music_json.prompt = prompt;
 	if (!musicUrl) {
