@@ -760,7 +760,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						} else {
 							music.preview = music.source_icon;
 						}
-						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com@');
+						music.jumpUrl = (music.jumpUrl || '').replace(/(http:\/\/|https:\/\/)/, '$1ptlogin2.qq.com/jump?u1=$1');
 						MsgList.push({
 							...user_info,
 							message: segment.json(music_json)
