@@ -46,7 +46,6 @@ try {
   let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default(rendererCfg);
   xiaofei_plugin.puppeteer = puppeteer;
 } catch (err) {
-  logger.error(err);
   try {
     let puppeteer = (await import("../../lib/puppeteer/puppeteer.js")).default;
     xiaofei_plugin.puppeteer = puppeteer;
