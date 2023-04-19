@@ -31,7 +31,19 @@ if (is_icqq || is_oicq) {
 }
 
 try {
-  let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default;
+  let configFile = `../../renderers/puppeteer/config.yaml`;
+  let rendererCfg = {};
+  if (!fs.existsSync(configFile)) {
+    configFile = `../../renderers/puppeteer/config_default.yaml`;
+  }
+
+  try {
+    rendererCfg = yaml.parse(fs.readFileSync(configFile, 'utf8'));
+  } catch (e) {
+    rendererCfg = {};
+  }
+
+  let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default(rendererCfg);
   xiaofei_plugin.puppeteer = puppeteer;
 } catch (err) {
   logger.error(err);
