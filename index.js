@@ -6,7 +6,7 @@
 const apps = {};
 global.xiaofei_plugin = {
   apps: apps,
-  puppeteer: {}
+  puppeteer: null
 };
 
 let is_icqq = false;
@@ -30,26 +30,31 @@ if (is_icqq || is_oicq) {
   global.uploadRecord = segment.record;
 }
 
-try {
-  let configFile = `../../renderers/puppeteer/config.yaml`;
-  let rendererCfg = {};
-  if (!fs.existsSync(configFile)) {
-    configFile = `../../renderers/puppeteer/config_default.yaml`;
-  }
-
+if (fs.existsSync("../../renderers/puppeteer/lib/puppeteer.js")) {
   try {
-    rendererCfg = yaml.parse(fs.readFileSync(configFile, 'utf8'));
-  } catch (e) {
-    rendererCfg = {};
-  }
+    let configFile = `../../renderers/puppeteer/config.yaml`;
+    let rendererCfg = {};
+    if (!fs.existsSync(configFile)) {
+      configFile = `../../renderers/puppeteer/config_default.yaml`;
+    }
 
-  let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default(rendererCfg);
-  xiaofei_plugin.puppeteer = puppeteer;
-} catch (err) {
+    try {
+      rendererCfg = yaml.parse(fs.readFileSync(configFile, 'utf8'));
+    } catch (e) {
+      rendererCfg = {};
+    }
+
+    let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default(rendererCfg);
+    xiaofei_plugin.puppeteer = puppeteer;
+  } catch (e) { }
+}
+
+if (!xiaofei_plugin.puppeteer) {
   try {
     let puppeteer = (await import("../../lib/puppeteer/puppeteer.js")).default;
     xiaofei_plugin.puppeteer = puppeteer;
   } catch (err) {
+    xiaofei_plugin.puppeteer = {};
   }
 }
 
