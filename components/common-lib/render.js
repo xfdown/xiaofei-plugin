@@ -1,6 +1,5 @@
 import { Data, Version, Plugin_Name} from '../index.js'
 import fs from 'fs'
-import puppeteer from '../../../../lib/puppeteer/puppeteer.js'
 
 const _path = process.cwd()
 
@@ -41,7 +40,7 @@ export default async function (path, params, cfg) {
     data._app = app
     fs.writeFileSync(file, JSON.stringify(data))
   }
-  let base64 = await puppeteer.screenshot(`${Plugin_Name}/${app}/${tpl}`, data)
+  let base64 = await xiaofei_plugin.puppeteer.screenshot(`${Plugin_Name}/${app}/${tpl}`, data)
   let ret = true
   if (base64) {
     ret = await e.reply(base64)

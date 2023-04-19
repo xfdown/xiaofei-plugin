@@ -186,7 +186,7 @@ async function weather(e, search) {
 
 	let buff = null;
 	try {
-		const browser = await puppeteer.browserInit();
+		const browser = await xiaofei_plugin.puppeteer.browserInit();
 		const page = await browser.newPage();
 		await page.setViewport({
 			width: 1280,
@@ -227,8 +227,8 @@ async function weather(e, search) {
 
 		page.close().catch((err) => logger.error(err));
 
-		puppeteer.renderNum++;
-		puppeteer.restart();
+		xiaofei_plugin.puppeteer.renderNum++;
+		xiaofei_plugin.puppeteer.restart();
 	} catch (err) {
 		logger.error(err);
 	}

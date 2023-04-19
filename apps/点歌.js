@@ -1,6 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js';
 import fetch from "node-fetch";
-import puppeteer from '../../../lib/puppeteer/puppeteer.js';
 import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 import fs from 'fs';
 import md5 from 'md5';
@@ -980,7 +979,7 @@ async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//Êù•Ë
 	};
 
 
-	let img = await puppeteer.screenshot("xiaofei-plugin/music_list", {
+	let img = await xiaofei_plugin.puppeteer.screenshot("xiaofei-plugin/music_list", {
 		saveId: saveId,
 		tplFile: `${Plugin_Path}/resources/html/music_list/index.html`,
 		data: data,

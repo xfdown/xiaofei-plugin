@@ -5,7 +5,8 @@
 
 const apps = {};
 global.xiaofei_plugin = {
-  apps: apps
+  apps: apps,
+  puppeteer: {}
 };
 
 let is_icqq = false;
@@ -25,8 +26,20 @@ if (is_icqq || is_oicq) {
   if (!global.core) global.core = (await import(is_icqq ? 'icqq' : 'oicq')).core;
   if (!global.segment) global.segment = (await import(is_icqq ? 'icqq' : 'oicq')).segment;
   global.uploadRecord = (await import("./model/uploadRecord.js")).default;
-}else{
+} else {
   global.uploadRecord = segment.record;
+}
+
+try {
+  let puppeteer = (await import("../../lib/puppeteer/puppeteer.js")).default;
+  xiaofei_plugin.puppeteer = puppeteer;
+} catch (err) {
+  try {
+    let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default;
+    xiaofei_plugin.puppeteer = puppeteer;
+  } catch (err) {
+    logger.error(err);
+  }
 }
 
 import fs from 'node:fs'
