@@ -30,12 +30,12 @@ if (is_icqq || is_oicq) {
   global.uploadRecord = segment.record;
 }
 
-if (fs.existsSync("../../renderers/puppeteer/lib/puppeteer.js")) {
+if (fs.existsSync("./renderers/puppeteer/lib/puppeteer.js")) {
   try {
-    let configFile = `../../renderers/puppeteer/config.yaml`;
+    let configFile = `./renderers/puppeteer/config.yaml`;
     let rendererCfg = {};
     if (!fs.existsSync(configFile)) {
-      configFile = `../../renderers/puppeteer/config_default.yaml`;
+      configFile = `./renderers/puppeteer/config_default.yaml`;
     }
 
     try {
