@@ -31,11 +31,11 @@ if (is_icqq || is_oicq) {
 }
 
 try {
-  let puppeteer = (await import("../../lib/puppeteer/puppeteer.js")).default;
+  let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default;
   xiaofei_plugin.puppeteer = puppeteer;
 } catch (err) {
   try {
-    let puppeteer = new (await import("../../renderers/puppeteer/lib/puppeteer.js")).default;
+    let puppeteer = (await import("../../lib/puppeteer/puppeteer.js")).default;
     xiaofei_plugin.puppeteer = puppeteer;
   } catch (err) {
     logger.error(err);
