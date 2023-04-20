@@ -1,4 +1,4 @@
-import { Data, Version, Plugin_Name} from '../index.js'
+import { Data, Version, Plugin_Name } from '../index.js'
 import fs from 'fs'
 
 const _path = process.cwd()
@@ -27,7 +27,7 @@ export default async function (path, params, cfg) {
       scale: 1,
       copyright: `Created By Yunzai-Bot<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
     },
-	quality: 100
+    quality: 100
   }
   if (process.argv.includes('web-debug')) {
     // debug下保存当前页面的渲染数据，方便模板编写与调试
@@ -40,10 +40,11 @@ export default async function (path, params, cfg) {
     data._app = app
     fs.writeFileSync(file, JSON.stringify(data))
   }
-  let base64 = await xiaofei_plugin.puppeteer.screenshot(`${Plugin_Name}/${app}/${tpl}`, data)
+  let img = await xiaofei_plugin.puppeteer.screenshot(`${Plugin_Name}/${app}/${tpl}`, data)
   let ret = true
-  if (base64) {
-    ret = await e.reply(base64)
+  if (img) {
+    if (img?.type != 'image') img = segment.image(img)
+    ret = await e.reply(img)
   }
   return cfg.retMsgId ? ret : true
 }

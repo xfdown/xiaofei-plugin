@@ -993,6 +993,7 @@ async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//来�
 	}, 100);
 
 	logger.mark(`[小飞插件_点歌列表图片生成耗时]${logger.green(`${Date.now() - start}ms`)}`);
+	if (img && img?.type != 'image') img = segment.image(img);
 	return img;
 }
 
