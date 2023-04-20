@@ -153,24 +153,27 @@ export class xiaofei_music extends plugin {
 		];
 	}
 
-	async init() {
-		try {
-			for (let key in music_cookies) {
-				let ck = music_cookies[key].ck;
-				if (key == 'netease' && (!ck || ck?.includes('MUSIC_U=;'))) {
-					logger.info(`【小飞插件_网易云音乐ck】未设置网易云音乐ck！`);
+	init() {
+		new Promise(async (resolve, reject) => {
+			try {
+				for (let key in music_cookies) {
+					let ck = music_cookies[key].ck;
+					if (key == 'netease' && (!ck || ck?.includes('MUSIC_U=;'))) {
+						logger.info(`【小飞插件_网易云音乐ck】未设置网易云音乐ck！`);
+					}
 				}
-			}
-			await update_qqmusic_ck();
-		} catch (err) { }
+				await update_qqmusic_ck();
+			} catch (err) { }
 
-		try {
-			let path = `${process.cwd()}/data/html/xiaofei-plugin/music_list`;
-			let files = fs.readdirSync(path);
-			files.forEach(file => {
-				fs.unlink(`${path}/${file}`, err => { });
-			});
-		} catch (err) { }
+			try {
+				let path = `${process.cwd()}/data/html/xiaofei-plugin/music_list`;
+				let files = fs.readdirSync(path);
+				files.forEach(file => {
+					fs.unlink(`${path}/${file}`, err => { });
+				});
+			} catch (err) { }
+			resolve();
+		});
 	}
 
 	async music_task() {
