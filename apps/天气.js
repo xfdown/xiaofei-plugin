@@ -218,11 +218,12 @@ async function weather(e, search) {
 
 		await page.evaluate(`$('body').append('<p style="text-align: center;font-size: 15px;margin-top: -25px;">Created By Yunzai-Bot ${Version.yunzai} &amp; xiaofei-Plugin ${Version.ver}</p><br>');`);//增加版本号显示
 
-		buff = await page.screenshot({
-			fullPage: true,
+		let body = await page.$('body');
+		buff = await body.screenshot({
+			//fullPage: true,
 			type: 'jpeg',
 			omitBackground: false,
-			quality: 90,
+			quality: 100,
 		});
 
 		page.close().catch((err) => logger.error(err));
