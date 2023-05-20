@@ -40,6 +40,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			if (ck.ck) {
 				cookie = ck.ck;
 			}
+			if (['星穹列车', '无名客'].includes(ck.region_name)) continue;
 			query_list.push(await query_reg_time(this.e, cookie, ck.uid));
 		}
 		this.reply(`---原神注册时间---\r\n${query_list.join('\r\n----------------\r\n')}\r\n----------------\r\n提示：如需更新数据，请发送【#刷新注册时间】`);
