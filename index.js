@@ -2,7 +2,7 @@
 /**
 插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
 */
-
+import YAML from 'yaml';
 const apps = {};
 global.xiaofei_plugin = {
   apps: apps,
@@ -39,7 +39,7 @@ if (fs.existsSync("./renderers/puppeteer/lib/puppeteer.js")) {
     }
 
     try {
-      rendererCfg = yaml.parse(fs.readFileSync(configFile, 'utf8'));
+      rendererCfg = YAML.parse(fs.readFileSync(configFile, 'utf8'));
     } catch (e) {
       rendererCfg = {};
     }
