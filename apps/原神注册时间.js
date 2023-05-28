@@ -204,18 +204,35 @@ async function hk4e_cn_login(mys_cookies, uid) {
 }
 
 async function query_mysck(e) {
-	let cks = gsCfg.getBingCkSingle(e.user_id);
-	if (lodash.isEmpty(cks)) {
-		return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
-	}
 	let list = [];
-	for (let uid in cks) {
-		let ck = cks[uid];
-		if (!lodash.isEmpty(ck)) {
-			list.push(ck);
+	if (e.user) {
+		let NoteUser = e.user;
+		let mysUsers = NoteUser.mysUsers || {}
+		if (Object.keys(mysUsers).length < 1) {
+			return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
+		}
+		let uidMap = NoteUser.uidMap || {}
+		let game = 'gs';
+		for (let uid of Object.keys(uidMap[game] || {})) {
+			let val = uidMap[game][uid]
+			if (val?.type != 'ck') continue
+			if (!lodash.isEmpty(val)) {
+				list.push(val);
+			}
+		}
+	} else {
+		let cks = gsCfg.getBingCkSingle(e.user_id);
+		if (lodash.isEmpty(cks)) {
+			return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
+		}
+		
+		for (let uid in cks) {
+			let ck = cks[uid];
+			if (!lodash.isEmpty(ck)) {
+				list.push(ck);
+			}
 		}
 	}
-
 	if (list.length < 1) {
 		return { code: -1, msg: '获取Cookie失败！' };
 	}
