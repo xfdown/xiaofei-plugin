@@ -217,7 +217,10 @@ async function query_mysck(e) {
 			let val = uidMap[game][uid]
 			if (val?.type != 'ck') continue
 			if (!lodash.isEmpty(val)) {
-				list.push(val);
+				list.push({
+					uid: String(uid),
+					...mysUsers[val.ltuid]
+				});
 			}
 		}
 	} else {
