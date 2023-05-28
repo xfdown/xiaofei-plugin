@@ -209,7 +209,7 @@ async function query_mysck(e) {
 	try {
 		cks = gsCfg.getBingCkSingle(e.user_id);
 	} catch (err) { }
-	if (e.user && !lodash.isEmpty(cks)) {
+	if (e.user && lodash.isEmpty(cks)) {
 		let NoteUser = e.user;
 		let mysUsers = NoteUser.mysUsers || {}
 		if (Object.keys(mysUsers).length < 1) {
