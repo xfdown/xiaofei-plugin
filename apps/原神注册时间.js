@@ -212,17 +212,14 @@ async function query_mysck(e) {
 	if (e.user && lodash.isEmpty(cks)) {
 		let NoteUser = e.user;
 		let mysUsers = NoteUser.mysUsers || {}
-		if (Object.keys(mysUsers).length < 1) {
+		if (!NoteUser.hasCk) {
 			return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
 		}
-		let uidMap = NoteUser.uidMap || {}
 		let game = 'gs';
-		for (let uid of Object.keys(uidMap[game] || {})) {
-			let val = uidMap[game][uid]
-			if (val?.type != 'ck') continue
+		for(let val of NoteUser.getCkUidList(game) || []){
 			if (!lodash.isEmpty(val)) {
 				list.push({
-					uid: String(uid),
+					uid: String(val.uid),
 					...mysUsers[val.ltuid]
 				});
 			}
