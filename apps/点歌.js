@@ -4,7 +4,6 @@ import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
-import ArkMsg from '../model/ArkMsg.js';
 
 const no_pic = '';
 var _page_size = 20;
@@ -798,13 +797,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						tag = `${tag}的个性电台`;
 					}
 					let music = result.data[0];
-					let music_json = await CreateMusicShareJSON({
-						...music,
-						app_name: tag
-					});
-					music = music_json.meta.music;
-					music.tag = tag;
-					await ArkMsg.Share(JSON.stringify(music_json), e);
+					music.name = `${music.name}-${music.artist}`;
+					music.artist = tag;
+					let body = await CreateMusicShare(e, music);
+					await SendMusicShare(body);
 					data = {
 						time: new Date().getTime(),
 						data: [result.data[0]],
