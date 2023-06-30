@@ -13,7 +13,7 @@ export class xiaofei_violation_query extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^#机器人违规记录(查询)?(\d+)?$',
+					reg: '^#机器人违规记录(查询)?(.*)?$',
 					/** 执行方法 */
 					fnc: 'violation_query',
 					permission: 'master'
