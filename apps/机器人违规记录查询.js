@@ -25,7 +25,7 @@ export class xiaofei_violation_query extends plugin {
 	async violation_query() {
 		let e = this.e;
 		let reg = /^#机器人违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
-		let num = reg.length > 2 ? parseInt(reg[2]) : 20;
+		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
 		let appid = 1109907872;
 		let code = await LightApp_GetCode(appid);
 		if (!code) {
