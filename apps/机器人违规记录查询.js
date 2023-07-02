@@ -88,7 +88,8 @@ export class xiaofei_violation_query extends plugin {
 			});
 			let day = record.duration > 0 ? Math.ceil((record.duration - record.time) / 86400) + '天' : '';
 			let msg = [`冻结时间：${new Date(record.time * 1000 + 28800000).toJSON().replace('T', ' ').split('.')[0]}`];
-			msg.push(`冻结原因：因涉嫌${violation_info.reasonDesc}被冻结${day}。`);
+			let reason = violation_info.reasonDesc == '' ? violation_info.title : `因涉嫌${violation_info.reasonDesc}被冻结${day}。`;
+			msg.push(`冻结原因：${reason}`);
 			msg.push(`冻结详情：${violation_info.description}`);
 			MsgList.push({
 				message: msg.join("\n"),
