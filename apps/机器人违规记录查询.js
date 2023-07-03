@@ -94,7 +94,8 @@ export class xiaofei_violation_query extends plugin {
 			MsgList.push({
 				message: msg.join("\n"),
 				nickname: Bot.nickname,
-				user_id: Bot.uin
+				user_id: Bot.uin,
+				time: record.time
 			});
 		}
 		let forwardMsg = await Bot.makeForwardMsg(MsgList);
