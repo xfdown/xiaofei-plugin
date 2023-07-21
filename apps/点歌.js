@@ -1408,10 +1408,20 @@ async function music_search(search, source, page = 1, page_size = 10) {
 							return a.id - b.id;
 						});
 						let play_url = audios[audios.length - 1].base_url;
-						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+(:\d+)?/, 'https://upos-sz-mirrorhw.bilivideo.com');
+						//backup_url
+						if(!/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(play_url)){
+							let backup_url = audios[audios.length - 1].backup_url;
+							for(let url of backup_url){
+								if(/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(url)){
+									play_url = url;
+									break;
+								}
+							}
+						}
+						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/, 'https://upos-sz-mirrorhw.bilivideo.com/');
 					} else if (res.data?.durl && res.data?.durl.length > 0) {
 						let play_url = res.data?.durl[0].url;
-						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+(:\d+)?/, 'https://upos-sz-mirrorhw.bilivideo.com');
+						if (play_url) music_data.url = play_url.replace(/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/, 'https://upos-sz-mirrorhw.bilivideo.com/');
 					}
 				}
 				return music_data;
