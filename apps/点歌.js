@@ -734,20 +734,24 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						});
 					}
 
-					let json_list = [];
+					//let json_list = [];
 					for (let music of result.data) {
 						let music_json = await CreateMusicShareJSON({
 							...music,
 						});
-						music_json.app = 'com.tencent.qzone.structmsg';
-						music_json.config.autosize = true;
+						//music_json.app = 'com.tencent.structmsg';
+						//music_json.config.autosize = true;
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
-						json_list.push(music_json);
+						//json_list.push(music_json);
+						MsgList.push({
+							...user_info,
+							message: segment.json(music_json)
+						});
 						index++;
 					}
 
-					let images = (await Bot.pickFriend(Bot.uin)._preprocess(json_list.map(music_json => {
+					/*let images = (await Bot.pickFriend(Bot.uin)._preprocess(json_list.map(music_json => {
 						return segment.image(music_json.meta.music.preview);
 					}))).imgs;
 
@@ -767,12 +771,26 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 							message: segment.json(music_json)
 						});
 						index++;
-					}
-
+					}*/
 					let is_sign = true;
 					let forwardMsg = await Bot.makeForwardMsg(MsgList);
+					let forwardMsg_json = forwardMsg.data;
+					if (typeof (forwardMsg_json) === 'object') {
+						if (forwardMsg_json.app === 'com.tencent.multimsg' && forwardMsg_json.meta?.detail) {
+							let detail = forwardMsg_json.meta.detail;
+							let resid = detail.resid;
+							let fileName = detail.uniseq;
+							let preview = '';
+							for (let val of detail.news) {
+								preview += `<title color="#777777" size="26">${val.text}</title>`;
+							}
+							forwardMsg.data = `<?xml version="1.0" encoding="utf-8"?><msg brief="[聊天记录]" m_fileName="${fileName}" action="viewMultiMsg" tSum="1" flag="3" m_resid="${resid}" serviceID="35" m_fileSize="0"><item layout="1"><title color="#000000" size="34">转发的聊天记录</title>${preview}<hr></hr><summary color="#808080" size="26">${detail.summary}</summary></item><source name="聊天记录"></source></msg>`;
+							forwardMsg.type = 'xml';
+							forwardMsg.id = 35;
+						}
+					}
 					forwardMsg.data = forwardMsg.data
-						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')
+						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="UTF-8"?>')
 						.replace(/\n/g, '')
 						.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
 						.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
@@ -1409,10 +1427,10 @@ async function music_search(search, source, page = 1, page_size = 10) {
 						});
 						let play_url = audios[audios.length - 1].base_url;
 						//backup_url
-						if(!/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(play_url)){
+						if (!/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(play_url)) {
 							let backup_url = audios[audios.length - 1].backup_url;
-							for(let url of backup_url){
-								if(/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(url)){
+							for (let url of backup_url) {
+								if (/https?\:\/\/\d+.\d+.\d+.\d+\/\/?/.test(url)) {
 									play_url = url;
 									break;
 								}
