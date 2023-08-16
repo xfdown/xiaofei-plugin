@@ -37,7 +37,7 @@ export class xiaofei_violation_query extends plugin {
 		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
 		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
 		let appid = 1109907872;
-		if (reg[0].indexOf('我的')) {
+		if (reg[0].includes('我的')) {
 			let options = {
 				method: 'GET',
 				headers: {
@@ -166,13 +166,13 @@ export class xiaofei_violation_query extends plugin {
 		}
 
 		if (result.totalSize < 1) {
-			e.reply(`${reg[0].indexOf('我的') ? '账号[' + e.user_id + ']' : '本账号'}没有违规记录！`, true);
+			e.reply(`${reg[0].includes('我的') ? '账号[' + e.user_id + ']' : '本账号'}没有违规记录！`, true);
 			return true;
 		}
 
 		let records = result.records;
 		let MsgList = [{
-			message: `${reg[0].indexOf('我的') ? '账号[' + e.user_id + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
+			message: `${reg[0].includes('我的') ? '账号[' + e.user_id + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
 			nickname: Bot.nickname,
 			user_id: Bot.uin
 		}];
