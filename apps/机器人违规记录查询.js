@@ -78,6 +78,7 @@ export class xiaofei_violation_query extends plugin {
 						}
 						let data = result.data || {};
 						if (data?.ok === 1) {
+							clearInterval(timer);
 							let ticket = data.ticket;
 							let options = {
 								method: 'POST',
@@ -95,12 +96,10 @@ export class xiaofei_violation_query extends plugin {
 							let response = await fetch('https://q.qq.com/ide/login', options);
 							let result = await response.json();
 							if (!result.code) {
-								clearInterval(timer);
 								e.reply(`授权登录失败！\n${result.message}`, true);
 								resolve(false);
 								return;
 							}
-							clearInterval(timer);
 							resolve(result.code);
 							return;
 						}
