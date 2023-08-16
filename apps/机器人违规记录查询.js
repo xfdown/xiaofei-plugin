@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 export class xiaofei_violation_query extends plugin {
+
 	constructor() {
 		super({
 			/** 功能名称 */
@@ -17,17 +18,112 @@ export class xiaofei_violation_query extends plugin {
 					/** 执行方法 */
 					fnc: 'violation_query',
 					permission: 'master'
+				},
+				{
+					/** 命令正则匹配 */
+					reg: '^#我的违规记录(查询)?(.*)?$',
+					/** 执行方法 */
+					fnc: 'violation_query',
 				}
 			]
 		});
+		this.login_list = {};
 	}
 
 	async violation_query() {
 		let e = this.e;
-		let reg = /^#机器人违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
+		let reg;
+		let code;
+		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
 		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
 		let appid = 1109907872;
-		let code = await LightApp_GetCode(appid);
+		if (reg[0].indexOf('我的')) {
+			let options = {
+				method: 'GET',
+				headers: {
+					'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
+					'host': 'q.qq.com',
+					'accept': 'application/json',
+					'content-type': 'application/json'
+				}
+			};
+			let response = await fetch('https://q.qq.com/ide/devtoolAuth/GetLoginCode', options);
+			let result = await response.json();
+			if (result.data && result.data.code) {
+				let login_code = result.data.code;
+				let verify_message = await e.reply(`请在一分钟内通过以下链接授权登录！\nhttps://h5.qzone.qq.com/qqq/code/${login_code}?_proxy=1&from=ide`, true);
+				let time = Date.now();
+				let timer = -1;
+				code = await new Promise(resolve => {
+					let count = 0;
+					if (this.login_list[e.user_id]) {
+						clearInterval(this.login_list[e.user_id]);
+						delete this.login_list[e.user_id];
+					}
+					this.login_list[e.user_id] = time;
+					timer = setInterval(async () => {
+						if (count >= 60 || this.login_list[e.user_id] != time) {
+							clearInterval(timer);
+							if (count >= 60) e.reply('授权登录超时！', true);
+							resolve(false);
+							return;
+						}
+						let response = await fetch(`https://q.qq.com/ide/devtoolAuth/syncScanSateGetTicket?code=${login_code}`, options);
+						let result = await response.json();
+						if (result.code != 0) {
+							clearInterval(timer);
+							e.reply(`授权登录失败！\n${result.message}[${result.code}]`, true);
+							resolve(false);
+							return;
+						}
+						let data = result.data || {};
+						if (data?.ok === 1) {
+							let ticket = data.ticket;
+							let options = {
+								method: 'POST',
+								headers: {
+									'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
+									'host': 'q.qq.com',
+									'accept': 'application/json',
+									'content-type': 'application/json'
+								},
+								body: JSON.stringify({
+									appid: appid,
+									ticket: ticket
+								})
+							};
+							let response = await fetch('https://q.qq.com/ide/login', options);
+							let result = await response.json();
+							if (!result.code) {
+								clearInterval(timer);
+								e.reply(`授权登录失败！\n${result.message}`, true);
+								resolve(false);
+								return;
+							}
+							clearInterval(timer);
+							resolve(result.code);
+							return;
+						}
+						count++;
+					}, 1000);
+				});
+
+				if (verify_message) {
+					try {
+						if (e.group) e.group.recallMsg(verify_message.message_id);
+						if (e.friend) e.friend.recallMsg(verify_message.message_id);
+					} catch (err) {
+					}
+				}
+				
+				if (this.login_list[e.user_id] === time) delete this.login_list[e.user_id];
+				if (!code) {
+					return true;
+				}
+			}
+		} else {
+			code = await LightApp_GetCode(appid);
+		}
 		if (!code) {
 			e.reply('获取code失败！', true);
 			return;
@@ -71,13 +167,13 @@ export class xiaofei_violation_query extends plugin {
 		}
 
 		if (result.totalSize < 1) {
-			e.reply('本账号没有违规记录！', true);
+			e.reply(`${reg[0].indexOf('我的') ? '账号[' + e.user_id + ']' : '本账号'}没有违规记录！`, true);
 			return true;
 		}
 
 		let records = result.records;
 		let MsgList = [{
-			message: `本账号存在${result.totalSize}条历史违规记录`,
+			message: `${reg[0].indexOf('我的') ? '账号[' + e.user_id + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
 			nickname: Bot.nickname,
 			user_id: Bot.uin
 		}];
