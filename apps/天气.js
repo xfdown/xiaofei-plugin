@@ -145,25 +145,26 @@ async function weather(e, search) {
 			}
 
 			if (adcode) {
-				options.method = 'POST';
-				options.body = JSON.stringify({
-					adcode: adcode,
-				});
+				//options.method = 'POST';
+				//options.body = JSON.stringify({
+				//	adcode: adcode,
+				//});
 
-				let url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
+				//let url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
+				let url = `https://weather.mp.qq.com/page/poster?_wv=2&&_wwv=4&adcode=${adcode}`;
 				let response = await fetch(url, options);
-				let res = null;
+				let res;
 				try {
-					res = await response.json();
+					let json = /window.__INITIAL_STATE__ = \{(.*?)\};/.exec(await response.text())[1];
+					json = JSON.parse(`{${json}}`);
+					if (json?.weekStore?.share) res = json?.weekStore?.share;
 				} catch (err) { }
 				if (res == null || res.code != 0 || !res.data) {
 					return { code: -1, msg: '没有查询到该地区的天气！' };
 				}
-
 				let data = {
-					weather: weather,
 					share_json: res.data
-				}
+				};
 				e.reply({ type: 'json', data: data.share_json });
 			}
 		} catch (err) {
