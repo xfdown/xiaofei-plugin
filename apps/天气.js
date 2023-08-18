@@ -1,7 +1,7 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import fetch from "node-fetch";
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import { Config, Version } from '../components/index.js'
+const city_list = {};
 export class xiaofei_weather extends plugin {
 	constructor() {
 		super({
@@ -123,7 +123,7 @@ async function weather(e, search) {
 			let g_tk = get_bkn(pskey);
 
 			let options = {
-				method: 'POST',
+				method: 'GET',
 				headers: {
 					'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 12; MI 9 Build/SKQ1.211230.001) V1_AND_SQ_8.9.8_3238_YYB_D A_8090800 QQ/8.9.8.9000 NetType/WIFI WebP/0.4.1 Pixel/1080 StatusBarHeight/75 SimpleUISwitch/0 QQTheme/1000 InMagicWin/0 StudyMode/0 CurrentMode/0 CurrentFontScale/1.0 GlobalDensityScale/0.9818182 AppId/537132847',
 					'Content-Type': 'application/json',
@@ -131,32 +131,28 @@ async function weather(e, search) {
 				}
 			};
 
-			options.method = 'POST';
-			options.headers['Content-Type'] = 'application/json';
-			options.body = JSON.stringify({
-				area_id: area_id,
-				isRealAdcode: false,
-				allAstro: false
-			});
-			let url = `https://weather.mp.qq.com/cgi/home?g_tk=${g_tk}`;
+			let adcode = city_list[area_id]
+			if (!adcode) {
+				let url = `https://ti.qq.com/v2/city-selector/index?star=11&redirect=true`;
+				let response = await fetch(url, options);
+				let res = await response.text();
+				let match = /\<li data-adcode=\"(\d+)\" data-areaid=\"(\d+)\">/g;
+				let arr;
+				while (arr = match.exec(res)) {
+					city_list[arr[2]] = arr[1];
+				}
+				adcode = city_list[area_id];
+			}
 
-			let response = await fetch(url, options);
-			res = null;
-			try {
-				res = await response.json();
-			} catch (err) { }
-			if (!(res == null || !res.weather || !res.weather?.adcode)) {
-				let adcode = res.weather.adcode;
-				let weather = res.weather;
-
+			if (adcode) {
+				options.method = 'POST';
 				options.body = JSON.stringify({
 					adcode: adcode,
 				});
 
-				url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
-				response = await fetch(url, options);
-				res = null;
-
+				let url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
+				let response = await fetch(url, options);
+				let res = null;
 				try {
 					res = await response.json();
 				} catch (err) { }
@@ -170,7 +166,6 @@ async function weather(e, search) {
 				}
 				e.reply({ type: 'json', data: data.share_json });
 			}
-
 		} catch (err) {
 			logger.error(err);
 			if (e.msg.includes('#')) await e.reply('[小飞插件]卡片天气发送失败！');
