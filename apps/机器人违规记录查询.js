@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import common from '../../../lib/common/common.js'
 const login_list = {};
 export class xiaofei_violation_query extends plugin {
 	constructor() {
@@ -183,13 +184,9 @@ export class xiaofei_violation_query extends plugin {
 			return true;
 		}
 
+		let title = `${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}存在${result.totalSize}条历史违规记录`;
+		let MsgList = [title];
 		let records = result.records;
-		let MsgList = [{
-			message: `${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
-			nickname: Bot.nickname,
-			user_id: Bot.uin
-		}];
-
 		for (let record of records) {
 			let violation_info = violation_list.find(val => {
 				return val.reason == record.reason;
@@ -199,14 +196,9 @@ export class xiaofei_violation_query extends plugin {
 			let reason = violation_info.reasonDesc == '' ? violation_info.title : `因涉嫌${violation_info.reasonDesc}被冻结${day}。`;
 			msg.push(`冻结原因：${reason}`);
 			msg.push(`冻结详情：${violation_info.description}`);
-			MsgList.push({
-				message: msg.join("\n"),
-				nickname: Bot.nickname,
-				user_id: Bot.uin,
-				time: record.time
-			});
+			MsgList.push(msg.join("\n"));
 		}
-		let forwardMsg = await Bot.makeForwardMsg(MsgList);
+		let forwardMsg = await common.makeForwardMsg(e, MsgList, title);
 		e.reply(forwardMsg);
 		return true;
 
