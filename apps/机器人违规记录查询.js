@@ -37,91 +37,103 @@ export class xiaofei_violation_query extends plugin {
 		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
 		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
 		let appid = 1109907872;
-		if (reg[0].includes('我的')) {
-			let options = {
-				method: 'GET',
-				headers: {
-					'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
-					'host': 'q.qq.com',
-					'accept': 'application/json',
-					'content-type': 'application/json'
-				}
-			};
-			let response = await fetch('https://q.qq.com/ide/devtoolAuth/GetLoginCode', options);
-			let result = await response.json();
-			if (result.data && result.data.code) {
-				let login_code = result.data.code;
-				let verify_message = await e.reply(`请在一分钟内通过以下链接授权登录！\nhttps://h5.qzone.qq.com/qqq/code/${login_code}?_proxy=1&from=ide`, true);
-				let time = Date.now();
-				let timer = -1;
-				code = await new Promise(resolve => {
-					let count = 0;
-					if (this.login_list[e.user_id]) {
-						clearInterval(this.login_list[e.user_id]);
-						delete this.login_list[e.user_id];
+		let uin = reg[0].includes('我的') ? e.user_id : Bot.uin;
+		if(this.login_list[`${uin}_code`] && (Date.now() - this.login_list[`${uin}_code`].time) < 10 * 60 * 1000){
+			code = this.login_list[`${uin}_code`].code;
+		}
+		if (!code) {
+			if (reg[0].includes('我的')) {
+				let options = {
+					method: 'GET',
+					headers: {
+						'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
+						'host': 'q.qq.com',
+						'accept': 'application/json',
+						'content-type': 'application/json'
 					}
-					this.login_list[e.user_id] = time;
-					timer = setInterval(async () => {
-						if (count >= 60 || this.login_list[e.user_id] != time) {
-							clearInterval(timer);
-							if (count >= 60) e.reply('授权登录超时！', true);
-							resolve(false);
-							return;
+				};
+				let response = await fetch('https://q.qq.com/ide/devtoolAuth/GetLoginCode', options);
+				let result = await response.json();
+				if (result.data && result.data.code) {
+					let login_code = result.data.code;
+					let verify_message = await e.reply(`请在一分钟内通过以下链接授权登录！\nhttps://h5.qzone.qq.com/qqq/code/${login_code}?_proxy=1&from=ide`, true);
+					let time = Date.now();
+					let timer = -1;
+					code = await new Promise(resolve => {
+						let count = 0;
+						if (this.login_list[uin]) {
+							clearInterval(this.login_list[uin]);
+							delete this.login_list[uin];
 						}
-						let response = await fetch(`https://q.qq.com/ide/devtoolAuth/syncScanSateGetTicket?code=${login_code}`, options);
-						let result = await response.json();
-						if (result.code != 0) {
-							clearInterval(timer);
-							e.reply(`授权登录失败！\n${result.message}[${result.code}]`, true);
-							resolve(false);
-							return;
-						}
-						let data = result.data || {};
-						if (data?.ok === 1) {
-							clearInterval(timer);
-							let ticket = data.ticket;
-							let options = {
-								method: 'POST',
-								headers: {
-									'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
-									'host': 'q.qq.com',
-									'accept': 'application/json',
-									'content-type': 'application/json'
-								},
-								body: JSON.stringify({
-									appid: appid,
-									ticket: ticket
-								})
-							};
-							let response = await fetch('https://q.qq.com/ide/login', options);
-							let result = await response.json();
-							if (!result.code) {
-								e.reply(`授权登录失败！\n${result.message}`, true);
+						this.login_list[uin] = time;
+						timer = setInterval(async () => {
+							if (count >= 60 || this.login_list[uin] != time) {
+								clearInterval(timer);
+								if (count >= 60) e.reply('授权登录超时！', true);
 								resolve(false);
 								return;
 							}
-							resolve(result.code);
-							return;
-						}
-						count++;
-					}, 1000);
-				});
+							let response = await fetch(`https://q.qq.com/ide/devtoolAuth/syncScanSateGetTicket?code=${login_code}`, options);
+							let result = await response.json();
+							if (result.code != 0) {
+								clearInterval(timer);
+								e.reply(`授权登录失败！\n${result.message}[${result.code}]`, true);
+								resolve(false);
+								return;
+							}
+							let data = result.data || {};
+							if (data?.ok === 1) {
+								clearInterval(timer);
+								let ticket = data.ticket;
+								let options = {
+									method: 'POST',
+									headers: {
+										'qua': 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D',
+										'host': 'q.qq.com',
+										'accept': 'application/json',
+										'content-type': 'application/json'
+									},
+									body: JSON.stringify({
+										appid: appid,
+										ticket: ticket
+									})
+								};
+								let response = await fetch('https://q.qq.com/ide/login', options);
+								let result = await response.json();
+								if (!result.code) {
+									e.reply(`授权登录失败！\n${result.message}`, true);
+									resolve(false);
+									return;
+								}
+								resolve(result.code);
+								return;
+							}
+							count++;
+						}, 1000);
+					});
 
-				if (verify_message) {
-					try {
-						if (e.group) e.group.recallMsg(verify_message.message_id);
-						if (e.friend) e.friend.recallMsg(verify_message.message_id);
-					} catch (err) {
+					if (verify_message) {
+						try {
+							if (e.group) e.group.recallMsg(verify_message.message_id);
+							if (e.friend) e.friend.recallMsg(verify_message.message_id);
+						} catch (err) {
+						}
+					}
+
+					if (this.login_list[uin] === time) delete this.login_list[uin];
+					if (!code) {
+						return true;
 					}
 				}
-				
-				if (this.login_list[e.user_id] === time) delete this.login_list[e.user_id];
-				if (!code) {
-					return true;
-				}
+			} else {
+				code = await LightApp_GetCode(appid);
 			}
-		} else {
-			code = await LightApp_GetCode(appid);
+			if(code){
+				this.login_list[`${uin}_code`] = {
+					code: code,
+					time: Date.now()
+				};
+			}
 		}
 		if (!code) {
 			e.reply('获取code失败！', true);
@@ -142,7 +154,8 @@ export class xiaofei_violation_query extends plugin {
 		let response = await fetch(url, options);
 		let result = await response.json();
 		if (result.retcode != '0' || !result.data) {
-			e.reply(`code授权登录失败[${result.retcode}]！`, true);
+			if (this.login_list[`${uin}_code`]) delete this.login_list[`${uin}_code`];
+			e.reply(`code授权登录失败[${result.retcode}]，请重试！`, true);
 		}
 
 		let data = result.data;
