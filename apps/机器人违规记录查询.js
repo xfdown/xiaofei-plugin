@@ -179,13 +179,13 @@ export class xiaofei_violation_query extends plugin {
 		}
 
 		if (result.totalSize < 1) {
-			e.reply(`${reg[0].includes('我的') ? '账号[' + e.user_id + ']' : '本账号'}没有违规记录！`, true);
+			e.reply(`${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}没有违规记录！`, true);
 			return true;
 		}
 
 		let records = result.records;
 		let MsgList = [{
-			message: `${reg[0].includes('我的') ? '账号[' + e.user_id + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
+			message: `${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}存在${result.totalSize}条历史违规记录`,
 			nickname: Bot.nickname,
 			user_id: Bot.uin
 		}];
