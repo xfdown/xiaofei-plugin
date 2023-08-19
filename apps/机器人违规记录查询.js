@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
+const login_list = {};
 export class xiaofei_violation_query extends plugin {
-
 	constructor() {
 		super({
 			/** 功能名称 */
@@ -27,7 +27,6 @@ export class xiaofei_violation_query extends plugin {
 				}
 			]
 		});
-		this.login_list = {};
 	}
 
 	async violation_query() {
@@ -38,8 +37,8 @@ export class xiaofei_violation_query extends plugin {
 		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
 		let appid = 1109907872;
 		let uin = reg[0].includes('我的') ? e.user_id : Bot.uin;
-		if(this.login_list[`${uin}_code`] && (Date.now() - this.login_list[`${uin}_code`].time) < 10 * 60 * 1000){
-			code = this.login_list[`${uin}_code`].code;
+		if (login_list[`${uin}_code`] && (Date.now() - login_list[`${uin}_code`].time) < 10 * 60 * 1000) {
+			code = login_list[`${uin}_code`].code;
 		}
 		if (!code) {
 			if (reg[0].includes('我的')) {
@@ -61,13 +60,13 @@ export class xiaofei_violation_query extends plugin {
 					let timer = -1;
 					code = await new Promise(resolve => {
 						let count = 0;
-						if (this.login_list[uin]) {
-							clearInterval(this.login_list[uin]);
-							delete this.login_list[uin];
+						if (login_list[uin]) {
+							clearInterval(login_list[uin]);
+							delete login_list[uin];
 						}
-						this.login_list[uin] = time;
+						login_list[uin] = time;
 						timer = setInterval(async () => {
-							if (count >= 60 || this.login_list[uin] != time) {
+							if (count >= 60 || login_list[uin] != time) {
 								clearInterval(timer);
 								if (count >= 60) e.reply('授权登录超时！', true);
 								resolve(false);
@@ -83,6 +82,7 @@ export class xiaofei_violation_query extends plugin {
 							}
 							let data = result.data || {};
 							if (data?.ok === 1) {
+								if (data.uin) uin = data.uin;
 								clearInterval(timer);
 								let ticket = data.ticket;
 								let options = {
@@ -120,7 +120,7 @@ export class xiaofei_violation_query extends plugin {
 						}
 					}
 
-					if (this.login_list[uin] === time) delete this.login_list[uin];
+					if (login_list[uin] === time) delete login_list[uin];
 					if (!code) {
 						return true;
 					}
@@ -128,8 +128,8 @@ export class xiaofei_violation_query extends plugin {
 			} else {
 				code = await LightApp_GetCode(appid);
 			}
-			if(code){
-				this.login_list[`${uin}_code`] = {
+			if (code) {
+				login_list[`${uin}_code`] = {
 					code: code,
 					time: Date.now()
 				};
@@ -154,7 +154,7 @@ export class xiaofei_violation_query extends plugin {
 		let response = await fetch(url, options);
 		let result = await response.json();
 		if (result.retcode != '0' || !result.data) {
-			if (this.login_list[`${uin}_code`]) delete this.login_list[`${uin}_code`];
+			if (login_list[`${uin}_code`]) delete login_list[`${uin}_code`];
 			e.reply(`code授权登录失败[${result.retcode}]，请重试！`, true);
 		}
 
