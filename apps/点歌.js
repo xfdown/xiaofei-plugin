@@ -296,8 +296,8 @@ export class xiaofei_music extends plugin {
 		let msgs = ['格式：#提交音乐ck+音乐ck'];
 		msgs.push(`---QQ音乐ck说明---`);
 		msgs.push(`请前往：http://y.qq.com/ 获取以下ck：`);
-		msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;`);
-		msgs.push(`微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=;`);
+		msgs.push(`QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=; qm_keyst=; qqmusic_key=;`);
+		msgs.push(`微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=; qm_keyst=; qqmusic_key=;`);
 		msgs.push(`---网易云音乐ck说明---`);
 		msgs.push(`请前往：http://music.163.com/ 获取以下ck：`);
 		msgs.push(`必须参数：MUSIC_U=;`);
