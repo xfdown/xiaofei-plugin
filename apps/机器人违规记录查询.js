@@ -35,14 +35,14 @@ export class xiaofei_violation_query extends plugin {
 		let reg;
 		let code;
 		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
-		let num = (reg.length > 2 && reg[2]) ? parseInt(reg[2]) : 20;
+		let num = (reg.length > 2 && reg[3]) ? parseInt(reg[3]) : 20;
 		let appid = 1109907872;
-		let uin = reg[0].includes('我的') ? e.user_id : Bot.uin;
+		let uin = reg[1].includes('我的') ? e.user_id : Bot.uin;
 		if (login_list[`${uin}_code`] && (Date.now() - login_list[`${uin}_code`].time) < 10 * 60 * 1000) {
 			code = login_list[`${uin}_code`].code;
 		}
 		if (!code) {
-			if (reg[0].includes('我的')) {
+			if (reg[1].includes('我的')) {
 				let options = {
 					method: 'GET',
 					headers: {
@@ -180,11 +180,11 @@ export class xiaofei_violation_query extends plugin {
 		}
 
 		if (result.totalSize < 1) {
-			e.reply(`${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}没有违规记录！`, true);
+			e.reply(`${reg[1].includes('我的') ? '账号[' + uin + ']' : '本账号'}没有违规记录！`, true);
 			return true;
 		}
 
-		let title = `${reg[0].includes('我的') ? '账号[' + uin + ']' : '本账号'}存在${result.totalSize}条历史违规记录`;
+		let title = `${reg[1].includes('我的') ? '账号[' + uin + ']' : '本账号'}存在${result.totalSize}条历史违规记录`;
 		let MsgList = [title];
 		let records = result.records;
 		for (let record of records) {
