@@ -590,7 +590,15 @@ async function music_message(e) {
 	let page = reg[2] == '多选' ? 1 : 0;
 	let page_size = reg[2] == '多选' ? _page_size : 10;
 
-	if (reg[4] == '个性电台' || ((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+
+	if (((reg[4] == '来首' || reg[4] == '放首') && search == '歌')) {
+		search = e.user_id;
+		source = ['qq_recommend', '推荐'];
+		page = 0;
+		page_size = 1;
+	}
+
+	if (reg[4] == '个性电台') {
 		if (reg[4] == '个性电台' && search != '') return true;
 		search = e.user_id;
 		source = ['qq_radio', '个性电台'];
@@ -606,7 +614,7 @@ async function music_message(e) {
 	if (reg[4] == '每日推荐' || reg[4] == '每日30首' || reg[4] == '日推') {
 		if (search != '') return true;
 		search = e.user_id;
-		source = ['qq_recommend', '每日推荐'];
+		source = ['qq_DailyRecommend', '每日推荐'];
 		page = 0;
 		page_size = 30;
 		e.reply('请稍候。。。', true);
@@ -716,7 +724,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					case 'qq_like':
 						title = `${nickname}的收藏`;
 						break;
-					case 'qq_recommend':
+					case 'qq_DailyRecommend':
 					default:
 						title = result.title;
 						break;
@@ -1464,9 +1472,13 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			source = 'qq';
 			result = await qqmusic_radio(search, page_size);
 			break;
-		case 'qq_recommend':
+		case 'qq_DailyRecommend':
 			source = 'qq';
 			result = await qqmusic_getdiss(search, 0, 202, page, page_size);
+			break;
+		case 'qq_recommend':
+			source = 'qq';
+			result = await qqmusic_recommend(search, page_size);
 			break;
 		case 'qq_like':
 			source = 'qq';
@@ -1905,6 +1917,86 @@ async function qqmusic_refresh_token(cookies, type) {
 		logger.error(err);
 	}
 	return result;
+}
+
+async function qqmusic_GetTrackInfo(ids) {
+	try {
+		let json_body = {
+			...JSON.parse(JSON.stringify(music_cookies.qqmusic.body)),
+			"req_0": { "module": "track_info.UniformRuleCtrlServer", "method": "GetTrackInfo", "param": {} }
+		};
+		let types = [];
+		for (let i in ids) {
+			ids[i] = parseInt(ids[i]);
+			types.push(200);
+		}
+		json_body.req_0.param = {
+			ids: ids,
+			types: types
+		};
+		let options = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: JSON.stringify(json_body)
+		};
+
+		let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let response = await fetch(url, options);
+		let res = await response.json();
+
+		if (res.code != '0' && res.req_0.code != '0') {
+			return null;
+		}
+
+		let data = res.req_0?.data?.tracks;
+		data = data ? data : [];
+		return { page: 0, data: data };
+	} catch (err) { }
+	return null;
+}
+
+async function qqmusic_recommend(uin, page_size) {
+	try {
+		let json_body = {
+			"comm": { "g_tk": 5381, "uin": uin, "format": "json", "ct": 20, "cv": 1803, "platform": "wk_v17" },
+			"req_0": { "module": "recommend.RecommendFeedServer", "method": "get_recommend_feed", "param": { "direction": 1, "page": 1, "v_cache": [], "v_uniq": [], "s_num": 0 } }
+		};
+		json_body.comm.guid = md5(String(new Date().getTime()));
+		json_body.comm.uin = uin;
+		json_body.comm.tmeLoginType = 2;
+		json_body.comm.psrf_qqunionid = '';
+		json_body.comm.authst = '';
+		let options = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: JSON.stringify(json_body)
+		};
+
+		let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
+		let response = await fetch(url, options);
+		let res = await response.json();
+
+		if (res.code != '0' && res.req_0.code != '0') {
+			return null;
+		}
+		let v_card = [];
+		for (let v_shelf of res.req_0?.data?.v_shelf) {
+			if (v_shelf.style == 1) {
+				for (let v_niche of v_shelf.v_niche) {
+					v_card = v_card.concat(v_niche.v_card);
+				}
+			}
+		}
+
+		let ids = [];
+		for (let val of v_card) {
+			if (ids.length >= page_size) break;
+			ids.push(val.id);
+		}
+
+		return await qqmusic_GetTrackInfo(ids);
+	} catch (err) { }
+	return null;
 }
 
 async function qqmusic_radio(uin, page_size) {
