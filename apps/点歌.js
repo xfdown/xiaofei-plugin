@@ -702,7 +702,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 				};
 			}
 		} else {
-			if (source[0] == 'qq_radio' || source[0] == 'qq_recommend' || source[0] == 'qq_like') {
+			if (['qq_radio', 'qq_recommend', 'qq_like', 'qq_DailyRecommend'].includes(source[0])) {
 				let title;
 				let nickname = e.sender.nickname || e.user_id;
 				if (e.isGroup) {
