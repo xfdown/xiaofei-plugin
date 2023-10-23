@@ -37,7 +37,7 @@ export class xiaofei_violation_query extends plugin {
 		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
 		let num = (reg.length > 2 && reg[3]) ? parseInt(reg[3]) : 20;
 		let appid = 1109907872;
-		let uin = reg[1].includes('我的') ? e.user_id : Bot.uin;
+		let uin = reg[1].includes('我的') ? e.user_id : e.self_id;
 		if (login_list[`${uin}_code`] && (Date.now() - login_list[`${uin}_code`].time) < 10 * 60 * 1000) {
 			code = login_list[`${uin}_code`].code;
 		}
@@ -127,7 +127,11 @@ export class xiaofei_violation_query extends plugin {
 					}
 				}
 			} else {
-				code = await LightApp_GetCode(appid);
+				if (!e.bot?.sendUni) {
+					e.reply('非 ICQQ 不支持，请使用 #我的违规记录 查询')
+					return
+				}
+				code = await LightApp_GetCode(e, appid);
 			}
 			if (code) {
 				login_list[`${uin}_code`] = {
@@ -171,7 +175,7 @@ export class xiaofei_violation_query extends plugin {
 			return `${key}=${param[key]}`;
 		}).join('&');
 		url = `https://minico.qq.com/minico/cgiproxy/v3_release/v3/getillegalityhistory?${param}`;
-		options.body = `{"com":{"src":0,"scene":1001,"platform":2,"version":"${Bot.apk.version}"},"pageNum":0,"pageSize":${num}}`;
+		options.body = `{"com":{"src":0,"scene":1001,"platform":2,"version":"${e.bot?.apk?.version || "8.9.85.12820"}"},"pageNum":0,"pageSize":${num}}`;
 		response = await fetch(url, options);
 		result = await response.json();
 		if (result.retcode != '0' || !result.records) {
@@ -205,18 +209,19 @@ export class xiaofei_violation_query extends plugin {
 	}
 }
 
-async function LightApp_GetCode(appid) {
+async function LightApp_GetCode(e, appid) {
 	let body = {
 		1: 3,
-		2: Bot.apk.qua == '' ? `V1_AND_SQ_${Bot.apk.ver}_1234_YYB_D` : Bot.apk.qua,
-		3: `i=${Bot.device.guid.toString('hex')}&imsi=&mac=${Bot.device.mac_address}&m=${Bot.device.model}&o=0&a=0&sd=0&c64=1&sc=1&p=1080*2221&aid=${Bot.device.guid.toString('hex')}&f=${Bot.device.brand}&mm=00&cf=00&cc=00&qimei=&qimei36=&sharpP=1&n=wifi&support_xsj_live=true&client_mod=default`,
+		2: e.bot.apk.qua == '' ? `V1_AND_SQ_${e.bot.apk.ver}_1234_YYB_D` : e.bot.apk.qua,
+		3: `i=${e.bot.device.guid.toString('hex')}&imsi=&mac=${e.bot.device.mac_address}&m=${e.bot.device.model}&o=0&a=0&sd=0&c64=1&sc=1&p=1080*2221&aid=${e.bot.device.guid.toString('hex')}&f=${e.bot.device.brand}&mm=00&cf=00&cc=00&qimei=&qimei36=&sharpP=1&n=wifi&support_xsj_live=true&client_mod=default`,
 		4: {
 			1: String(appid)
 		},
-		5: String(Bot.uin)
+		5: String(e.self_id)
 	};
 
-	let payload = await Bot.sendUni("LightAppSvc.mini_program_auth.GetCode", core.pb.encode(body));
+	const core = e.bot.core || global.core
+	let payload = await e.bot.sendUni("LightAppSvc.mini_program_auth.GetCode", core.pb.encode(body));
 
 	let result = core.pb.decode(payload);
 	return core.pb.decode(result[4].toBuffer())[2].toString();
