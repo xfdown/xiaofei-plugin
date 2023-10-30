@@ -42,10 +42,6 @@ export class xiaofei_replace extends plugin {
 			}
 			at = Number(at);
 			if (e.replyNew) e.reply = e.replyNew
-			delete e.at;
-			delete e.uid;
-			delete e.msg;
-
 			if (e.message) {
 				let at_index = 0;
 				for (let val of e.message) {
@@ -71,9 +67,13 @@ export class xiaofei_replace extends plugin {
 			msg = msg?.trim();
 			e.raw_message = msg;
 			e.original_msg = msg;
-			loader.deal(e);
+
+			delete e.at;
+			delete e.uid;
+			delete e.msg;
+
+			loader.deal({ ...e });
 			return true;
 		}
 	}
-
 }
