@@ -61,7 +61,7 @@ var music_cookies = {
 				"authst": "",
 				"ct": "19",
 				"cv": "1891",
-				"guid": md5(String(new Date().getTime())),
+				"guid": md5(String(Bot?.uin || '000000') + 'music'),
 				"patch": "118",
 				"psrf_access_token_expiresAt": 0,
 				"psrf_qqaccess_token": "",
@@ -371,6 +371,7 @@ async function update_qqmusic_ck() {
 		let psrf_musickey_createtime = Number(ck_map.get("psrf_musickey_createtime") || 0) * 1000;
 		let refresh_num = Number(ck_map.get("refresh_num") || 0);
 		if (((new Date().getTime() - psrf_musickey_createtime) > (1000 * 60 * 60 * 12) || !authst) && refresh_num < 3) {
+			music_cookies.qqmusic.body.comm.guid = md5(String(ck_map.get('uin') || ck_map.get('wxuin')) + 'music');
 			let result = await qqmusic_refresh_token(ck_map, type);
 			if (result.code == 1) {
 				ck_map = result.data;
@@ -393,7 +394,6 @@ async function update_qqmusic_ck() {
 		if (type == 1) comm.wid = ck_map.get('wxuin') || '', comm.psrf_qqunionid = ck_map.get('wxunionid') || '';
 		comm.tmeLoginType = Number(ck_map.get('tmeLoginType') || '2');
 		comm.authst = authst || '';
-		comm.guid = md5(String(comm.authst + comm.uin + comm.wid));
 	} catch (err) {
 		logger.error(err);
 	}
