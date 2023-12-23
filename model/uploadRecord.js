@@ -112,6 +112,7 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             if (result.code == 1) time = result.data;
             await fs.promises.writeFile(tmpfile, buf);
             buffer = await audioTrans(tmpfile, ffmpeg);
+            fs.unlink(tmpfile, NOOP);
         }
     }
     else if (file.startsWith("http://") || file.startsWith("https://")) {
@@ -133,11 +134,11 @@ async function getPttBuffer(file, ffmpeg = "ffmpeg", transcoding = true) {
             let result = await getAudioTime(tmpfile, ffmpeg);
             if (result.code == 1) time = result.data;
             if (head.includes("SILK") || head.includes("AMR") || !transcoding) {
-                fs.unlink(tmpfile, NOOP);
                 buffer = result.buffer || buf;
             } else {
                 buffer = await audioTrans(tmpfile, ffmpeg);
             }
+            fs.unlink(tmpfile, NOOP);
         } catch (err) { }
     }
     else {
@@ -209,15 +210,11 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
                 reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到pcm失败，请确认你的ffmpeg可以处理此转换"));
             }
             finally {
-
                 fs.unlink(tmpfile, NOOP);
             }
         });
     });
-    if (result) {
-        fs.unlink(file, NOOP);
-        return result;
-    }
+    if (result) return result;
     return await audioTrans1(file, ffmpeg);
 }
 
@@ -233,7 +230,6 @@ async function audioTrans1(file, ffmpeg = "ffmpeg") {
                 reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到amr失败，请确认你的ffmpeg可以处理此转换"));
             }
             finally {
-                fs.unlink(file, NOOP);
                 fs.unlink(tmpfile, NOOP);
             }
         });
