@@ -209,11 +209,15 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
                 reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到pcm失败，请确认你的ffmpeg可以处理此转换"));
             }
             finally {
+
                 fs.unlink(tmpfile, NOOP);
             }
         });
     });
-    if (result) return result;
+    if (result) {
+        fs.unlink(file, NOOP);
+        return result;
+    }
     return await audioTrans1(file, ffmpeg);
 }
 
@@ -229,6 +233,7 @@ async function audioTrans1(file, ffmpeg = "ffmpeg") {
                 reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到amr失败，请确认你的ffmpeg可以处理此转换"));
             }
             finally {
+                fs.unlink(file, NOOP);
                 fs.unlink(tmpfile, NOOP);
             }
         });
