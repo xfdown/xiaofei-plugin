@@ -200,7 +200,7 @@ async function getAudioTime(file, ffmpeg = "ffmpeg") {
 async function audioTrans(file, ffmpeg = "ffmpeg") {
     let result = await new Promise((resolve, reject) => {
         const tmpfile = TMP_DIR + '/' + (0, uuid)() + '.pcm';
-        (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -f s16le -ar 24000 -ac 1 "${tmpfile}"`, async (error, stdout, stderr) => {
+        (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -f s16le -ar 24000 -ac 1 -fs 31457280 "${tmpfile}"`, async (error, stdout, stderr) => {
             try {
                 let ret = await silk_worker.encode(fs.readFileSync(tmpfile), 24000);
                 resolve(Buffer.from(ret.data));
