@@ -6,6 +6,7 @@ import util from "util"
 import stream from "stream"
 import crypto from "crypto"
 import child_process from "child_process"
+import silk_worker from "./silk_worker/index.cjs"
 var errors = {};
 
 async function uploadRecord(record_url, seconds = 0, transcoding = true, brief = '') {
@@ -201,8 +202,8 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
         const tmpfile = TMP_DIR + '/' + (0, uuid)() + '.pcm';
         (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -f s16le -ar 24000 -ac 1 "${tmpfile}"`, async (error, stdout, stderr) => {
             try {
-                let silk = pcm_silk(tmpfile);
-                resolve(silk);
+                let ret = await silk_worker.encode(fs.readFileSync(tmpfile), 24000);
+                resolve(Buffer.from(ret.data));
             }
             catch {
                 reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到pcm失败，请确认你的ffmpeg可以处理此转换"));
@@ -214,22 +215,6 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
     });
     if (result) return result;
     return await audioTrans1(file, ffmpeg);
-}
-
-async function pcm_silk(file) {
-    let silk = false;
-    const tmpfile = TMP_DIR + '/' + (0, uuid)() + '.silk';
-    try {
-        await child_process.execSync(`silk_v3_encoder "${file}" "${tmpfile}" -tencent -rate 100000`);
-        silk = await fs.promises.readFile(tmpfile);
-    }
-    catch {
-        silk = false;
-    }
-    finally {
-        fs.unlink(tmpfile, NOOP);
-    }
-    return silk;
 }
 
 async function audioTrans1(file, ffmpeg = "ffmpeg") {
