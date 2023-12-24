@@ -6,7 +6,7 @@ import util from "util"
 import stream from "stream"
 import crypto from "crypto"
 import child_process from "child_process"
-import silk_worker from "./silk_worker/index.cjs"
+
 var errors = {};
 
 async function uploadRecord(record_url, seconds = 0, transcoding = true, brief = '') {
@@ -203,11 +203,13 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
         const tmpfile = TMP_DIR + '/' + (0, uuid)() + '.pcm';
         (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -f s16le -ar 24000 -ac 1 -fs 31457280 "${tmpfile}"`, async (error, stdout, stderr) => {
             try {
+                const silk_worker = await import("./silk_worker/index.cjs");
                 let ret = await silk_worker.encode(fs.readFileSync(tmpfile), 24000);
                 resolve(Buffer.from(ret.data));
             }
             catch {
-                reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到pcm失败，请确认你的ffmpeg可以处理此转换"));
+                logger.error("音频转码到pcm失败，请确认你的ffmpeg可以处理此转换");
+                resolve(false);
             }
             finally {
                 fs.unlink(tmpfile, NOOP);
@@ -227,7 +229,8 @@ async function audioTrans1(file, ffmpeg = "ffmpeg") {
                 resolve(amr);
             }
             catch {
-                reject(new core.ApiRejection(errors.ErrorCode.FFmpegPttTransError, "音频转码到amr失败，请确认你的ffmpeg可以处理此转换"));
+                logger.error("音频转码到amr失败，请确认你的ffmpeg可以处理此转换");
+                resolve(false);
             }
             finally {
                 fs.unlink(tmpfile, NOOP);
