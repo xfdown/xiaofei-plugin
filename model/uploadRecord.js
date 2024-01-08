@@ -204,7 +204,7 @@ async function audioTrans(file, ffmpeg = "ffmpeg") {
         (0, child_process.exec)(`${ffmpeg} -y -i "${file}" -f s16le -ar 24000 -ac 1 -fs 31457280 "${tmpfile}"`, async (error, stdout, stderr) => {
             try {
                 const silk_worker = await import("./silk_worker/index.cjs");
-                let ret = await silk_worker.encode(fs.readFileSync(tmpfile), 24000);
+                let ret = await silk_worker.encode(tmpfile, 24000);
                 resolve(Buffer.from(ret.data));
             }
             catch {
