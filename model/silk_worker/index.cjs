@@ -7,12 +7,11 @@ exports.getDuration = exports.decode = exports.encode = void 0;
 const worker_threads_1 = require("worker_threads");
 const silk_wasm_1 = require("silk-wasm");
 const fs_1 = __importDefault(require("fs"));
-const crypto_1 = __importDefault(require("crypto"));
 if (!worker_threads_1.isMainThread && worker_threads_1.parentPort) {
     worker_threads_1.parentPort.once('message', (val) => {
         const data = val.data;
         const port = val.port;
-        const input = data.file ? fs_1.default.readFileSync(data.file) : Buffer.alloc(0);
+        const input = data.input || Buffer.alloc(0);
         if (data.file)
             fs_1.default.unlink(data.file, () => { });
         switch (data.type) {
@@ -41,25 +40,24 @@ function postMessage(data) {
     return new Promise(resolve => {
         port.once('message', (ret) => {
             port.close();
+            worker.terminate();
             resolve(ret);
         });
         worker.postMessage({ port: subChannel.port1, data: data }, [subChannel.port1]);
     });
 }
 function file(input) {
-    if (input instanceof Buffer) {
-        const file = `./${crypto_1.default.randomUUID()}.audio`;
-        fs_1.default.writeFileSync(file, input);
-        input = file;
+    if (typeof (input) === 'string') {
+        input = fs_1.default.readFileSync(input);
     }
     return input;
 }
 function encode(input, sampleRate) {
-    return postMessage({ type: 'encode', file: file(input), sampleRate });
+    return postMessage({ type: 'encode', input: file(input), sampleRate });
 }
 exports.encode = encode;
 function decode(input, sampleRate) {
-    return postMessage({ type: 'decode', file: file(input), sampleRate });
+    return postMessage({ type: 'decode', input: file(input), sampleRate });
 }
 exports.decode = decode;
 function getDuration(silk, frameMs) {
