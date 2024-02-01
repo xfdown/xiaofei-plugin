@@ -220,7 +220,7 @@ async function LightApp_GetCode(e, appid) {
 		5: String(e.self_id)
 	};
 
-	const core = e.bot.core || global.core
+	const core = e.bot.icqq?.core || global.core
 	let payload = await e.bot.sendUni("LightAppSvc.mini_program_auth.GetCode", core.pb.encode(body));
 
 	let result = core.pb.decode(payload);
