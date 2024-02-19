@@ -58,8 +58,10 @@ export class xiaofei_replace extends plugin {
 			e.message = message;
 			e.user_id = at;
 			e.from_id = at;
-
-			let nickname = e.group?.pickMember(at)?.nickname || Bot.pickFriend(at).nickname;
+			let nickname;
+			try {
+				nickname = e.group.pickMember(at).info?.nickname || Bot.pickFriend(at).info?.nickname
+			} catch { }
 			nickname = nickname || at;
 			e.sender.card = nickname;
 			e.sender.nickname = nickname;
