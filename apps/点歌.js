@@ -1327,9 +1327,33 @@ async function music_search(search, source, page = 1, page_size = 10) {
 			url: null,
 			lrc: null,
 			api: async (data, types, music_data = {}) => {
-				let hash = data.hash;
-				let album_id = data.album_id;
-				let url = `https://wwwapi.kugou.com/yy/index.php?r=play/getdata&hash=${hash}&dfid=&appid=1014&mid=1234567890&platid=4&album_id=${album_id}&_=${new Date().getTime()}`;
+				let hash = data.hash || '';
+				let album_id = data.album_id || '';
+				let album_audio_id = data.album_audio_id || '';
+				let secret = 'NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt';
+				let params = {
+					appid: 1014,
+					clienttime: new Date().getTime(),
+					clientver: 20000,
+					dfid: '',
+					album_id,
+					album_audio_id,
+					hash,
+					mid: 123456789,
+					platid: 4,
+					srcappid: 2919,
+					token: '',
+					userid: 0,
+					uuid: ''
+				};
+				let param = [];
+				for (let key of Object.keys(params).sort()) {
+					param.push(`${key}=${params[key]}`);
+				}
+				param.push(`signature=${md5(`${secret}${param.join("")}${secret}`)}`)
+				param = param.join("&");
+				let url = `https://wwwapi.kugou.com/play/songinfo?${param}`;
+				//let url = `https://wwwapi.kugou.com/yy/index.php?r=play/getdata&hash=${hash}&dfid=&appid=1014&mid=1234567890&platid=4&album_id=${album_id}&_=${new Date().getTime()}`;
 				let response = await fetch(url); //调用接口获取数据
 				let res = await response.json(); //结果json字符串转对象
 
@@ -2101,39 +2125,22 @@ async function bilibili_search(search, page = 1, page_size = 10) {
 async function qqmusic_search(search, page = 1, page_size = 10) {
 	try {
 		let qq_search_json = {
-			"comm": {
-				"_channelid": "19",
-				"_os_version": "6.2.9200-2",
-				"authst": "",
-				"ct": "19",
-				"cv": "1891",
-				"guid": md5(String(new Date().getTime()) + random(100000, 999999)),
-				"patch": "118",
-				"psrf_access_token_expiresAt": 0,
-				"psrf_qqaccess_token": "",
-				"psrf_qqopenid": "",
-				"psrf_qqunionid": "",
-				"tmeAppID": "qqmusic",
-				"tmeLoginType": 2,
-				"uin": "0",
-				"wid": "0"
-			},
+			"comm": { "uin": "0", "authst": "", "ct": 29 },
 			"search": {
-				"method": "DoSearchForQQMusicDesktop",
+				"method": "DoSearchForQQMusicMobile",
 				"module": "music.search.SearchCgiService",
 				"param": {
 					"grp": 1,
 					"num_per_page": 40,
 					"page_num": 1,
 					"query": "",
-					"remoteplace": "sizer.newclient.song",
+					"remoteplace": "miniapp.1109523715",
 					"search_type": 0,
-					"searchid": ""
+					"searchid": String(Date.now())
 				}
 			}
 		};
 
-		qq_search_json['search']['param']['searchid'] = md5(String(new Date().getTime()) + random(100000, 999999));
 		qq_search_json['search']['param']['query'] = search;
 		qq_search_json['search']['param']['page_num'] = page;
 		qq_search_json['search']['param']['num_per_page'] = page_size;
@@ -2142,8 +2149,8 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 			method: 'POST',//post请求 
 			headers: {
 				'User-Agent': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)',
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Cookie': Bot.cookies['y.qq.com']
+				'Content-Type': 'application/json',
+				'Cookie': Bot.cookies['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
 			},
 			body: JSON.stringify(qq_search_json)
 		};
@@ -2157,7 +2164,8 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 		if (res.code != '0') {
 			return null;
 		}
-		return { page: page, data: res.search.data.body.song.list };
+		let body = res.search?.data?.body || {};
+		return { page: page, data: body.song?.list || body.item_song || [] };
 	} catch (err) { }
 
 	return null;
