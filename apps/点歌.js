@@ -209,10 +209,12 @@ export class xiaofei_music extends plugin {
 			{
 				name: 'QQ音乐',
 				ck: (music_cookies.qqmusic.ck && music_cookies.qqmusic.ck.get('qqmusic_key')),
+				cookies: getCookie(music_cookies.qqmusic.ck),
 				user_info: get_qqmusic_userinfo
 			}, {
 				name: '网易云音乐',
 				ck: !music_cookies.netease.ck?.includes('MUSIC_U=;'),
+				cookies: music_cookies.netease.ck,
 				user_info: get_netease_userinfo
 			}
 		];
@@ -221,7 +223,7 @@ export class xiaofei_music extends plugin {
 			if (!val.ck) {
 				msgs.push(`状态：未设置ck`);
 			} else {
-				let result = await val.user_info();
+				let result = await val.user_info(val.cookies);
 				if (result.code == 1) {
 					let data = result.data;
 					let userid = String(data.userid);
@@ -1277,7 +1279,7 @@ async function music_search(search, source, page = 1, page_size = 10) {
 						body: JSON.stringify(json_body)
 					};
 
-					let url = `https://u6.y.qq.com/cgi-bin/musicu.fcg`;
+					let url = `https://u.y.qq.com/cgi-bin/musicu.fcg`;
 					try {
 						let response = await fetch(url, options); //调用接口获取数据
 						let res = await response.json();
@@ -1714,12 +1716,12 @@ async function CreateMusicShare(e, data, to_uin = null) {
 		10: send_type,
 		11: recv_uin,
 		12: {
-			10: title,
-			11: singer,
-			12: prompt,
-			13: jumpUrl,
-			14: preview,
-			16: musicUrl,
+			10: title || '',
+			11: singer || '',
+			12: prompt || '',
+			13: jumpUrl || '',
+			14: preview || '',
+			16: musicUrl || '',
 		},
 		19: recv_guild_id
 	};
@@ -1731,8 +1733,8 @@ async function SendMusicShare(body) {
 	let payload = await Bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 
 	let result = core.pb.decode(payload);
-	console.log('share:' + result.toString());
 	if (result[3] != 0) {
+		console.log('share:' + result.toString());
 		e.reply('歌曲分享失败：' + result[3], true);
 	}
 }
@@ -1795,7 +1797,7 @@ async function get_qqmusic_userinfo(ck = null) {
 				code: 1, data: {
 					userid: ck.get('uin') || ck.get('wxuin'),
 					nickname: creator.nick,
-					is_vip: await is_qqmusic_vip(ck.get('uin') || ck.get('wxuin'))
+					is_vip: await is_qqmusic_vip(ck.get('uin') || ck.get('wxuin'), cookies.join('; '))
 				}
 			};
 		}
@@ -2221,6 +2223,17 @@ function getCookieMap(cookie) {
 		cookieMap.set(entry[0], entry[1]);
 	}
 	return cookieMap || {};
+}
+
+function getCookie(map) {
+	const cookies = [];
+	for (let key of map.keys()) {
+		let value = map.get(key);
+		if (value) {
+			cookies.push(`${key}=${value}`);
+		}
+	}
+	return cookies.join('; ');
 }
 
 function random(min, max) {
