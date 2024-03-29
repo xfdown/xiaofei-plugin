@@ -209,7 +209,7 @@ export class xiaofei_music extends plugin {
 			{
 				name: 'QQ音乐',
 				ck: (music_cookies.qqmusic.ck && music_cookies.qqmusic.ck.get('qqmusic_key')),
-				cookies: getCookie(music_cookies.qqmusic.ck),
+				cookies: music_cookies.qqmusic.ck,
 				user_info: get_qqmusic_userinfo
 			}, {
 				name: '网易云音乐',
@@ -1771,15 +1771,7 @@ async function get_netease_userinfo(ck = null) {
 async function get_qqmusic_userinfo(ck = null) {
 	try {
 		let url = `https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?_=${new Date().getTime()}&cv=4747474&ct=24&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&uin=0&g_tk_new_20200303=5381&g_tk=5381&cid=205360838&userid=0&reqfrom=1&reqtype=0&hostUin=0&loginUin=0`;
-		let cookies = [];
-		ck = ck || music_cookies.qqmusic.ck;
-
-		for (let key of ck.keys()) {
-			let value = ck.get(key);
-			if (value) {
-				cookies.push(`${key}=${value}`);
-			}
-		}
+		let cookies = getCookie(ck) || getCookie(music_cookies.qqmusic.ck) || [];
 
 		let options = {
 			method: 'GET',
@@ -2233,7 +2225,7 @@ function getCookie(map) {
 			cookies.push(`${key}=${value}`);
 		}
 	}
-	return cookies.join('; ');
+	return cookies;
 }
 
 function random(min, max) {
