@@ -287,7 +287,7 @@ async function mysck(e, game = 'gs') {
 }
 
 function getServer(uid, isSr) {
-	switch (uid) {
+	switch (String(uid)[0]) {
 		case '1':
 		case '2':
 			return isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
