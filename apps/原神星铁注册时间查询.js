@@ -19,7 +19,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^(#|\\*)?(刷新)?(我的)?(原神|星铁)?注册时间$',
+					reg: '^(#|\\*)?(星铁)?(刷新)?(我的)?(原神|星铁)?注册时间$',
 					/** 执行方法 */
 					fnc: 'regTime',
 				},
@@ -65,12 +65,16 @@ async function reg_time(e, ck, uid, game = 'gs') {
 				}
 				break;
 			case 'sr':
-				let list = result.game_data.data?.list || [];
-				data = list.find(val => {
-					return val.key == 'register_date'
-				}) || {};
-				if (data.value) {
-					reg_time = data.value;
+				if (result.game_data['1-1']) {
+					reg_time = result.game_data['1-1'];
+				} else {
+					let list = result.game_data.data?.list || [];
+					data = list.find(val => {
+						return val.key == 'register_date'
+					}) || {};
+					if (data.value) {
+						reg_time = data.value;
+					}
 				}
 				break;
 		}
@@ -160,7 +164,7 @@ async function update_game_data(ck, uid, game = 'gs') {
 				break;
 			case 'sr':
 				api = region.includes('prod_official') ? 'https://sg-public-api.hoyoverse.com' : 'https://api-takumi.mihoyo.com';
-				url = `${api}/event/e20231230card/getUserYearData?badge_uid=${uid}&badge_region=${info_data.region}&lang=zh-cn&game_biz=${info_data.game_biz}`;
+				url = `${api}/event/e20240426anniversary/data?plat=2&lang=zh-cn&badge_uid${uid}&badge_region=${info_data.region}&game_biz=${info_data.game_biz}`;
 				response = await fetch(url, options);
 				try {
 					let res = await response.json();
@@ -169,7 +173,7 @@ async function update_game_data(ck, uid, game = 'gs') {
 						return {
 							code: 1,
 							msg: msg,
-							data: { game_data: res, info_data: info_data, query_time: new Date().getTime() }
+							data: { game_data: JSON.parse(data?.raw_data || {}), info_data: info_data, query_time: new Date().getTime() }
 						};
 					} else {
 						msg = res.message;
