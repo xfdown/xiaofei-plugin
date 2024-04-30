@@ -22,6 +22,7 @@ export class xiaofei_replace extends plugin {
 	}
 
 	async replace() {
+		const bot = this.e.bot || Bot;
 		if (!this.e.msg || !this.e.isMaster) {
 			return;
 		}
@@ -74,7 +75,8 @@ export class xiaofei_replace extends plugin {
 			delete e.uid;
 			delete e.msg;
 
-			loader.deal({ ...e });
+			//loader.deal({ ...e });
+			bot.em('message', { ...e });
 			return true;
 		}
 	}
