@@ -74,9 +74,11 @@ export class xiaofei_replace extends plugin {
 			delete e.at;
 			delete e.uid;
 			delete e.msg;
-
-			//loader.deal({ ...e });
-			bot.em('message', { ...e });
+			try {
+				bot.em('message', { ...e });
+			} catch {
+				loader.deal({ ...e });
+			}
 			return true;
 		}
 	}
