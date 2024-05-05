@@ -1,0 +1,9 @@
+# 网易云cookie说明：
+# 必须参数：MUSIC_U=;
+# 请在下面填写ck！
+netease: MUSIC_U=;
+# QQ音乐cookie说明：
+# QQ登录必须参数：uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;
+# 微信登录必须参数：wxuin=; wxopenid=; wxunionid=; wxrefresh_token=; 
+# 请在下面填写ck！
+qqmusic: uin=; psrf_qqopenid=; psrf_qqunionid=; psrf_qqrefresh_token=;
