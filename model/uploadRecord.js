@@ -11,7 +11,7 @@ var errors = {};
 
 async function uploadRecord(e, record_url, seconds = 0, transcoding = true, brief = '') {
     if(!e.bot.sendUni) throw new Error("当前协议不支持uploadRecord上传")
-    const result = await getPttBuffer(record_url, Bot[e?.self_id]?.config.ffmpeg_path || 'ffmpeg', transcoding);
+    const result = await getPttBuffer(record_url, Bot?.config?.ffmpeg_path || 'ffmpeg', transcoding);
     if (!result.buffer) {
         return false;
     }
@@ -23,8 +23,8 @@ async function uploadRecord(e, record_url, seconds = 0, transcoding = true, brie
         1: 3,
         2: 3,
         5: {
-            1: e?.self_id || Bot.uin,
-            2: e?.self_id || Bot.uin,
+            1: e?.self_id || e.bot?.uin || Bot.uin,
+            2: e?.self_id || e.bot?.uin || Bot.uin,
             3: 0,
             4: hash,
             5: buf.length,
@@ -33,14 +33,14 @@ async function uploadRecord(e, record_url, seconds = 0, transcoding = true, brie
             8: 9,
             9: 4,
             11: 0,
-            10: Bot?.apk?.version || Bot[e.self_id]?.apk?.version,
+            10: e.bot?.apk?.version || Bot?.apk?.version,
             12: 1,
             13: 1,
             14: codec,
             15: 1,
         },
     });
-    const payload = await Bot[e.self_id].sendUni("PttStore.GroupPttUp", body);
+    const payload = await e.bot.sendUni("PttStore.GroupPttUp", body);
     const rsp = core.pb.decode(payload)[5];
     rsp[2] && (0, errors.drop)(rsp[2], rsp[3]);
     const ip = rsp[5]?.[0] || rsp[5], port = rsp[6]?.[0] || rsp[6];
@@ -55,7 +55,7 @@ async function uploadRecord(e, record_url, seconds = 0, transcoding = true, brie
     };
     const url = `http://${(0, int32ip2str)(ip)}:${port}/?` + querystring.stringify(params);
     const headers = {
-        "User-Agent": `QQ/${Bot?.apk?.version || Bot[e.self_id]?.apk?.version} CFNetwork/1126`,
+        "User-Agent": `QQ/${e.bot?.apk?.version || Bot?.apk?.version} CFNetwork/1126`,
         "Net-Type": "Wifi"
     };
     await fetch(url, {
@@ -68,7 +68,7 @@ async function uploadRecord(e, record_url, seconds = 0, transcoding = true, brie
     const fid = rsp[11].toBuffer();
     const b = core.pb.encode({
         1: 4,
-        2: e.self_id || Bot.uin,
+        2: e?.self_id || e.bot?.uin || Bot.uin,
         3: fid,
         4: hash,
         5: hash.toString("hex") + ".amr",
