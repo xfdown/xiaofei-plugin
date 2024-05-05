@@ -817,12 +817,12 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 							forwardMsg.id = 35;
 						}
 					}
-					if(!Version.isTrss) {
+					if (!Version.isTrss) {
 						forwardMsg.data = forwardMsg.data
-						.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="UTF-8"?>')
-						.replace(/\n/g, '')
-						.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-						.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
+							.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="UTF-8"?>')
+							.replace(/\n/g, '')
+							.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+							.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
 					}
 					if (!is_sign) {
 						forwardMsg.data = forwardMsg.data
