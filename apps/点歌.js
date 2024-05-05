@@ -454,7 +454,7 @@ async function music_message(e) {
 							isHigh = false
 						}
 						if (!isHigh) {
-							const tip = '上传[' + music.name + '-' + music.artist + ']失败！\n' + '链接：' + music.musicUrl + '\n尝试上传普通语音'
+							const tip = '上传[' + music.title + '-' + music.desc + ']失败！\n' + '链接：' + music.musicUrl + '\n尝试上传普通语音'
 							await e.reply(tip);
 						}
 						result = await e.reply(result);
