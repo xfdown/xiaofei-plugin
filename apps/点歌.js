@@ -538,7 +538,7 @@ async function music_message(e) {
 				if (!Array.isArray(lrcs)) lrcs = [lrcs];
 
 				let user_info = {
-					nickname: Bot?.nickname || e.bot?.nickname,
+					nickname: e.bot?.nickname || Bot?.nickname,
 					user_id: e.bot?.uin || e?.self_id || Bot.uin
 				};
 				let MsgList = [];
