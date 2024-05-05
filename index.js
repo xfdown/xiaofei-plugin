@@ -3,6 +3,9 @@
 插件更新地址：https://gitee.com/xfdown/xiaofei-plugin
 */
 import YAML from 'yaml';
+import fs from 'node:fs';
+import { Version, Plugin_Path } from './components/index.js';
+
 const apps = {};
 global.xiaofei_plugin = {
   apps: apps,
@@ -11,6 +14,8 @@ global.xiaofei_plugin = {
 
 let is_icqq = false;
 let is_oicq = false;
+
+const __dirname = process.cwd().replace(/\\/g, '/') + '/plugins/ICQQ-Plugin'
 
 try {
   let icqq = await import("icqq");
@@ -23,7 +28,22 @@ try {
 }
 
 if (is_icqq || is_oicq) {
-  if (!global.core) global.core = (await import(is_icqq ? 'icqq' : 'oicq')).core;
+  if (!global.core) {
+    if (Version.isTrss) {
+      const dirs = ["Model", "node_modules"].map(i => `${__dirname}/${i}/icqq/`).filter(fs.existsSync);
+      for (const dir of dirs) {
+        try {
+          const { core } = (await import(`file://${dir}lib/index.js`)).default;
+          global.core = core;
+          break;
+        } catch (err) {
+          logger.info(err);
+        }
+      }
+    } else {
+      global.core = (await import(is_icqq ? 'icqq' : 'oicq')).core;
+    }
+  }
   if (!global.segment) global.segment = (await import(is_icqq ? 'icqq' : 'oicq')).segment;
   global.uploadRecord = (await import("./model/uploadRecord.js")).default;
 } else {
@@ -57,10 +77,6 @@ if (!xiaofei_plugin.puppeteer) {
     xiaofei_plugin.puppeteer = {};
   }
 }
-
-import fs from 'node:fs'
-import { Version, Plugin_Path } from './components/index.js'
-
 
 const files = fs.readdirSync(`${Plugin_Path}/apps`).filter(file => file.endsWith('.js'))
 

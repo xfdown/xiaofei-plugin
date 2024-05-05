@@ -4,8 +4,9 @@ const Plugin_Path = `${process.cwd()}/plugins/xiaofei-plugin`;
 const README_path = `${Plugin_Path}/README.md`
 const CHANGELOG_path = `${Plugin_Path}/CHANGELOG.md`
 let yunzai_ver = '';
+let packageJson
 try{
-  let packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf8'));
+  packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf8'));
   yunzai_ver = packageJson.version;
 }catch(err){}
 
@@ -89,7 +90,12 @@ try{
 	}
 }catch(err){}
 
+const isMiao = packageJson.dependencies.sequelize ? true : false
+const isTrss = Array.isArray(Bot.uin) ? true : false
+
 let Version = {
+  isMiao,
+  isTrss,
   get ver () {
     return currentVersion;
   },
