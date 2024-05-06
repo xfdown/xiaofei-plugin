@@ -776,10 +776,17 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
 						//json_list.push(music_json);
-						MsgList.push({
-							...user_info,
-							message: segment.json(music_json)
-						});
+						if(Version.isTrss) {
+							MsgList.push({
+								...user_info,
+								message: { type: "json", data: music_json }
+							});
+						} else {
+							MsgList.push({
+								...user_info,
+								message: segment.json(music_json)
+							});
+						}
 						index++;
 					}
 
