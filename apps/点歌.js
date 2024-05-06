@@ -362,8 +362,8 @@ Bot.on('guild.message', xiaofei_plugin.music_guild);
 
 if (xiaofei_plugin.music_notice) Bot.off('notice', xiaofei_plugin.music_notice);
 xiaofei_plugin.music_notice = async (e) => {//处理通知
-	if (e?.sub_type != 'poke' || e?.target_id != e.bot?.uin) return;
-	e.user_id = e.operator_id;
+	if (e?.sub_type != 'poke' || e?.target_id != e?.self_id) return;
+	e.user_id = e?.operator_id;
 	let key = get_MusicListId(e);
 	let time = xiaofei_plugin.music_poke_cd[key] || 0;
 	if ((new Date().getTime() - time) < 8000) return;
@@ -1837,7 +1837,7 @@ async function is_qqmusic_vip(uin, cookies = null) {
 		method: 'POST',//post请求 
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Cookie': cookies || Bot.cookies['y.qq.com']
+			'Cookie': cookies || Bot?.cookies['y.qq.com']
 		},
 		body: JSON.stringify(json)
 	};
@@ -2168,7 +2168,7 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 			headers: {
 				'User-Agent': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)',
 				'Content-Type': 'application/json',
-				'Cookie': Bot.cookies['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
+				'Cookie': Bot?.cookies['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
 			},
 			body: JSON.stringify(qq_search_json)
 		};
