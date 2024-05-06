@@ -730,7 +730,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						nickname = info?.card || info?.nickname;
 					} catch (err) { 
 						let info = e.bot.pickMember(e.group_id, e.user_id);
-						nickname = info?.card || info?.nickname;
+						nickname = info?.info?.card || info?.info?.nickname;
 					} finally {
 						nickname = e.sender.nickname || e.user_id;
 					}
