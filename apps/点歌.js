@@ -723,7 +723,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 			}
 		} else {
 			if (['qq_radio', 'qq_recommend', 'qq_like', 'qq_DailyRecommend'].includes(source[0])) {
-				let title, nickname = nickname = e.sender.nickname || e.user_id;
+				let title, nickname = e.sender.nickname || e.user_id;
 				if (e.isGroup) {
 					try {
 						let info = await e.bot?.getGroupMemberInfo(e.group_id, e.user_id)
