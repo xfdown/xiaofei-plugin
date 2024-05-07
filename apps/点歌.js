@@ -2067,10 +2067,7 @@ async function qqmusic_radio(uin, page_size) {
 
 		let options = {
 			method: 'POST',//post请求 
-			headers: { 
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Cookie': Bot?.cookies?.['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
-			},
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: JSON.stringify(json_body)
 		};
 
