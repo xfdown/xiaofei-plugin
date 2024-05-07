@@ -1848,7 +1848,7 @@ async function is_qqmusic_vip(uin, cookies = null) {
 		method: 'POST',//post请求 
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Cookie': cookies || Bot?.cookies['y.qq.com']
+			'Cookie': cookies || Bot?.cookies?.['y.qq.com']
 		},
 		body: JSON.stringify(json)
 	};
