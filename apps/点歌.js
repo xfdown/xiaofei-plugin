@@ -2179,7 +2179,7 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 			headers: {
 				'User-Agent': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)',
 				'Content-Type': 'application/json',
-				'Cookie': Bot?.cookies['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
+				'Cookie': Bot?.cookies?.['y.qq.com'] || Config.getConfig('music', 'cookies')?.qqmusic || ''
 			},
 			body: JSON.stringify(qq_search_json)
 		};
