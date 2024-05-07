@@ -150,32 +150,6 @@ export class xiaofei_music extends plugin {
 				log: false
 			}
 		];
-
-		global.recallMusicMsg = async (e, key, msg_results) => {
-			if (msg_results && msg_results.length > 0) {
-				for (let msg_result of msg_results) {
-					let arr = key?.split('_');
-					let type = arr[0];
-					for (let val of msg_result) {
-						try {
-							val = await val;
-							let message_id = (await val?.message)?.message_id || val?.message_id;
-							switch (type) {
-								case 'group':
-									await e.bot.pickGroup(arr[1]).recallMsg(message_id);
-									break;
-								case 'friend':
-									await e.bot.pickFriend(arr[1]).recallMsg(message_id);
-									break;
-							}
-						} catch (err) {
-							logger.error(err);
-						}
-					}
-				}
-			}
-		}
-
 	}
 
 	init() {
@@ -340,6 +314,32 @@ export class xiaofei_music extends plugin {
 		let forwardMsg = await Bot.makeForwardMsg(MsgList);
 		await e.reply(forwardMsg);
 		return true;
+	}
+
+}
+
+async function recallMusicMsg(e, key, msg_results) {
+	if (msg_results && msg_results.length > 0) {
+		for (let msg_result of msg_results) {
+			let arr = key?.split('_');
+			let type = arr[0];
+			for (let val of msg_result) {
+				try {
+					val = await val;
+					let message_id = (await val?.message)?.message_id || val?.message_id;
+					switch (type) {
+						case 'group':
+							await (e.bot || Bot)?.pickGroup(arr[1]).recallMsg(message_id);
+							break;
+						case 'friend':
+							await (e.bot || Bot)?.pickFriend(arr[1]).recallMsg(message_id);
+							break;
+					}
+				} catch (err) {
+					logger.error(err);
+				}
+			}
+		}
 	}
 }
 
@@ -1591,7 +1591,6 @@ async function CreateMusicShareJSON(data) {
 			appid = 100495085;
 			app_name = '网易云音乐';
 			app_icon = 'https://i.gtimg.cn/open/app_icon/00/49/50/85/100495085_100_m.png';
-
 			break;
 		case 'kuwo':
 			appid = 100243533
