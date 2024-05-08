@@ -1760,10 +1760,26 @@ async function CreateMusicShare(e, data, to_uin = null) {
 		},
 		19: recv_guild_id
 	};
+
+	if(e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') {
+		let body = { type: "music", data: { id: data.id } }
+		switch (data.source) {
+			case 'netease':
+				body.data.type= "163"
+				break;
+			case 'qq':
+				body.data.type= "qq"
+				break;
+			default:
+				body.data = { "type": "custom", "url": jumpUrl, "audio": musicUrl, "title": title, "image": preview, "singer": singer }
+				break;
+		}
+	}
 	return body;
 }
 
 async function SendMusicShare(e, body) {
+	if(e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') return await e.reply(body), true
 	if (!e.bot.sendOidb) return await e.reply("当前协议不支持分享音乐card"), false;
 	let payload = await e.bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 
