@@ -329,10 +329,10 @@ async function recallMusicMsg(e, key, msg_results) {
 					let message_id = (await val?.message)?.message_id || val?.message_id;
 					switch (type) {
 						case 'group':
-							await (e.bot || Bot)?.pickGroup(arr[1]).recallMsg(message_id);
+							await (e?.bot || Bot?.[arr[3]] || Bot)?.pickGroup(arr[1]).recallMsg(message_id);
 							break;
 						case 'friend':
-							await (e.bot || Bot)?.pickFriend(arr[1]).recallMsg(message_id);
+							await (e?.bot || Bot?.[arr[2]] || Bot)?.pickFriend(arr[1]).recallMsg(message_id);
 							break;
 					}
 				} catch (err) {
@@ -1058,11 +1058,11 @@ async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//Êù•Ë
 function get_MusicListId(e) {
 	let id = '';
 	if (e.guild_id) {
-		id = `guild_${e.channel_id}_${e.guild_id}`;
+		id = `guild_${e.channel_id}_${e.guild_id}_${e.self_id}`;
 	} else if (e.group) {
-		id = `group_${e.group.gid}_${e.user_id}`;
+		id = `group_${e.group?.gid || e.group.id}_${e.user_id}_${e.self_id}`;
 	} else {
-		id = `friend_${e.user_id}`;
+		id = `friend_${e.user_id}_${e.self_id}`;
 	}
 	return `${id}`;
 }
@@ -1768,8 +1768,6 @@ async function CreateMusicShare(e, data, to_uin = null) {
 				body.data.type= "163"
 				break;
 			case 'qq':
-				body.data.type= "qq"
-				break;
 			default:
 				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, singer }
 				break;
