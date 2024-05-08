@@ -1774,6 +1774,7 @@ async function CreateMusicShare(e, data, to_uin = null) {
 				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, singer }
 				break;
 		}
+		return body;
 	}
 	return body;
 }
