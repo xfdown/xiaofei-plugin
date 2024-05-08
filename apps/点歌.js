@@ -1762,7 +1762,7 @@ async function CreateMusicShare(e, data, to_uin = null) {
 	};
 
 	if(e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') {
-		let body = { type: "music", data: { id: data.id } }
+		body = { type: "music", data: { id: data.id } };
 		switch (data.source) {
 			case 'netease':
 				body.data.type= "163"
@@ -1772,7 +1772,6 @@ async function CreateMusicShare(e, data, to_uin = null) {
 				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, singer }
 				break;
 		}
-		return body;
 	}
 	return body;
 }
