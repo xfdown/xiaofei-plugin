@@ -1771,7 +1771,7 @@ async function CreateMusicShare(e, data, to_uin = null) {
 				body.data.type= "qq"
 				break;
 			default:
-				body.data = { "type": "custom", "url": jumpUrl, "audio": musicUrl, "title": title, "image": preview, "singer": singer }
+				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, singer }
 				break;
 		}
 	}
