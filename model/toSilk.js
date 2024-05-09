@@ -17,7 +17,7 @@ async function encodeSilk(file) {
     let filePath = file;
     // 检查 file 是否为 Buffer 实例或 base64 编码的数据
     if (Buffer.isBuffer(file) || file.startsWith("base64://")) {
-        console.log('处理 base64 编码的数据...');
+        logger.info('处理 base64 编码的数据...');
         const base64Data = file.startsWith("base64://") ? file.substring("base64://".length) : file.toString('base64');
         const tempFilePath = path.join(TEMP_DIR, randomUUID());
         fs.writeFileSync(tempFilePath, base64Data, { encoding: 'base64' });
@@ -25,7 +25,7 @@ async function encodeSilk(file) {
     }
     // 如果 filePath 是一个 URL
     else if (typeof filePath === 'string' && (filePath.startsWith('http://') || filePath.startsWith('https://'))) {
-        console.log('从 URL 下载文件...');
+        logger.info('从 URL 下载文件...');
         const response = await fetch(filePath);
         if (!response.ok) throw new Error(`网络响应错误: ${response.statusText}`);
         const arrayBuffer = await response.arrayBuffer();
@@ -36,7 +36,7 @@ async function encodeSilk(file) {
     }
     // 如果 filePath 是一个本地文件 URI 或者是一个存在的本地文件路径
     else if (typeof filePath === 'string' && (filePath.startsWith('file://') || fs.existsSync(filePath))) {
-        console.log('处理本地文件...');
+        logger.info('处理本地文件...');
         // 移除 file:// 前缀
         filePath = filePath.replace(/^file:\/\/\//, '');
         // Windows 系统可能需要移除前导斜杠
@@ -68,7 +68,7 @@ async function encodeSilk(file) {
             });
             return buffer.subarray(0, bytesToRead);
         } catch (err) {
-            console.error('读取文件出错:', err);
+            logger.error('读取文件出错:', err);
             return null;
         }
     }
@@ -86,19 +86,19 @@ async function encodeSilk(file) {
 
         return new Promise((resolve, reject) => {
             cp.on('error', (err) => {
-                console.log('FFmpeg 转换错误:', err.message);
-                fs.unlinkSync(pcmPath); // 删除临时 PCM 文件
+                logger.info('FFmpeg 转换错误:', err.message);
+                fs.unlinkSync(pcmPath);
                 reject(err);
             });
             cp.on('exit', (code, signal) => {
                 const EXIT_CODES = [0, 255];
                 if (code == null || EXIT_CODES.includes(code)) {
                     const data = fs.readFileSync(pcmPath);
-                    fs.unlinkSync(pcmPath); // 删除临时 PCM 文件
+                    fs.unlinkSync(pcmPath);
                     resolve(data);
                 } else {
-                    console.log(`FFmpeg 退出: 代码=${code ?? '未知'} 信号=${signal ?? '未知'}`);
-                    fs.unlinkSync(pcmPath); // 删除临时 PCM 文件
+                    logger.info(`FFmpeg 退出: 代码=${code ?? '未知'} 信号=${signal ?? '未知'}`);
+                    fs.unlinkSync(pcmPath);
                     reject(new Error('FFmpeg 转换失败'));
                 }
             });
@@ -109,7 +109,7 @@ async function encodeSilk(file) {
         let input;
         let sampleRate = 24000; // 默认采样率
         if (!isSilk(getFileHeader(filePath))) {
-            console.log(`音频文件 ${filePath} 需要转换成 silk 格式`);
+            logger.info(`音频文件 ${filePath} 需要转换成 silk 格式`);
             const _isWav = await isWavFile(filePath);
             if (!_isWav) {
                 input = await convert();
@@ -125,18 +125,16 @@ async function encodeSilk(file) {
             }
 
             const silkData = await encode(input, sampleRate);
-            fs.unlinkSync(filePath); // 删除原始音频文件
             return Buffer.from(silkData.data);
         } else {
-            console.log(`文件 ${filePath} 已经是 silk 格式，无需转换。`);
+            logger.info(`文件 ${filePath} 已经是 silk 格式，无需转换。`);
             const silkBuffer = fs.readFileSync(filePath);
-            fs.unlinkSync(filePath); // 删除临时文件
-            return Buffer.from(silkBuffer);
+            return silkBuffer;
         }
     } catch (error) {
-        console.error('silk 转换失败:', error);
+        logger.error('silk 转换失败:', error);
+    } finally {
         fs.unlinkSync(filePath); // 删除临时文件
-        return null;
     }
 }
 
