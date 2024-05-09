@@ -57,7 +57,7 @@ async function encodeSilk(file) {
     else {
         throw new Error('提供的路径不是有效的文件、URL 或 base64 数据。');
     }
-    
+
     // 获取文件头部信息
     function getFileHeader(filePath) {
         const bytesToRead = 7;
@@ -135,6 +135,7 @@ async function encodeSilk(file) {
         }
     } catch (error) {
         console.error('silk 转换失败:', error);
+        fs.unlinkSync(filePath); // 删除临时文件
         return null;
     }
 }
