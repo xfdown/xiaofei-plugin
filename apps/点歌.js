@@ -2,6 +2,7 @@ import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
 import fetch from "node-fetch";
+import toSilk from '../model/toSilk.js';
 import plugin from '../../../lib/plugins/plugin.js';
 import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 
@@ -450,7 +451,7 @@ async function music_message(e) {
 							isHigh = true
 						} catch (error) {
 							logger.error(error)
-							result = await segment.record(music.musicUrl)
+							result = await segment.record(await toSilk(music.musicUrl))
 							isHigh = false
 						}
 						if (!isHigh) {
@@ -507,7 +508,7 @@ async function music_message(e) {
 						isHigh = true
 					} catch (error) {
 						logger.error(error)
-						result = await segment.record(music_json.meta.music.musicUrl)
+						result = await segment.record(await toSilk(music_json.meta.music.musicUrl))
 						isHigh = false
 					}
 					if (!isHigh) {
