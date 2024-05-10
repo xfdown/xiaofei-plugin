@@ -729,7 +729,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 					try {
 						let info = await e.bot?.getGroupMemberInfo(e.group_id, e.user_id)
 						nickname = info?.card || info?.nickname;
-					} catch (err) { 
+					} catch (err) {
 						let info = e.bot.pickMember(e.group_id, e.user_id);
 						nickname = info?.info?.card || info?.info?.nickname;
 					} finally {
@@ -777,7 +777,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						music = music_json.meta.music;
 						music.tag = index + '.' + tag;
 						//json_list.push(music_json);
-						if(Version.isTrss) {
+						if (Version.isTrss) {
 							MsgList.push({
 								...user_info,
 								message: { type: "json", data: music_json }
@@ -812,10 +812,10 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						});
 						index++;
 					}*/
-					let is_sign = true;
+					const friend = Bot.pickFriend(Bot.uin);
 					let forwardMsg = await Bot.makeForwardMsg(MsgList);
 					let forwardMsg_json = forwardMsg.data;
-					if (typeof (forwardMsg_json) === 'object') {
+					if (typeof (forwardMsg_json) === 'object' && !friend?.uploadLongMsg) {
 						if (forwardMsg_json.app === 'com.tencent.multimsg' && forwardMsg_json.meta?.detail) {
 							let detail = forwardMsg_json.meta.detail;
 							let resid = detail.resid;
@@ -829,16 +829,17 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 							forwardMsg.id = 35;
 						}
 					}
-					if (!Version.isTrss) {
+					if (!Version.isTrss && forwardMsg.type === 'xml') {
 						forwardMsg.data = forwardMsg.data
 							.replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="UTF-8"?>')
 							.replace(/\n/g, '')
 							.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
 							.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
 					}
-					if (!is_sign) {
-						forwardMsg.data = forwardMsg.data
-							.replace('转发的', '不可转发的');
+					if (friend?.uploadLongMsg) {
+						try {
+							forwardMsg = await friend.uploadLongMsg(forwardMsg);
+						} catch { }
 					}
 					await e.reply(forwardMsg);
 					data = {
@@ -1762,11 +1763,11 @@ async function CreateMusicShare(e, data, to_uin = null) {
 		19: recv_guild_id
 	};
 
-	if(e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') {
+	if (e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') {
 		body = { type: "music", data: { id: data.id } };
 		switch (data.source) {
 			case 'netease':
-				body.data.type= "163"
+				body.data.type = "163"
 				break;
 			case 'qq':
 			default:
@@ -1778,7 +1779,7 @@ async function CreateMusicShare(e, data, to_uin = null) {
 }
 
 async function SendMusicShare(e, body) {
-	if(e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') return await e.reply(body), true
+	if (e.bot?.adapter === 'OneBotv11' || e.bot?.adapter?.name === 'OneBotv11') return await e.reply(body), true
 	if (!e.bot.sendOidb) return await e.reply("当前协议不支持分享音乐card"), false;
 	let payload = await e.bot.sendOidb("OidbSvc.0xb77_9", core.pb.encode(body));
 
