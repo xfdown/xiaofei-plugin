@@ -992,6 +992,7 @@ function ShareMusic_JSONList(e, list, page, page_size, title = '') {
 }
 
 async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//来自土块插件（earth-k-plugin）的列表样式（已修改）
+	let BotName = Version.isTrss ? 'Trss-Yunzai' : Version.isMiao ? 'Miao-Yunzai' : 'Yunzai-Bot'
 	let next_page = (page > 0 && list.length >= page_size) ? true : false;
 	let start = Date.now()
 	let new_list = [];
@@ -1033,7 +1034,7 @@ async function ShareMusic_HtmlList(e, list, page, page_size, title = '') {//来�
 		background_path: background_path || _background_path,
 		title: `${title.split('').join(' ')}`,
 		tips: '请在一分钟内发送序号进行点歌' + (next_page ? '，发送【#下一页】查看更多' : '') + '！',
-		sub_title: `Created By Yunzai-Bot ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
+		sub_title: `Created By ${BotName} ${Version.yunzai} & xiaofei-Plugin ${Version.ver}`,
 		list: new_list,
 	};
 

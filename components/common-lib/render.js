@@ -6,6 +6,7 @@ const _path = process.cwd()
 export default async function (path, params, cfg) {
   let [app, tpl] = path.split('/')
   let { e } = cfg
+  let BotName = Version.isTrss ? 'Trss-Yunzai' : Version.isMiao ? 'Miao-Yunzai' : 'Yunzai-Bot'
   let layoutPath = process.cwd() + `/plugins/${Plugin_Name}/resources/common/layout/`
   let resPath = `../../../../../plugins/${Plugin_Name}/resources/`
   Data.createDir(`data/html/${Plugin_Name}/${app}/${tpl}`, 'root')
@@ -25,7 +26,7 @@ export default async function (path, params, cfg) {
     },
     sys: {
       scale: 1,
-      copyright: `Created By Yunzai-Bot<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
+      copyright: `Created By ${BotName}<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
     },
     quality: 100
   }
