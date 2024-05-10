@@ -835,6 +835,12 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 							.replace(/\n/g, '')
 							.replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
 							.replace(/___+/, `<title color="#777777" size="26">${title}</title>`);
+					} else if (!Version.isTrss && forwardMsg.type === 'json') {
+						let forwardMsg_json = forwardMsg.data;
+						if (forwardMsg_json.app === 'com.tencent.multimsg' && forwardMsg_json.meta?.detail) {
+							let detail = forwardMsg_json.meta.detail;
+							detail.news = [{ text: title }];
+						}
 					}
 					if (friend?.uploadLongMsg) {
 						try {
