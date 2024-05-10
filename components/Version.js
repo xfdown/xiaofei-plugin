@@ -92,10 +92,12 @@ try{
 
 const isMiao = packageJson.dependencies.sequelize ? true : false
 const isTrss = Array.isArray(Bot.uin) ? true : false
+const Botname = Version.isTrss ? 'Trss-Yunzai' : Version.isMiao ? 'Miao-Yunzai' : 'Yunzai-Bot'
 
 let Version = {
   isMiao,
   isTrss,
+  Botname,
   get ver () {
     return currentVersion;
   },
