@@ -92,19 +92,19 @@ try{
 
 const isMiao = packageJson.dependencies.sequelize ? true : false
 const isTrss = Array.isArray(Bot.uin) ? true : false
-let Botname = 'Yunzai-Bot'
+let BotName = 'Yunzai-Bot'
 if (packageJson.name === 'miao-yunzai') {
-  Botname = 'Miao-Yunzai'
+  BotName = 'Miao-Yunzai'
 } else if (packageJson.name === 'trss-yunzai') {
-  Botname = 'TRSS-Yunzai'
+  BotName = 'TRSS-Yunzai'
 } else {
-  Botname = 'Yunzai-Bot'
+  BotName = 'Yunzai-Bot'
 }
 
 let Version = {
   isMiao,
   isTrss,
-  Botname,
+  BotName,
   get ver () {
     return currentVersion;
   },
