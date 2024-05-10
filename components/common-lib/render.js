@@ -25,7 +25,7 @@ export default async function (path, params, cfg) {
     },
     sys: {
       scale: 1,
-      copyright: `Created By Yunzai-Bot<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
+      copyright: `Created By ${Version.BotName}<span class="version">${Version.yunzai}</span> & xiaofei-Plugin<span class="version">${Version.ver}</span>`
     },
     quality: 100
   }

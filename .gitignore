@@ -3,6 +3,11 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
+/node_modules
+/data/sr_RegTime/
+/data/ys_RegTime/
+/config/music.cookies.yaml
+/defSet/setting.system.yaml
 
 # Other files and folders
 .settings/
