@@ -813,7 +813,7 @@ async function music_handle(e, search, source, page = 0, page_size = 10, temp_da
 						index++;
 					}*/
 					const friend = (e.bot || Bot)?.pickFriend(e.bot.uin || e.self_id || Bot.uin);
-					let forwardMsg = await (e.bot || Bot)?.makeForwardMsg(MsgList);
+					let forwardMsg = await Bot.makeForwardMsg(MsgList);
 					let forwardMsg_json = forwardMsg.data;
 					if (typeof (forwardMsg_json) === 'object' && !friend?.uploadLongMsg) {
 						if (forwardMsg_json.app === 'com.tencent.multimsg' && forwardMsg_json.meta?.detail) {
