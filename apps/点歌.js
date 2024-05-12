@@ -462,7 +462,7 @@ async function music_message(e) {
 						result = await e.reply(result);
 						if (reg[1].includes('高清') && result && isHigh) {
 							try {
-								let message = await (Bot || e.group || e.friend)?.getMsg(result.message_id);
+								let message = await (Bot || e.bot || e.group || e.friend)?.getMsg(result.message_id);
 								if (Array.isArray(message.message)) message.message.push({ type: 'text', text: '[语音]' });
 								await (e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
 							} catch (err) {
@@ -520,7 +520,7 @@ async function music_message(e) {
 					result = await e.reply(result)
 					if (reg[1].includes('高清') && result && isHigh) {
 						try {
-							let message = await (Bot || e.group || e.friend)?.getMsg(result.message_id);
+							let message = await (Bot || e.bot || e.group || e.friend)?.getMsg(result.message_id);
 							if (Array.isArray(message.message)) message.message.push({ type: 'text', text: '[语音]' });
 							await (e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
 						} catch (err) {
