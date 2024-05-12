@@ -2,10 +2,11 @@ import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
 import fetch from "node-fetch";
-import toSilk from '../model/toSilk.js';
 import plugin from '../../../lib/plugins/plugin.js';
 import { Config, Data, Version, Plugin_Path } from '../components/index.js';
 
+let toSilk
+try{ toSilk = (await import('../model/toSilk.js')).default; } catch{ };
 const no_pic = '';
 var _page_size = 20;
 var _music_timeout = 1000 * 60 * 3;
@@ -451,7 +452,7 @@ async function music_message(e) {
 							isHigh = true
 						} catch (error) {
 							logger.error(error)
-							result = await segment.record(await toSilk(music.musicUrl))
+							result = await segment.record(await toSilk(music.musicUrl) || music.musicUrl);
 							isHigh = false
 						}
 						if (!isHigh) {
@@ -461,11 +462,12 @@ async function music_message(e) {
 						result = await e.reply(result);
 						if (reg[1].includes('高清') && result && isHigh) {
 							try {
-								let message = await (Bot?.getMsg || e.group?.getMsg || e.friend?.getMsg)?.(result.message_id);
+								let message = await (Bot || e.group || e.friend)?.getMsg(result.message_id);
 								if (Array.isArray(message.message)) message.message.push({ type: 'text', text: '[语音]' });
-								(e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
+								await (e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
 							} catch (err) {
-								logger.error(err)
+								let message = [ await segment.reply(result.message_id), `PCQQ不要播放，否则会导致语音无声音！` ];
+								await (e.group || e.friend)?.sendMsg(message);
 							}
 						}
 					}
@@ -508,7 +510,7 @@ async function music_message(e) {
 						isHigh = true
 					} catch (error) {
 						logger.error(error)
-						result = await segment.record(await toSilk(music_json.meta.music.musicUrl))
+						result = await segment.record(await toSilk(music_json.meta.music.musicUrl) || music_json.meta.music.musicUrl);
 						isHigh = false
 					}
 					if (!isHigh) {
@@ -518,10 +520,13 @@ async function music_message(e) {
 					result = await e.reply(result)
 					if (reg[1].includes('高清') && result && isHigh) {
 						try {
-							let message = await (Bot?.getMsg || e.group?.getMsg || e.friend?.getMsg)?.(result.message_id);
+							let message = await (Bot || e.group || e.friend)?.getMsg(result.message_id);
 							if (Array.isArray(message.message)) message.message.push({ type: 'text', text: '[语音]' });
-							(e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
-						} catch (err) { }
+							await (e.group || e.friend)?.sendMsg('PCQQ不要播放，否则会导致语音无声音！', message);
+						} catch (err) {
+							let message = [ await segment.reply(result.message_id), `PCQQ不要播放，否则会导致语音无声音！` ];
+							await (e.group || e.friend)?.sendMsg(message);
+						}
 					}
 					return true;
 				}

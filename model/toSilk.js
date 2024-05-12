@@ -4,9 +4,13 @@ import path from 'path';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
 import { randomUUID } from 'node:crypto';
-import { encode } from './silk_worker/index.cjs';
-import { getWavFileInfo, isWav, isSilk } from 'silk-wasm';
 
+let getWavFileInfo, isWav, isSilk, encode;
+try {
+    ({ getWavFileInfo, isWav, isSilk, encode } = await import('silk-wasm'));
+} catch (error) {
+  logger.warn(`小飞插件提示：未安装最新silk-wasm依赖，可能无法使用语音转换功能，请使用pnpm i命令进行更新依赖(*^_^*)`);
+}
 const TEMP_DIR = os.tmpdir(); // 将 TEMP_DIR 设置为系统的临时目录
 
 /**
@@ -132,7 +136,7 @@ async function encodeSilk(file) {
             return silkBuffer;
         }
     } catch (error) {
-        logger.error('silk 转换失败:', error);
+        logger.error('silk 转换失败(可能没有装silk-wasm依赖或者没有FFmpeg): ', error);
     } finally {
         fs.unlinkSync(filePath); // 删除临时文件
     }
