@@ -1,4 +1,4 @@
-﻿# Yunzai-Bot_小飞插件
+﻿# Yunzai-Bot_xiaofei-plugin
 
 #### 介绍
 
