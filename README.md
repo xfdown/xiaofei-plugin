@@ -2,8 +2,6 @@
 
 #### 介绍
 
-交流群：938326742
-
 [查看更新](./CHANGELOG.md)
 
 #### 安装教程
@@ -48,11 +46,6 @@ git clone https://github.com/xfdown/xiaofei-plugin.git ./plugins/xiaofei-plugin/
 
 #### 联系方式
 
-QQ：203017966
-
-Q群：938326742
-
-邮箱：w22649@139.com
 
 #### 参与贡献
 
