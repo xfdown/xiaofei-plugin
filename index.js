@@ -92,9 +92,6 @@ let ver = Version.ver;
 logger.info(`---------^_^---------`)
 logger.info(`小飞插件${ver}：初始化~`)
 
-if (Version.yunzai[0] != '3') {
-  logger.error(`小飞插件${ver}：初始化失败，本插件仅支持Yunzai-Bot v3！`)
-} else {
   for (let i in files) {
     let name = files[i].replace('.js', '')
     if (ret[i].status != 'fulfilled') {
@@ -106,6 +103,5 @@ if (Version.yunzai[0] != '3') {
     apps[name] = ret[i].value[Object.keys(ret[i].value)[0]]
   }
   logger.info(`小飞插件${ver}：初始化完成！`)
-}
 logger.info(`---------------------`)
 export { apps }

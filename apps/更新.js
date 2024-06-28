@@ -1,7 +1,9 @@
-import plugin from '../../../lib/plugins/plugin.js'
 import { execSync } from 'child_process'
-import { update } from '../../other/update.js'
 import { Version, Common, Plugin_Name } from '../components/index.js'
+let update;
+try{
+	update = (await import('../../other/update.js'))?.update;
+}catch{}
 
 export class xiaofei_update extends plugin {
 	constructor() {
@@ -39,6 +41,10 @@ export class xiaofei_update extends plugin {
 	}
 
 	async update_plugin() {
+		if(!update){
+			this.e.msg = `#${this.e.msg.includes('强制') ? '强制' : ''}更新xiaofei-plugin`;
+			return false;
+		}
 		let Update_Plugin = new update();
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;
@@ -61,6 +67,10 @@ export class xiaofei_update extends plugin {
 	}
 
 	async update_log() {
+		if(!update){
+			this.e.msg = `#更新日志xiaofei-plugin`;
+			return false;
+		}
 		let Update_Plugin = new update();
 		Update_Plugin.e = this.e;
 		Update_Plugin.reply = this.reply;

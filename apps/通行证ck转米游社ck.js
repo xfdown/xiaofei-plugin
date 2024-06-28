@@ -1,7 +1,11 @@
-import plugin from '../../../lib/plugins/plugin.js'
 import fetch from 'node-fetch'
-import gsCfg from '../../genshin/model/gsCfg.js'
 import lodash from 'lodash'
+let gsCfg;
+try{
+	gsCfg = await import('../../genshin/model/gsCfg.js');
+}catch{
+	gsCfg = await import('../../genshin/model/gsCfg');
+}
 
 export class xiaofei_mysck extends plugin {
 	constructor() {

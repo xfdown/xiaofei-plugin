@@ -1,9 +1,13 @@
-﻿import plugin from '../../../lib/plugins/plugin.js'
-import lodash from 'lodash'
+﻿import lodash from 'lodash'
 import fetch from 'node-fetch'
 import fs from 'node:fs'
-import gsCfg from '../../genshin/model/gsCfg.js'
 import { Plugin_Path } from '../components/index.js'
+let gsCfg;
+try{
+	gsCfg = await import('../../genshin/model/gsCfg.js');
+}catch{
+	gsCfg = await import('../../genshin/model/gsCfg');
+}
 
 export class xiaofei_ys_QueryRegTime extends plugin {
 	constructor() {
