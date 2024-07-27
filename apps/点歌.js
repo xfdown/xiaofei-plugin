@@ -2,8 +2,8 @@ import fs from 'fs';
 import md5 from 'md5';
 import crypto from 'crypto';
 import fetch from "node-fetch";
-import plugin from '../../../lib/plugins/plugin.js';
 import { Config, Data, Version, Plugin_Path } from '../components/index.js';
+import uploadRecord from '../model/uploadRecord.js';
 
 let toSilk
 try{ toSilk = (await import('../model/toSilk.js')).default; } catch{ };
@@ -448,7 +448,7 @@ async function music_message(e) {
 						await e.reply('开始上传[' + music.title + '-' + music.desc + ']。。。');
 						let result, isHigh
 						try {
-							result = await uploadRecord(music.musicUrl, 0, !reg[1].includes('高清'), music.title + '-' + music.desc);
+							result = await uploadRecord(e, music.musicUrl, 0, !reg[1].includes('高清'), music.title + '-' + music.desc);
 							isHigh = true
 						} catch (error) {
 							logger.error(error)
