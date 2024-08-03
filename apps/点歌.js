@@ -1782,7 +1782,7 @@ async function CreateMusicShare(e, data, to_uin = null) {
 				break;
 			case 'qq':
 			default:
-				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, singer }
+				body.data = { type: "custom", url: jumpUrl, audio: musicUrl, title, image: preview, content: singer }
 				break;
 		}
 	}
