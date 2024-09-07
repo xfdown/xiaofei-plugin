@@ -180,7 +180,7 @@ async function weather(e, search) {
 		isDefault: true
 	}]);
 
-	let buff = null;
+	let img = null;
 	try {
 		const browser = await xiaofei_plugin.puppeteer.browserInit();
 		const page = await browser.newPage();
@@ -215,7 +215,7 @@ async function weather(e, search) {
 		await page.evaluate(`$('body').append('<p style="text-align: center;font-size: 15px;margin-top: -25px;">Created By Yunzai-Bot ${Version.yunzai} &amp; xiaofei-Plugin ${Version.ver}</p><br>');`);//增加版本号显示
 
 		let body = await page.$('body');
-		buff = await body.screenshot({
+		img = await body.screenshot({
 			//fullPage: true,
 			type: 'jpeg',
 			omitBackground: false,
@@ -230,12 +230,13 @@ async function weather(e, search) {
 		logger.error(err);
 	}
 
-	if (!buff) {
+	if (!img) {
 		if (e.msg.includes('#')) await e.reply('[小飞插件]天气截图失败！');
 		return false;
 	}
-
-	await e.reply(segment.image(buff));
+	if (img?.type != 'image') img = segment.image(img);
+	if (img?.file) img.file = Buffer.from(img?.file);
+	await e.reply(img);
 
 	return true;
 }
