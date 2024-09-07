@@ -235,7 +235,7 @@ async function weather(e, search) {
 		return false;
 	}
 	if (img?.type != 'image') img = segment.image(img);
-	if (img?.file) img.file = Buffer.from(img?.file);
+	if (img?.file) img.file = Buffer.from(img.file);
 	await e.reply(img);
 
 	return true;
