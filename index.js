@@ -45,9 +45,6 @@ if (is_icqq || is_oicq) {
     }
   }
   if (!global.segment) global.segment = (await import(is_icqq ? 'icqq' : 'oicq')).segment;
-  global.uploadRecord = (await import("./model/uploadRecord.js")).default;
-} else {
-  global.uploadRecord = segment.record;
 }
 
 if (fs.existsSync("./renderers/puppeteer/lib/puppeteer.js")) {
