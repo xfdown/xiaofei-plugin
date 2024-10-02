@@ -23,26 +23,26 @@ export class xiaofei_replace extends plugin {
 
 	async replace() {
 		const bot = this.e.bot || Bot;
-		if (!this.e.msg || !this.e.isMaster) {
+		if (!this.e.msg || !this.e.isMaster || !bot) {
 			return;
 		}
 		let e = this.e;
 		let message = [];
 		let reg = /^#?代(.*)$/.exec(e.msg);
 		if (reg) {
-			let msg = reg[1];
+			let msg = reg[1]?.trim();
 			let at = e.at;
 			if (!at) {
 				reg = /^#?代(\d+)(.*)$/.exec(e.msg);
 				if (reg) {
 					at = reg[1];
-					msg = reg[2];
+					msg = reg[2]?.trim();
 				} else {
 					return;
 				}
 			}
 			at = Number(at);
-			if (e.replyNew) e.reply = e.replyNew
+			if (e.replyNew) e.reply = e.replyNew;
 			if (e.message) {
 				let at_index = 0;
 				for (let val of e.message) {
@@ -50,8 +50,8 @@ export class xiaofei_replace extends plugin {
 						at_index++;
 						continue;
 					}
-					let reg = /^#?代(.*)$/.exec(val.text);
-					if (reg) val.text = reg[1];
+					let reg = /^#?代(\d+)?(.*)$/.exec(val.text);
+					if (reg) val.text = reg[2]?.trim();
 					message.push(val);
 				}
 			}
@@ -61,7 +61,7 @@ export class xiaofei_replace extends plugin {
 			e.from_id = at;
 			let nickname;
 			try {
-				nickname = e.group.pickMember(at).info?.nickname || Bot.pickFriend(at).info?.nickname
+				nickname = e.group.pickMember(at).info?.nickname || bot.pickFriend(at).info?.nickname;
 			} catch { }
 			nickname = nickname || at;
 			e.sender.card = nickname;
