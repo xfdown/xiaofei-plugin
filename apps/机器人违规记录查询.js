@@ -34,7 +34,7 @@ export class xiaofei_violation_query extends plugin {
 		let e = this.e;
 		let reg;
 		let code;
-		reg = /^#(机器人|我的)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
+		reg = /^#(.*?)违规记录(查询)?(\d+)?$/.exec(e.msg) || [];
 		let num = (reg.length > 2 && reg[3]) ? parseInt(reg[3]) : 20;
 		let appid = 1109907872;
 		let uin = reg[1].includes('我的') ? e.user_id : e.self_id;
