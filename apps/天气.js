@@ -115,63 +115,7 @@ async function weather(e, search) {
 		if (e.msg.includes('#')) e.reply('没有查询到该地区的天气！', true);
 		return true;
 	}
-
-	let setting = Config.getdefSet('setting', 'system') || {};
-	if (setting['card_weather']) {
-		try {
-			let pskey = (await get_pskey('mp.qq.com'))['mp.qq.com'];
-			let g_tk = get_bkn(pskey);
-
-			let options = {
-				method: 'GET',
-				headers: {
-					'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 12; MI 9 Build/SKQ1.211230.001) V1_AND_SQ_8.9.8_3238_YYB_D A_8090800 QQ/8.9.8.9000 NetType/WIFI WebP/0.4.1 Pixel/1080 StatusBarHeight/75 SimpleUISwitch/0 QQTheme/1000 InMagicWin/0 StudyMode/0 CurrentMode/0 CurrentFontScale/1.0 GlobalDensityScale/0.9818182 AppId/537132847',
-					'Content-Type': 'application/json',
-					'Cookie': `p_uin=o${Bot.uin}; p_skey=${pskey}`
-				}
-			};
-
-			let adcode = city_list[area_id]
-			if (!adcode) {
-				let url = `https://ti.qq.com/v2/city-selector/index?star=11&redirect=true`;
-				let response = await fetch(url, options);
-				let res = await response.text();
-				let match = /\<li data-adcode=\"(\d+)\" data-areaid=\"(\d+)\">/g;
-				let arr;
-				while (arr = match.exec(res)) {
-					city_list[arr[2]] = arr[1];
-				}
-				adcode = city_list[area_id];
-			}
-
-			if (adcode) {
-				//options.method = 'POST';
-				//options.body = JSON.stringify({
-				//	adcode: adcode,
-				//});
-
-				//let url = `https://weather.mp.qq.com/cgi/share?g_tk=${g_tk}`;
-				let url = `https://weather.mp.qq.com/page/poster?_wv=2&&_wwv=4&adcode=${adcode}`;
-				let response = await fetch(url, options);
-				let res;
-				try {
-					let json = /window.__INITIAL_STATE__ = \{(.*?)\};/.exec(await response.text())[1];
-					json = JSON.parse(`{${json}}`);
-					if (json?.weekStore?.share) res = json?.weekStore?.share;
-				} catch (err) { }
-				if (res == null || res.code != 0 || !res.data) {
-					return { code: -1, msg: '没有查询到该地区的天气！' };
-				}
-				let data = {
-					share_json: res.data
-				};
-				e.reply({ type: 'json', data: data.share_json });
-			}
-		} catch (err) {
-			logger.error(err);
-			if (e.msg.includes('#')) await e.reply('[小飞插件]卡片天气发送失败！');
-		}
-	}
+	//let setting = Config.getdefSet('setting', 'system') || {};
 
 	var attentionCity = JSON.stringify([{
 		province: province,
@@ -189,9 +133,9 @@ async function weather(e, search) {
 			height: 1320
 		});
 
-		await page.goto('https://tianqi.qq.com/favicon.ico');
+		await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0');
+		await page.goto('view-source:https://tianqi.qq.com/');
 		await page.evaluate(`localStorage.setItem('attentionCity', '${attentionCity}')`);//设置默认地区信息
-
 		await page.setRequestInterception(true);
 		page.on('request', req => {
 			let urls = [
@@ -239,40 +183,4 @@ async function weather(e, search) {
 	await e.reply(img);
 
 	return true;
-}
-
-function get_bkn(skey) {
-	let bkn = 5381;
-	skey = new Buffer(skey);
-	for (let v of skey) {
-		bkn = bkn + (bkn << 5) + v;
-	}
-	bkn &= 2147483647;
-	return bkn;
-}
-
-async function get_pskey(domains) {
-	if (!Array.isArray(domains)) domains = [domains];
-
-	let body = {
-		1: 4138,
-		2: 0,
-		3: 0,
-		4: {
-			1: domains
-		},
-		6: "android 8.9.33"
-	};
-	body = core.pb.encode(body);
-
-	let payload = core.pb.decode(await Bot.sendUni("OidbSvcTcp.0x102a", body));
-	if (!payload[4]) return null;
-
-	let result = core.pb.decode(payload[4].encoded);
-	let list = {};
-	if (!Array.isArray(result[1])) result[1] = [result[1]];
-	for (let val of result[1]) {
-		if (val[2]) list[val[1]] = val[2].toString();
-	}
-	return list;
 }
