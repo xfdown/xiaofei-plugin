@@ -30,12 +30,12 @@ export class xiaofei_replace extends plugin {
 		}
 		let e = this.e;
 		let message = [];
-		let reg = /^#?代(.*)$/.exec(e.msg);
+		let reg = /代(.*)$/.exec(e.msg);
 		if (reg) {
 			let msg = reg[1]?.trim();
 			let at = e.at;
 			if (!at) {
-				reg = /^#?代(\d+)(.*)$/.exec(e.msg);
+				reg = /代(\d+)(.*)$/.exec(e.msg);
 				if (reg) {
 					at = reg[1];
 					msg = reg[2]?.trim();
@@ -52,11 +52,12 @@ export class xiaofei_replace extends plugin {
 						at_index++;
 						continue;
 					}
-					let reg = /^#?代(\d+)?(.*)$/.exec(val.text);
+					let reg = /代(\d+)?(.*)$/.exec(val.text);
 					if (reg) val.text = reg[2]?.trim();
 					message.push(val);
 				}
 			}
+			message.unshift(segment.at(bot.uin));
 			msg = msg?.trim();
 			const new_e = {
 				atall: e.atall,
