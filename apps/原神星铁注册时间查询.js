@@ -63,7 +63,7 @@ async function reg_time(e, ck, uid, game = 'gs') {
 			case 'gs':
 				data = result.game_data.data?.data;
 				data = data ? JSON.parse(data) : {};
-				reg_time = data['1'];
+				reg_time = data['1'] || data['1-1-1'];
 				if (reg_time > 0) {
 					reg_time = new Date(reg_time * 1000 + 28800000).toJSON().split('T').join(' ').split('.')[0];
 				}
@@ -150,7 +150,7 @@ async function update_game_data(ck, uid, game = 'gs') {
 		let response;
 		switch (game) {
 			case 'gs':
-				url = `${api}/event/e20220928anniversary/game_data?badge_uid=${uid}&badge_region=${info_data.region}&lang=zh-cn&game_biz=${info_data.game_biz}`;
+				url = `${api}/event/e20240928anniversary/data?badge_uid=${uid}&badge_region=${info_data.region}&lang=zh-cn&game_biz=${info_data.game_biz}`;
 				response = await fetch(url, options);
 				try {
 					let res = await response.json();
