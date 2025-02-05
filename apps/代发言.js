@@ -94,6 +94,10 @@ export class xiaofei_replace extends plugin {
 				nickname: at,
 				user_id: at,
 			};
+
+			if (loader.groupGlobalCD) delete loader.groupGlobalCD[e.group_id];
+			if (loader.groupCD) delete loader.groupCD[e.group_id];
+
 			try {
 				bot.em("message", { ...new_e });
 			} catch {
