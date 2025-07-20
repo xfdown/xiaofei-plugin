@@ -3,6 +3,7 @@
 	"version": "1.8.8",
 	"type": "module",
 	"dependencies": {
+		"md5": "^2.3.0",
 		"silk-wasm": "^3.4.0",
 		"xiaofei-plugin": "file:"
 	}

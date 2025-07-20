@@ -1435,24 +1435,25 @@ async function music_search(e, search, source, page = 1, page_size = 10) {
 				let title = data.title.replace(/\<.*?\>/g, '');
 				return title;
 			},
-			id: 'bvid',
+			id: (data) => {
+				return data.share?.video?.bvid;
+			},
 			artist: (data) => {
 				let author = data.author.replace(/\<.*?\>/g, '');
 				return author;
 			},
 			pic: (data) => {
-				let url = data.pic || '';
+				let url = data.cover || '';
 				if (url.indexOf('http') != 0) url = 'http:' + url;
 				return url;
 			},
 			link: (data) => {
-				let url = `https://www.bilibili.com/video/${data.bvid}`;
-				return url;
+				return data.share?.video?.short_link || `https://www.bilibili.com/video/${data.share?.video?.bvid}`;
 			},
 			url: null,
 			lrc: null,
 			api: async (data, types, music_data = {}) => {
-				let url = `https://api.bilibili.com/x/web-interface/view?bvid=${data.bvid}`;
+				let url = `https://api.bilibili.com/x/web-interface/view?bvid=${data.share?.video?.bvid}`;
 				let response = await fetch(url);
 				let res = await response.json();
 				let info = res.data;
@@ -1501,7 +1502,6 @@ async function music_search(e, search, source, page = 1, page_size = 10) {
 					param += `&sign=${sign}`;
 					let response = await fetch(`${url}?${param}`);
 					let res = await response.json();
-					logger.info(res);
 					if (res.data?.dash?.audio && res.data?.dash?.audio.length > 0) {
 						let audios = res.data?.dash?.audio;
 						audios = audios.sort((a, b) => {
@@ -2155,25 +2155,53 @@ async function qqmusic_getdiss(uin = 0, disstid = 0, dirid = 202, page = 1, page
 
 async function bilibili_search(search, page = 1, page_size = 10) {
 	try {
-		let url = `https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&_extra=&context=&page=${page}&page_size=${page_size}&from_source=&from_spmid=333.337&platform=pc&highlight=1&single_column=0&keyword=${encodeURI(search)}&qv_id=CAwC63KwwHyP6q4IJlnV2afQ6clyM87r&ad_resource=5654&source_tag=3&gaia_vtoken=&category_id=&search_type=video&dynamic_offset=0&wts=1678977993`;
-		let options = {
-			method: 'GET',//post请求 
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Referer': 'https://search.bilibili.com/',
-				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41',
-				'Cookie': 'buvid3=A40E384B-1E77-B3F8-0FA6-8177143B71DB09209infoc'
-			}
+		let url = `https://app.bilibili.com/x/v2/search/type`;
+		let time = parseInt(new Date().getTime() / 1000);
+		let params = {
+			access_key: '',
+			appkey: '1d8b6e7d45233436',
+			build: 7210300,
+			buvid: 'XU973E09237CC101E74F6E24CCF3DE3300D0B',
+			c_locale: 'zh_CN',
+			channel: 'xiaomi',
+			disable_rcmd: 0,
+			fnval: 16,//130
+			fnver: 0,
+			fourk: 1,
+			is_dolby: 0,
+			is_h265: 0,
+			is_proj: 1,
+			live_extra: '',
+			mobi_app: 'android',
+			mobile_access_key: '',
+			platform: 'android',
+			playurl_type: 1,
+			protocol: 1,
+			qn: 64,
+			s_locale: 'zh_CN',
+			statistics: '%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%227.21.0%22%2C%22abtest%22%3A%22%22%7D',
+			sys_ver: 31,
+			ts: time,
+			video_type: 0,
+			keyword: encodeURI(search),
+			type: 10,
+			pn: page,
+			ps: page_size
 		};
-		let response = await fetch(url, options); //调用接口获取数据
-		let res = await response.json(); //结果json字符串转对象
-
-		if (!res.data?.result || res.data?.result.length < 1) {
+		let param = [];
+		for (let key of Object.keys(params).sort()) {
+			param.push(`${key}=${params[key]}`);
+		}
+		param = param.join("&");
+		let sign = md5(`${param}560c52ccd288fed045859ed18bffd973`);
+		param += `&sign=${sign}`;
+		let response = await fetch(`${url}?${param}`);
+		let res = await response.json();
+		if (!res.data?.items || res.data?.items.length < 1) {
 			return null;
 		}
-		return { page: page, data: res.data?.result };
+		return { page: page, data: res.data?.items };
 	} catch (err) { }
-
 	return null;
 }
 
