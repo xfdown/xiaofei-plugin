@@ -149,7 +149,7 @@ async function weather(e, search) {
 				req.continue();
 			}
 		});
-		await page.goto('https://tianqi.qq.com/');//请求天气页面
+		await page.goto('https://tianqi.qq.com/', { waitUntil: 'networkidle0' });//请求天气页面
 
 		await page.evaluate(() => {
 			$('a').remove();
