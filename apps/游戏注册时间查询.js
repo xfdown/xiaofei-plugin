@@ -3,9 +3,9 @@ import fetch from 'node-fetch'
 import fs from 'node:fs'
 import { Plugin_Path } from '../components/index.js'
 let gsCfg;
-try{
+try {
 	gsCfg = await import('../../genshin/model/gsCfg.js');
-}catch{
+} catch {
 	gsCfg = await import('../../genshin/model/gsCfg');
 }
 
@@ -13,7 +13,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 	constructor() {
 		super({
 			/** 功能名称 */
-			name: '小飞插件_原神星铁注册时间查询',
+			name: '小飞插件_游戏注册时间查询',
 			/** 功能描述 */
 			dsc: '通过官方活动接口获取游戏注册时间。',
 			/** https://oicqjs.github.io/oicq/#events */
@@ -23,7 +23,7 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 			rule: [
 				{
 					/** 命令正则匹配 */
-					reg: '^(#|\\*)?(星铁)?(刷新)?(我的)?(原神|星铁)?注册时间$',
+					reg: '^(#|\\*|\\%)?(星铁|绝区零)?(刷新)?(我的)?(原神|星铁|绝区零)?注册时间$',
 					/** 执行方法 */
 					fnc: 'regTime',
 				},
@@ -32,8 +32,23 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 	}
 
 	async regTime() {
-		const game = (this.e.msg.indexOf('*') == 0 || this.e.msg.includes('铁')) ? 'sr' : 'gs';
-		let result = await mysck(this.e, this.e.msg.includes('铁') ? 'sr' : 'gs');
+		let game = 'gs';
+		let game_name = '原神';
+		switch (true) {
+			case (this.e.msg.indexOf('*') == 0 || this.e.msg.includes('铁')):
+				game = 'sr';
+				game_name = '星铁';
+				break;
+			case (this.e.msg.indexOf('%') == 0 || this.e.msg.includes('零')):
+				game = 'zzz';
+				game_name = '绝区零';
+				break;
+			default:
+				game = 'gs';
+				game_name = '原神';
+				break;
+		}
+		let result = await mysck(this.e, game);
 		if (result.code != 1) {
 			await this.e.reply(result.msg);
 			return true;
@@ -44,7 +59,6 @@ export class xiaofei_ys_QueryRegTime extends plugin {
 		for (let ck of ck_list) {
 			query_list.push(await reg_time(this.e, ck, ck.uid, game));
 		}
-		const game_name = game == 'sr' ? '星铁' : '原神';
 		this.reply(`---${game_name}注册时间---\r\n${query_list.join('\r\n----------------\r\n')}\r\n----------------\r\n提示：如需更新数据，请发送【#刷新${game_name}注册时间】`);
 		return true;
 	}
@@ -81,6 +95,12 @@ async function reg_time(e, ck, uid, game = 'gs') {
 					}
 				}
 				break;
+			case 'zzz':
+				reg_time = result.game_data['1'];
+				if (reg_time > 0) {
+					reg_time = new Date(reg_time * 1000 + 28800000).toJSON().split('T').join(' ').split('.')[0];
+				}
+				break;
 		}
 
 
@@ -96,7 +116,11 @@ async function get_game_data(e, ck, uid, game = 'gs') {
 	let msg = '';
 	let game_data = null;
 	let temp_data = null;
-	let temp_file = `${Plugin_Path}/data/${game == 'gs' ? 'ys' : 'sr'}_RegTime/${e.user_id}.json`;
+	const temp_dir = `${Plugin_Path}/data/${game == 'gs' ? 'ys' : game}_RegTime`;
+	if (!fs.existsSync(temp_dir)) {
+		fs.mkdirSync(temp_dir, { recursive: true });
+	}
+	const temp_file = `${temp_dir}/${e.user_id}.json`;
 	try {
 		if (fs.existsSync(temp_file)) {
 			temp_data = JSON.parse(fs.readFileSync(temp_file, 'utf8'));
@@ -168,7 +192,7 @@ async function update_game_data(ck, uid, game = 'gs') {
 				break;
 			case 'sr':
 				api = region.includes('prod_official') ? 'https://sg-public-api.hoyoverse.com' : 'https://api-takumi.mihoyo.com';
-				url = `${api}/event/e20240426anniversary/data?plat=2&lang=zh-cn&badge_uid${uid}&badge_region=${info_data.region}&game_biz=${info_data.game_biz}`;
+				url = `${api}/event/e20240426anniversary/data?plat=2&lang=zh-cn&badge_uid=${uid}&badge_region=${info_data.region}&game_biz=${info_data.game_biz}`;
 				response = await fetch(url, options);
 				try {
 					let res = await response.json();
@@ -184,7 +208,24 @@ async function update_game_data(ck, uid, game = 'gs') {
 					}
 				} catch (err) { }
 				break;
-
+			case 'zzz':
+				api = !region.includes('prod_gf_cn') ? 'https://sg-public-api.hoyoverse.com' : 'https://api-takumi.mihoyo.com';
+				url = `${api}/event/e20250606anniversary/data?badge_uid=${uid}&badge_region=${info_data.region}&game_biz=${info_data.game_biz}&lang=zh-cn`;
+				response = await fetch(url, options);
+				try {
+					let res = await response.json();
+					let data = res?.data;
+					if (info_data && data) {
+						return {
+							code: 1,
+							msg: msg,
+							data: { game_data: JSON.parse(data?.raw_data || {}), info_data: info_data, query_time: new Date().getTime() }
+						};
+					} else {
+						msg = res.message;
+					}
+				} catch (err) { }
+				break;
 		}
 	} else {
 		msg = result.msg;
@@ -196,7 +237,7 @@ async function update_game_data(ck, uid, game = 'gs') {
 async function hk4e_cn_login(ck, uid, game = 'gs') {
 	let api = 'https://api-takumi.mihoyo.com';
 	let body = { "game_biz": "hk4e_cn", "lang": "zh-cn", "region": "cn_gf01", "uid": "" };
-	body['region'] = getServer(uid, game == 'sr');
+	body['region'] = getServer(uid, game);
 	body['uid'] = uid;
 	switch (game) {
 		case 'gs':
@@ -209,6 +250,13 @@ async function hk4e_cn_login(ck, uid, game = 'gs') {
 			body['game_biz'] = 'hkrpg_cn'
 			if (body['region'].includes('prod_official')) {
 				body['game_biz'] = 'hkrpg_global';
+				api = 'https://sg-public-api.hoyoverse.com';
+			}
+			break;
+		case 'zzz':
+			body['game_biz'] = 'nap_cn';
+			if (!body['region'].includes('prod_gf_cn')) {
+				body['game_biz'] = 'nap_global';
 				api = 'https://sg-public-api.hoyoverse.com';
 			}
 			break;
@@ -294,7 +342,55 @@ async function mysck(e, game = 'gs') {
 	return { code: 1, msg: '获取成功！', data: list };
 }
 
-function getServer(uid, isSr) {
+const game_region = {
+	gs: ["cn_gf01", "cn_qd01", "os_usa", "os_euro", "os_asia", "os_cht"],
+	sr: [
+		"prod_gf_cn",
+		"prod_qd_cn",
+		"prod_official_usa",
+		"prod_official_euro",
+		"prod_official_asia",
+		"prod_official_cht",
+	],
+	zzz: ["prod_gf_cn", "prod_gf_cn", "prod_gf_us", "prod_gf_eu", "prod_gf_jp", "prod_gf_sg"],
+}
+
+function getServer(uid, game) {
+	const _uid = String(uid)
+	if (game == "zzz") {
+		if (_uid.length < 10) {
+			return game_region[game][0] // 官服
+		}
+
+		switch (_uid.slice(0, -8)) {
+			case "10":
+				return game_region[game][2] // 美服
+			case "15":
+				return game_region[game][3] // 欧服
+			case "13":
+				return game_region[game][4] // 亚服
+			case "17":
+				return game_region[game][5] // 港澳台服
+		}
+	} else {
+		switch (_uid.slice(0, -8)) {
+			case "5":
+				return game_region[game][1] // B服
+			case "6":
+				return game_region[game][2] // 美服
+			case "7":
+				return game_region[game][3] // 欧服
+			case "8":
+			case "18":
+				return game_region[game][4] // 亚服
+			case "9":
+				return game_region[game][5] // 港澳台服
+		}
+	}
+	return game_region[game][0] // 官服
+}
+
+function _getServer(uid, isSr) {
 	switch (String(uid)[0]) {
 		case '1':
 		case '2':
