@@ -1,7 +1,7 @@
-﻿import lodash from 'lodash'
-import fetch from 'node-fetch'
-import fs from 'node:fs'
-import { Plugin_Path } from '../components/index.js'
+﻿import lodash from 'lodash';
+import fetch from 'node-fetch';
+import fs from 'node:fs';
+import { Plugin_Path } from '../components/index.js';
 let gsCfg;
 try {
 	gsCfg = await import('../../genshin/model/gsCfg.js');
@@ -155,7 +155,7 @@ async function get_game_data(e, ck, uid, game = 'gs') {
 async function update_game_data(ck, uid, game = 'gs') {
 	let msg = '';
 	let result = await hk4e_cn_login(ck, uid, game);
-	if (result.code == 1) {
+	if (result.code === 0) {
 		let info_data = result.data.data?.data; info_data = info_data ? info_data : null;
 		let options = {
 			method: 'GET',
@@ -278,24 +278,13 @@ async function hk4e_cn_login(ck, uid, game = 'gs') {
 	let msg = '';
 	let result = null;
 	try {
-		let headers = response.headers;
-		let SetCookie = headers.getAll('set-cookie');
-		for (let index in SetCookie) {
-			let cookie = SetCookie[index];
-			let reg = /(.*?);/.exec(cookie);
-			if (reg && reg.length > 1) {
-				cookie = reg[1];
-				let arr = cookie.split('=');
-				if (arr.length > 1 && arr[1] != '') {
-					if (/e_\S+_token/.test(arr[0] || '')) {
-						code = 1;
-					}
-					cookies.push(cookie);
-				}
-			}
-		}
+		let SetCookie = response.headers.raw()['set-cookie'];
+		cookies = SetCookie
+			.map(cookie => cookie.split(';')?.[0])
+			.filter(cookie => cookie.split('=')?.[1]);
 		let res = await response.json();
 		result = { cookies: cookies, data: res };
+		code = res.retcode ?? code;
 		msg = res.message;
 	} catch (err) { }
 	return { code: code, msg: msg, data: result };
@@ -388,23 +377,4 @@ function getServer(uid, game) {
 		}
 	}
 	return game_region[game][0] // 官服
-}
-
-function _getServer(uid, isSr) {
-	switch (String(uid)[0]) {
-		case '1':
-		case '2':
-			return isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
-		case '5':
-			return isSr ? 'prod_qd_cn' : 'cn_qd01' // B服
-		case '6':
-			return isSr ? 'prod_official_usa' : 'os_usa' // 美服
-		case '7':
-			return isSr ? 'prod_official_euro' : 'os_euro' // 欧服
-		case '8':
-			return isSr ? 'prod_official_asia' : 'os_asia' // 亚服
-		case '9':
-			return isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
-	}
-	return isSr ? 'prod_gf_cn' : 'cn_gf01'
 }
