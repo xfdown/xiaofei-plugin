@@ -278,7 +278,8 @@ async function hk4e_cn_login(ck, uid, game = 'gs') {
 	let msg = '';
 	let result = null;
 	try {
-		let SetCookie = response.headers.raw()['set-cookie'];
+		const headers = response.headers;
+		const SetCookie = headers.getSetCookie ? headers.getSetCookie() : headers.raw()['set-cookie'];
 		cookies = SetCookie
 			.map(cookie => cookie.split(';')?.[0])
 			.filter(cookie => cookie.split('=')?.[1]);
