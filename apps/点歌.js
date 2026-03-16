@@ -2219,7 +2219,7 @@ async function qqmusic_search(search, page = 1, page_size = 10) {
 					"query": "",
 					"remoteplace": "miniapp.1109523715",
 					"search_type": 0,
-					"searchid": String(Date.now())
+					"searchid": String(Math.floor(Math.random() * 10000000))
 				}
 			}
 		};
