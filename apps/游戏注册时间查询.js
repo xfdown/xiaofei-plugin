@@ -122,6 +122,29 @@ function getCurrentTimeString() {
 	return formatTimestamp(Date.now());
 }
 
+/**
+ * 从 fetch Response 中安全提取 Set-Cookie 数组
+ * 兼容 node-fetch v2/v3 及原生 fetch
+ */
+function extractSetCookies(response) {
+	const cookies = [];
+	// node-fetch v2 提供 headers.raw()
+	if (typeof response.headers.raw === 'function') {
+		const raw = response.headers.raw();
+		if (raw['set-cookie']) {
+			raw['set-cookie'].forEach(c => cookies.push(c.split(';')[0]));
+		}
+	} else {
+		// node-fetch v3 和原生 fetch 使用 headers.forEach
+		response.headers.forEach((value, key) => {
+			if (key.toLowerCase() === 'set-cookie') {
+				cookies.push(value.split(';')[0]);
+			}
+		});
+	}
+	return cookies.filter(c => c.includes('='));
+}
+
 // ==================== 账号与 Cookie 管理 ====================
 /**
  * 获取用户绑定的指定游戏的 Cookie 列表
@@ -179,7 +202,7 @@ async function performBadgeLogin(account, uid, gameKey) {
 	const meta = GAME_META[gameKey];
 	const region = inferServerRegion(uid, gameKey);
 	const isGlobal = isGlobalServer(region, gameKey);
-	const apiBase = isGlobal ? API_BASE.GLOBAL : API_BASE.CN;
+	const apiBase = getApiBaseUrl(region, gameKey);
 	const gameBiz = isGlobal ? meta.bizGlobal : meta.bizCN;
 
 	const requestBody = {
@@ -189,31 +212,26 @@ async function performBadgeLogin(account, uid, gameKey) {
 		uid: String(uid),
 	};
 
-	const response = await fetch(`${apiBase}/common/badge/v1/login/account`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Cookie: account.ck || '',
-		},
-		body: JSON.stringify(requestBody),
-	});
-
 	let cookies = [];
 	let code = -1;
 	let message = '';
 	let responseData = null;
 
 	try {
-		const setCookieHeader = response.headers.raw()['set-cookie'];
-		cookies = setCookieHeader
-			.map(cookie => cookie.split(';')[0])
-			.filter(cookie => cookie.includes('='));
-		const json = await response.json();
-		responseData = json;
-		code = json.retcode ?? -1;
-		message = json.message;
+		const response = await fetch(`${apiBase}/common/badge/v1/login/account`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: account.ck || '',
+			},
+			body: JSON.stringify(requestBody),
+		});
+		cookies = extractSetCookies(response);
+		responseData = await response.json();
+		code = responseData.retcode ?? -1;
+		message = responseData.message;
 	} catch (err) {
-		message = '登录接口响应解析失败';
+		message = `登录接口响应解析失败: ${err?.message || err}`;
 	}
 
 	return {
