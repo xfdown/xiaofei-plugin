@@ -1,274 +1,282 @@
-import fetch from 'node-fetch'
-import lodash from 'lodash'
-let gsCfg;
-try{
-	gsCfg = await import('../../genshin/model/gsCfg.js');
-}catch{
-	gsCfg = await import('../../genshin/model/gsCfg');
+import fetch from 'node-fetch';
+import lodash from 'lodash';
+
+// ==================== 动态加载账号管理模块 ====================
+let accountManager;
+try {
+    accountManager = await import('../../genshin/model/gsCfg.js');
+} catch {
+    accountManager = await import('../../genshin/model/gsCfg');
 }
 
+// ==================== 常量配置 ====================
+const API_LIST = {
+    CN: 'https://api-takumi.mihoyo.com',
+    Global: 'https://api-os-takumi.mihoyo.com',
+};
+
+const WEB_API_LIST = {
+    CN: 'https://webapi.account.mihoyo.com',
+    Global: 'https://webapi-os.account.hoyoverse.com',
+};
+
+const SERVER_NAMES = {
+    0: '米哈游',
+    1: 'HoYoverse',
+};
+
+// ==================== 通用工具 ====================
+/**
+ * 将 cookie 字符串解析为 Map 对象
+ */
+function parseCookieToMap(cookieStr) {
+    const map = new Map();
+    if (!cookieStr) return map;
+    cookieStr
+        .replace(/\s/g, '')
+        .split(';')
+        .forEach(item => {
+            const [key, ...val] = item.split('=');
+            if (key) map.set(key, val.join('='));
+        });
+    return map;
+}
+
+/**
+ * 检测文本中是否包含通行证 Cookie（仅含 login_ticket，不含 cookie_token）
+ */
+function isPassportCookie(text) {
+    return text.includes('login_ticket=') && !text.includes('cookie_token=') && !text.includes('cookie_token_v2=');
+}
+
+// ==================== 数据获取函数 ====================
+/**
+ * 获取当前用户所有已绑定的 Cookie 记录
+ */
+async function getAllBoundCookies(userId) {
+    try {
+        const cks = accountManager.getBingCkSingle(userId);
+        if (lodash.isEmpty(cks)) {
+            return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
+        }
+        const list = Object.values(cks).filter(ck => !lodash.isEmpty(ck));
+        if (list.length === 0) {
+            return { code: -1, msg: '获取Cookie失败！' };
+        }
+        return { code: 1, msg: '获取成功！', data: list };
+    } catch (err) {
+        return { code: -1, msg: `读取绑定信息异常: ${err.message}` };
+    }
+}
+
+/**
+ * 通过 login_ticket 获取多 token（stoken、ltoken 等）
+ */
+async function fetchMultiToken(apiBase, loginTicket, loginUid) {
+    const url = `${apiBase}/auth/api/getMultiTokenByLoginTicket?login_ticket=${loginTicket}&token_types=3&uid=${loginUid}`;
+    try {
+        const response = await fetch(url);
+        const res = await response.json();
+        if (res?.retcode === 0 && res?.data?.list) {
+            const tokenMap = {};
+            const cookiePairs = [];
+            for (const { name, token } of res.data.list) {
+                tokenMap[name] = token;
+                cookiePairs.push(`${name}=${token}`);
+            }
+            tokenMap.stuid = loginUid;
+            cookiePairs.push(`stuid=${loginUid}`);
+            return { code: 1, data: { tokens: tokenMap, cookies: cookiePairs.join('; ') } };
+        }
+        return { code: -1, msg: res?.message || '获取stoken失败' };
+    } catch (err) {
+        return { code: -1, msg: `网络请求异常: ${err.message}` };
+    }
+}
+
+/**
+ * 探测 login_ticket 所属服务器，返回 API 基础地址和 account_id
+ */
+async function detectServer(loginTicket) {
+    const webApis = [WEB_API_LIST.CN, WEB_API_LIST.Global];
+    for (let i = 0; i < webApis.length; i++) {
+        try {
+            const url = `${webApis[i]}/Api/login_by_cookie?t=${Date.now()}`;
+            const response = await fetch(url, {
+                headers: { Cookie: `login_ticket=${loginTicket};` },
+            });
+            const res = await response.json();
+            if (res?.code === 200 && res.data?.status === 1) {
+                return {
+                    apiIndex: i,
+                    apiBase: i === 0 ? API_LIST.CN : API_LIST.Global,
+                    webApi: webApis[i],
+                    accountId: res.data.account_info?.account_id || 0,
+                    serverName: SERVER_NAMES[i],
+                };
+            }
+        } catch (_) { /* 尝试下一个 */ }
+    }
+    return { apiIndex: -1, apiBase: '', webApi: '', accountId: 0, serverName: '' };
+}
+
+/**
+ * 使用 stoken 换取 cookie_token
+ */
+async function exchangeCookieToken(apiBase, apiIndex, stoken, stuid) {
+    const gameBiz = apiIndex === 0 ? 'hk4e_cn' : 'hk4e_global';
+    const url = `${apiBase}/auth/api/getCookieAccountInfoBySToken?game_biz=${gameBiz}&stoken=${stoken}&uid=${stuid}`;
+    const options = apiIndex === 0 ? {} : {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: JSON.stringify({ game_biz: gameBiz, stoken, uid: stuid }),
+    };
+    try {
+        const response = await fetch(url, options);
+        const res = await response.json();
+        if (res?.retcode === 0 && res?.data) {
+            return res.data.cookie_token;
+        }
+        return null;
+    } catch (_) {
+        return null;
+    }
+}
+
+// ==================== 插件主类 ====================
 export class xiaofei_mysck extends plugin {
-	constructor() {
-		super({
-			/** 功能名称 */
-			name: '小飞插件_通行证ck转米游社ck',
-			/** 功能描述 */
-			dsc: '使用米哈游通行证ck登录米游社并自动绑定。',
-			/** https://oicqjs.github.io/oicq/#events */
-			event: 'message',
-			/** 优先级，数字越小等级越高 */
-			priority: -1,//防止禁用私聊功能后无法绑定通行证ck
-			rule: [
-				{
-					/** 命令正则匹配 */
-					reg: '^#?获取stoken$',
-					/** 执行方法 */
-					fnc: 'get_stoken'
-				}
-			]
-		});
-	}
+    constructor() {
+        super({
+            name: '小飞插件_通行证ck转米游社ck',
+            dsc: '使用米哈游通行证ck登录米游社并自动绑定',
+            event: 'message',
+            priority: -1,
+            rule: [
+                {
+                    reg: '^#?获取stoken$',
+                    fnc: 'handleGetStoken',
+                },
+            ],
+        });
+    }
 
-	/** 接受到消息都会执行一次 */
-	async accept() {
-		if (!this.e.msg) {
-			return false;
-		}
-		await this.mysck();
-	}
+    /**
+     * 所有消息的入口（用于自动识别通行证 Cookie）
+     */
+    async accept() {
+        if (!this.e.msg) return false;
+        await this.detectAndLoginByPassport();
+        return false;
+    }
 
-	async get_stoken() {
-		if (this.e.isGroup) {
-			this.e.reply('请私聊发送该指令！', false, { at: true });
-			return true;
-		}
+    /**
+     * 处理 "#获取stoken" 命令
+     */
+    async handleGetStoken() {
+        if (this.e.isGroup) {
+            this.e.reply('请私聊发送该指令！', false, { at: true });
+            return true;
+        }
 
-		let info = {
-			nickname: Bot.nickname,
-			user_id: Bot.uin
-		};
-		let MsgList = [];
+        const botInfo = { nickname: Bot.nickname, user_id: Bot.uin };
+        const result = await getAllBoundCookies(this.e.user_id);
+        if (result.code !== 1) {
+            await this.e.reply(result.msg);
+            return true;
+        }
 
-		let result = await query_mysck(this.e);
-		if (result.code != 1) {
-			await this.e.reply(result.msg);
-			return true;
-		}
-		let ck_list = result.data; ck_list = ck_list ? ck_list : [];
+        const messages = [];
+        for (const ck of result.data) {
+            if (!ck.uid) continue;
+            let cookieText;
+            if (ck.login_ticket) {
+                const serverInfo = await detectServer(ck.login_ticket);
+                if (serverInfo.apiIndex < 0) {
+                    cookieText = '获取stoken失败，login_ticket已失效！';
+                } else {
+                    const tokenRes = await fetchMultiToken(serverInfo.apiBase, ck.login_ticket, String(serverInfo.accountId));
+                    cookieText = tokenRes.code === 1 ? tokenRes.data.cookies : '获取stoken失败！';
+                }
+            } else {
+                cookieText = '获取stoken失败，没有找到login_ticket！';
+            }
+            messages.push({
+                ...botInfo,
+                message: `uid：${ck.uid}\ncookie：${cookieText}`,
+            });
+        }
 
-		for (let ck of ck_list) {
-			if (ck.uid) {
-				let cookie = '';
-				let uid = ck.uid;
-				if (ck.login_ticket) {
-					let param = {
-						login_ticket: ck.login_ticket
-					};
-					let result = await get_server_api(param);
-					if (result.api_index < 0) {
-						cookie = '获取stoken失败，login_ticket已失效！';
-					} else {
-						param = {
-							...param,
-							...result
-						};
-						param.login_uid = String(param.account_id);
+        if (messages.length > 0) {
+            const forwardMsg = await Bot.makeForwardMsg(messages);
+            await this.e.reply(forwardMsg);
+        } else {
+            await this.e.reply('未找到可导出stoken的账号');
+        }
+        return true;
+    }
 
-						result = await get_stoken(param);
-						if (result?.code != 1) {
-							cookie = '获取stoken失败！';
-						} else {
-							let stoken_data = result.data;
-							cookie = stoken_data.cookies;
-						}
-					}
-				} else {
-					cookie = '获取stoken失败，没有找到login_ticket！';
-				}
-				MsgList.push({
-					...info,
-					message: `uid：${uid}\ncookie：${cookie}`
-				});
-			}
-		}
-		let forwardMsg = await Bot.makeForwardMsg(MsgList);
-		await this.e.reply(forwardMsg);
-		return true;
-	}
+    /**
+     * 检测并处理消息中的通行证 Cookie（自动绑定）
+     */
+    async detectAndLoginByPassport() {
+        if (!isPassportCookie(this.e.msg)) return;
 
-	async mysck() {
-		if (this.e.msg.includes('login_ticket=') && !this.e.msg.includes('cookie_token=') && !this.e.msg.includes('cookie_token_v2=')) {
-			if (this.e.isGroup) {
-				this.e.reply('请私聊发送cookie', false, { at: true });
-				this.e.msg = '';
-				return true;
-			}
-			let ck_map = getCookieMap(this.e.msg.replace(/'/g, '').replace(/"/g, ''));
+        if (this.e.isGroup) {
+            this.e.reply('请私聊发送cookie', false, { at: true });
+            this.e.msg = '';
+            return;
+        }
 
-			let param = {
-				login_ticket: ck_map?.get('login_ticket'),
-				login_uid: ck_map?.get('login_uid')
-			};
+        const cleanMsg = this.e.msg.replace(/'/g, '').replace(/"/g, '');
+        const cookieMap = parseCookieToMap(cleanMsg);
+        const loginTicket = cookieMap.get('login_ticket');
+        const loginUid = cookieMap.get('login_uid');
 
-			if (!param.login_ticket) {
-				let arr = [];
-				!param.login_ticket && arr.push('login_ticket参数不存在!');
-				this.e.reply('[通行证]Cookie参数不完整！' + arr.join("\r\n"), false);
-				//this.e.msg = '';
-				return true;
-			}
-			let result = await get_server_api(param);
-			if (result.api_index < 0) {
-				this.e.reply('[通行证]Cookie已失效，请重新获取！', false);
-				//this.e.msg = '';
-				return true;
-			}
+        if (!loginTicket) {
+            this.e.reply('[通行证]Cookie参数不完整！login_ticket参数不存在!', false);
+            return;
+        }
 
-			param = {
-				...param,
-				...result
-			};
-			param.login_uid = String(param.account_id);
+        // 1. 探测服务器
+        const serverInfo = await detectServer(loginTicket);
+        if (serverInfo.apiIndex < 0) {
+            this.e.reply('[通行证]Cookie已失效，请重新获取！', false);
+            return;
+        }
 
-			result = await get_stoken(param);
-			if (result?.code != 1) {
-				this.e.reply(`[${param.server_name}通行证]获取stoken失败，请重试！`, false);
-				//this.e.msg = '';
-				return true;
-			}
-			let stoken_data = result.data;
-			let cookies = stoken_data.cookies;
+        // 2. 获取 stoken 等凭证
+        const finalLoginUid = loginUid || String(serverInfo.accountId);
+        const tokenRes = await fetchMultiToken(serverInfo.apiBase, loginTicket, finalLoginUid);
+        if (tokenRes.code !== 1) {
+            this.e.reply(`[${serverInfo.serverName}通行证]获取stoken失败，请重试！`, false);
+            return;
+        }
 
-			try {
-				let map = getCookieMap(cookies);
-				let game_biz = param.api_index == 0 ? 'hk4e_cn' : 'hk4e_global';
-				let url = `${param.api}/auth/api/getCookieAccountInfoBySToken?game_biz=${game_biz}`;
-				url += `&stoken=${map.get("stoken")}&uid=${map.get("stuid")}`;
-				let options = {
-					method: param.api_index == 0 ? 'GET' : 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-					},
-					body: JSON.stringify({ game_biz: game_biz, stoken: map.get("stoken"), uid: map.get("stuid") })
-				};
-				let response = await fetch(url, param.api_index == 0 ? {} : options);
-				let res = await response.json()
+        const stokenCookies = tokenRes.data.cookies;
+        const tokenMap = parseCookieToMap(stokenCookies);
+        const stoken = tokenMap.get('stoken');
+        const stuid = tokenMap.get('stuid');
 
-				if (res?.retcode == 0 && res?.data) {
-					let cookie_token = res["data"]["cookie_token"];
-					let arr = [];
-					arr.push(`ltoken=${map.get("ltoken")}`);
-					arr.push(`ltuid=${map.get("stuid")}`);
-					arr.push(`cookie_token=${cookie_token}`);
-					arr.push(`account_id=${map.get("stuid")}`);
-					arr.push(`login_ticket=${param.login_ticket}`);
-					arr.push(`login_uid=${param.login_uid}`);
-					await this.e.reply(`[${param.server_name}通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。`, false);
-					//this.e.ck = arr.join('; ');
-					//this.e.msg = '#绑定cookie';
-					this.e.msg = arr.join('; ');
-					this.e.raw_message = this.e.msg;
-					return true;
-				}
-			} catch (err) { }
+        // 3. 换取 cookie_token
+        const cookieToken = await exchangeCookieToken(serverInfo.apiBase, serverInfo.apiIndex, stoken, stuid);
+        if (!cookieToken) {
+            this.e.reply(`[${serverInfo.serverName}通行证]获取cookie_token失败，请重试！`, false);
+            return;
+        }
 
-			this.e.reply(`[${param.server_name}通行证]获取cookie_token失败，请重试！`, false);
-			//this.e.msg = '';
-			return true;
-		}
-		return false;
-	}
-}
+        // 4. 组装完整的米游社 Cookie，并触发框架的绑定流程
+        const finalCookie = [
+            `ltoken=${tokenMap.get('ltoken')}`,
+            `ltuid=${stuid}`,
+            `cookie_token=${cookieToken}`,
+            `account_id=${stuid}`,
+            `login_ticket=${loginTicket}`,
+            `login_uid=${finalLoginUid}`,
+        ].join('; ');
 
-async function query_mysck(e) {
-	let cks = gsCfg.getBingCkSingle(e.user_id);
-	if (lodash.isEmpty(cks)) {
-		return { code: -2, msg: '请先绑定Cookie！\r\n发送【ck帮助】查看配置教程' };
-	}
-	let list = [];
-	for (let uid in cks) {
-		let ck = cks[uid];
-		if (!lodash.isEmpty(ck)) {
-			list.push(ck);
-		}
-	}
+        await this.e.reply(`[${serverInfo.serverName}通行证]获取cookie_token成功，下面开始执行官方绑定过程。。。`, false);
 
-	if (list.length < 1) {
-		return { code: -1, msg: '获取Cookie失败！' };
-	}
-	return { code: 1, msg: '获取成功！', data: list };
-}
-
-async function get_stoken(param) {
-	let result = {
-		code: -1,
-		msg: '',
-		data: {}
-	};
-
-	try {
-		var response = await fetch(`${param.api}/auth/api/getMultiTokenByLoginTicket?login_ticket=${param.login_ticket}&token_types=3&uid=${param.login_uid}`);
-		var res = await response.json();
-		if (res?.retcode == 0 && res?.data?.list) {
-			let list = res.data.list;
-			let arr = [];
-			for (let index in list) {
-				let value = list[index];
-				result.data[value.name] = value.token;
-				arr.push(`${value.name}=${value.token}`);
-			}
-			result.data['stuid'] = param.login_uid;
-			arr.push(`stuid=${param.login_uid}`);
-			result.data['cookies'] = arr.join('; ');
-			result.code = 1;
-		}
-	} catch (err) { }
-
-	return result;
-}
-
-async function get_server_api(param) {
-	let apis = ['https://api-takumi.mihoyo.com', 'https://api-os-takumi.mihoyo.com'];
-	let web_apis = ['https://webapi.account.mihoyo.com', 'https://webapi-os.account.hoyoverse.com'];
-	let api_index = -1;
-	let account_id = 0;
-	let server_name = '';
-	try {
-		let options = {
-			method: 'GET',
-			headers: {
-				'Cookie': `login_ticket=${param.login_ticket};`
-			}
-		};
-		for (let index in web_apis) {
-			let url = `${web_apis[index]}/Api/login_by_cookie?t=${new Date().getTime()}`;
-			let response = await fetch(url, options);
-			let res = await response.json();
-			if (res?.code == 200 && res.data?.status == 1) {
-				api_index = index;
-				account_id = res.data.account_info?.account_id;
-				server_name = index == 0 ? '米哈游' : 'HoYoverse';
-				break;
-			}
-		}
-	} catch (err) { }
-	return {
-		api_index: api_index,
-		api: api_index == -1 ? '' : apis[api_index],
-		web_api: api_index == -1 ? '' : web_apis[api_index],
-		account_id: account_id,
-		server_name: server_name
-	};
-}
-
-function getCookieMap(cookie) {
-	let cookiePattern = /^(\S+)=(\S+)$/;
-	let cookieArray = cookie.replace(/\s*/g, "").split(";");
-	let cookieMap = new Map();
-	for (let item of cookieArray) {
-		let entry = item.split("=");
-		if (!entry[0]) continue;
-		cookieMap.set(entry[0], entry[1]);
-	}
-	return cookieMap || {};
+        this.e.msg = finalCookie;
+        this.e.raw_message = finalCookie;
+    }
 }
